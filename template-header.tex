@@ -1,0 +1,119 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{geometry}
+\geometry{%
+  a4paper,
+  lmargin=1.7cm,
+  rmargin=1.7cm,
+  tmargin=2cm,
+  bmargin=2cm,
+  footskip=12pt,
+  headheight=12pt}
+
+\usepackage{paralist}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\let\ge=\geqslant  \let\le=\leqslant
+\usepackage{multicol}
+% \usepackage{asymptote}
+\usepackage{tikz}
+% \usetikzlibrary{shapes.geometric}
+\usetikzlibrary{calc}
+\tikzset{above/.default=6pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% \makeatletter
+%   \def\@listi{\leftmargin\leftmargini
+%             \parsep 5\p@  \@plus2.5\p@ \@minus\p@
+%             \topsep 10\p@ \@plus4\p@   \@minus6\p@
+%             \itemsep25\p@  \@plus5\p@ \@minus\p@}
+% \makeatother
+
+% Usage of these macros:
+% First do: \setshapesize{size} where size is the side length of
+% the triangle/square given in cm with no units
+% Then:
+% \...triangle{(x0,y0)}{label1}{label2}{label3}
+% where the first argument is the coordinate of the centre,
+% and the labels are placed anticlockwise in the following order:
+% \uptriangle: base, right, left
+% \downtriangle: base, left, right
+% \lefttriangle: right, top, bottom
+% \righttriangle: left, bottom, top
+
+\newlength\trad % triangle circumradius
+\newlength\srad % square circumradius
+\newcommand{\setshapesize}[1]{%
+ \pgfmathsetlength\trad{(#1*72.27/2.54) / sqrt(3)}
+ \pgfmathsetlength\srad{(#1*72.27/2.54) / sqrt(2)}
+}
+\newcommand{\shapestyle}{}
+\newcommand{\setshapestyle}[1]{\renewcommand{\shapestyle}{#1}}
+
+% Unfortunately, cycles don't work well with nodes
+\newcommand{\uptriangle}[6]{%
+  \coordinate (a) at ($ #1 +(-30:\trad) $);
+  \coordinate (b) at ($ #1 +(90:\trad) $);
+  \coordinate (c) at ($ #1 +(-150:\trad) $);
+
+  \draw[allow upside down]
+    ($ (a)!0.5!(c) $) --
+    (a) -- node[sloped, above] {\shapestyle #3}
+    (b) -- node[sloped, above] {\shapestyle #4}
+    (c) -- node[sloped, above] {\shapestyle #2}
+    (a) --
+    ($ (a)!0.5!(b) $);
+  \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
+}
+\newcommand{\downtriangle}[6]{%
+  \coordinate (a) at ($ #1 +(30:\trad) $);
+  \coordinate (b) at ($ #1 +(150:\trad) $);
+  \coordinate (c) at ($ #1 +(-90:\trad) $);
+
+  \draw[allow upside down]
+    ($ (a)!0.5!(c) $) --
+    (a) -- node[sloped, above] {\shapestyle #2}
+    (b) -- node[sloped, above] {\shapestyle #3}
+    (c) -- node[sloped, above] {\shapestyle #4}
+    (a) --
+    ($ (a)!0.5!(b) $);
+  \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
+}
+\newcommand{\lefttriangle}[6]{%
+  \coordinate (a) at ($ #1 +(60:\trad) $);
+  \coordinate (b) at ($ #1 +(180:\trad) $);
+  \coordinate (c) at ($ #1 +(-60:\trad) $);
+
+  \draw[allow upside down]
+    ($ (a)!0.5!(c) $) --
+    (a) -- node[sloped, above] {\shapestyle #3}
+    (b) -- node[sloped, above] {\shapestyle #4}
+    (c) -- node[sloped, above] {\shapestyle #2}
+    (a) --
+    ($ (a)!0.5!(b) $);
+  \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
+}
+\newcommand{\righttriangle}[6]{%
+  \coordinate (a) at ($ #1 +(120:\trad) $);
+  \coordinate (b) at ($ #1 +(-120:\trad) $);
+  \coordinate (c) at ($ #1 +(0:\trad) $);
+
+  \draw[allow upside down]
+    ($ (a)!0.5!(c) $) --
+    (a) -- node[sloped, above] {\shapestyle #2}
+    (b) -- node[sloped, above] {\shapestyle #3}
+    (c) -- node[sloped, above] {\shapestyle #4}
+    (a) --
+    ($ (a)!0.5!(b) $);
+  \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
+}
+
+\pagestyle{empty}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
