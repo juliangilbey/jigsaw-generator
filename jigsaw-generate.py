@@ -22,12 +22,13 @@ def _r(filename):
         return False
 
 parser = argparse.ArgumentParser()
-parser.add_argument("puzzlefile", help="yaml file containing puzzle data")
+parser.add_argument("puzfile", metavar="puzzlefile[.yaml]",
+                    help="yaml file containing puzzle data")
 args = parser.parse_args()
-if args.puzzlefile[-5:] == '.yaml':
-    puzfile = args.puzzlefile
+if args.puzfile[-5:] == '.yaml':
+    puzfile = args.puzfile
 else:
-    puzfile = args.puzzlefile + '.yaml'
+    puzfile = args.puzfile + '.yaml'
 puzbase = puzfile[:-5]
 
 knowntypes = {
