@@ -1,15 +1,38 @@
 #! /usr/bin/python3
 
 import random
-import random
 import sys
+import os
 import re
+import argparse
 
 from yaml import load, dump
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import Loader, Dumper
+
+# A utility function
+def _r(filename):
+    """Almost equivalent to shell file test [ -r FILE ]."""
+
+    try:
+        return os.path.isfile(filename) and os.access(filename, os.R_OK)
+    except:
+        return False
+
+parser = argparse.ArgumentParser()
+parser.add_argument("puzzlefile", help="yaml file containing puzzle data")
+args = parser.parse_args()
+if args.puzzlefile[-5:] == '.yaml':
+    puzfile = args.puzzlefile
+else:
+    puzfile = args.puzzlefile + '.yaml'
+puzbase = puzfile[:-5]
+
+knowntypes = {
+    'smallhexagon': True
+}
 
 def losub(text, subs):
     def subtext(matchobj):
@@ -20,35 +43,45 @@ def losub(text, subs):
                   file=sys.stderr)
     return re.sub(r"<:=\s*(\S*)\s*:>", subtext, text)
 
-infile = open("puzzle.yaml")
+# This will be taken from command line parameter soon!
+try:
+    infile = open(puzfile)
+except:
+    sys.exit("Cannot open {} for reading".format(puzfile))
+
 headerf = open("template-header.tex")
-bodypuzf = open("template-smallhexagon-puzzle.tex")
-bodysolf = open("template-smallhexagon-solution.tex")
 bodytablef = open("template-table.tex")
-outpuz = open("puzzle-puzzle.tex", "w")
-outsol = open("puzzle-solution.tex", "w")
-outtable = open("puzzle-table.tex", "w")
 
 data = load(infile, Loader=Loader)
 
-random.seed(1)  # Will eventually do this using filename hash
+random.seed(1)  # Will eventually do this using filename or title hash
+
+dsubs = dict()
+if 'type' in data and data['type'] in knowntypes:
+    puztype = data['type']
+elif 'type' in data:
+    sys.exit("Unrecognised jigsaw type {}".format(data['type']))
+else:
+    sys.exit("No jigsaw type found in puzzle file")
+
+layoutf = open(puztype + ".yaml")
+bodypuzf = open("template-" + puztype + "-puzzle.tex")
+bodysolf = open("template-" + puztype + "-solution.tex")
+layout = load(layoutf, Loader=Loader)
+
+bodypuz = bodypuzf.read()
+bodysol = bodysolf.read()
+bodytable = bodytablef.read()
+
+outpuz = open(puzbase + "-puzzle.tex", "w")
+outsol = open(puzbase + "-solution.tex", "w")
+outtable = open(puzbase + "-table.tex", "w")
 
 header = headerf.read()
 print(header, file=outpuz)
 print(header, file=outsol)
 print(header, file=outtable)
 
-bodypuz = bodypuzf.read()
-bodysol = bodysolf.read()
-bodytable = bodytablef.read()
-
-dsubs = dict()
-if 'type' in data:
-    if data['type'] == 'smallhexagon':
-        # good
-        pass
-    else:
-        sys.exit("Unrecognised jigsaw type")
 
 if 'title' in data:
     dsubs['title'] = data['title']
