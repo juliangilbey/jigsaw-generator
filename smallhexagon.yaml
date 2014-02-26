@@ -1,5 +1,8 @@
 # Template file for smallhexagon jigsaw
 type: smallhexagon
+typename: small hexagon
+pairs: 6
+edges: 6
 # Do we rotate individual tiles by default?
 rotate: true
 # Do we randomly flip individual questions and answers by default?
@@ -13,12 +16,12 @@ puzzleTextSize: 5
 # Default text size on solution pieces
 solutionTextSize: 5
 triangleSolutionCards:
-  - [A0, Q1, E0]
-  - [E1, A1, Q2]
-  - [Q3, E2, A2]
-  - [A3, Q4, E3]
-  - [E4, A4, Q5]
-  - [Q0, E5, A5]
+  - [A0, Q1, E5]
+  - [E4, A1, Q2]
+  - [Q3, E3, A2]
+  - [A3, Q4, E2]
+  - [E1, A4, Q5]
+  - [Q0, E0, A5]
 triangleSolutionOrientation: [180, 0, 180, 0, 180, 0]
 
 trianglePuzzleOrientation:

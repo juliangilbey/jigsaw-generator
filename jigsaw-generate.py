@@ -36,6 +36,7 @@ knowntypes = {
 }
 
 def losub(text, subs):
+    """Substitute <:= var :> strings in text using the dict subs"""
     def subtext(matchobj):
         if matchobj.group(1) in subs:
             return subs[matchobj.group(1)]
@@ -55,9 +56,6 @@ bodytablef = open("template-table.tex")
 
 data = load(infile, Loader=Loader)
 
-random.seed(1)  # Will eventually do this using filename or title hash
-
-dsubs = dict()
 if 'type' in data and data['type'] in knowntypes:
     puztype = data['type']
 elif 'type' in data:
@@ -83,30 +81,45 @@ print(header, file=outpuz)
 print(header, file=outsol)
 print(header, file=outtable)
 
+# This dict will contain the substitutions needed for the template
+# files
+dsubs = dict()
 
 if 'title' in data:
     dsubs['title'] = data['title']
 else:
     dsubs['title'] = ''
+random.seed(dsubs['title'])
 
-if 'pairs' in data:
-    pairs = data['pairs']
-    if len(pairs) != 6:
-        sys.exit("Small hexagons need exactly 6 pairs")
-else:
-    sys.exit("Require pairs in puzzle data file")
+if 'pairs' in layout:
+    if 'pairs' in data:
+        pairs = data['pairs']
+        if layout['pairs'] == 'any':
+            if len(pairs) == 0:
+                sys.exit("Puzzle type {} needs at least one pair".format(layout['typename']))
+        else:
+            if len(pairs) != layout['pairs']:
+                sys.exit("Puzzle type {} needs exactly {} pairs".\
+                             format(layout['typename'], layout['pairs']))
+    else:
+        sys.exit("Puzzle type {} requires pairs in data file".format(layout['typename']))
+elif 'pairs' in data:
+    sys.exit("Puzzle type {} does not accept pairs in data file".format(layout['typename']))
 
-if 'edges' in data:
-    edges = data['edges']
-    if len(edges) > 6:
-        print("Warning: more than 6 edges given; extra will be ignored",
-              file=sys.stderr)
-    elif len(edges) < 6:
-        print("Warning: fewer than 6 edges given; remainder will be blank",
-              file=sys.stderr)
-        edges += [""] * 6
-else:
-    edges = [""] * 6
+if 'edges' in layout:
+    if 'edges' in data:
+        edges = data['edges']
+        if len(edges) > layout['edges']:
+            print("Warning: more than {} edges given; extra will be ignored".format(layout['edges']),
+                  file=sys.stderr)
+        elif len(edges) < layout['edges']:
+            print("Warning: fewer than {} edges given; remainder will be blank".format(layout['edges']),
+                  file=sys.stderr)
+            edges += [""] * (layout['edges'] - len(edges))
+    else:
+        edges = [""] * layout['edges']
+elif 'edges' in data:
+    sys.exit("Puzzle type {} does not accept edges in data file".format(layout['typename']))
 
 dsubs['tablepairs'] = ''
 dsubs['tableedges'] = ''
@@ -126,12 +139,12 @@ trianglepuzcard = [[]] * 6
 
 # This needs to go in a smallhexagon template module
 # List: base, side 2, side 3 (anticlockwise)
-trianglesolcard[0] = [pairs[0][1], pairs[1][0], edges[0]]
-trianglesolcard[1] = [edges[1], pairs[1][1], pairs[2][0]]
-trianglesolcard[2] = [pairs[3][0], edges[2], pairs[2][1]]
-trianglesolcard[3] = [pairs[3][1], pairs[4][0], edges[3]]
-trianglesolcard[4] = [edges[4], pairs[4][1], pairs[5][0]]
-trianglesolcard[5] = [pairs[0][0], edges[5], pairs[5][1]]
+trianglesolcard[0] = [pairs[0][0], edges[0], pairs[5][1]]
+trianglesolcard[1] = [edges[1], pairs[4][1], pairs[5][0]]
+trianglesolcard[2] = [pairs[3][1], pairs[4][0], edges[2]]
+trianglesolcard[3] = [pairs[3][0], edges[3], pairs[2][1]]
+trianglesolcard[4] = [edges[4], pairs[1][1], pairs[2][0]]
+trianglesolcard[5] = [pairs[0][1], pairs[1][0], edges[5]]
 
 # List: direction of base side
 trianglesolorient = [180, 0, 180, 0, 180, 0]
