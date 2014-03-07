@@ -14,22 +14,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \let\ge=\geqslant  \let\le=\leqslant
-\usepackage{multicol}
-% \usepackage{asymptote}
-\usepackage{tikz}
-% \usetikzlibrary{shapes.geometric}
+\usepackage{tikz}[2013/12/13 v3.0.0]
 \usetikzlibrary{calc}
 \tikzset{above/.default=6pt}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
-
-% \makeatletter
-%   \def\@listi{\leftmargin\leftmargini
-%             \parsep 5\p@  \@plus2.5\p@ \@minus\p@
-%             \topsep 10\p@ \@plus4\p@   \@minus6\p@
-%             \itemsep25\p@  \@plus5\p@ \@minus\p@}
-% \makeatother
 
 % Usage of these macros:
 % First do: \setshapesize{size} where size is the side length of
@@ -52,19 +42,16 @@
 \newcommand{\shapestyle}{}
 \newcommand{\setshapestyle}[1]{\renewcommand{\shapestyle}{#1}}
 
-% Unfortunately, cycles don't work well with nodes
 \newcommand{\uptriangle}[6]{%
   \coordinate (a) at ($ #1 +(-30:\trad) $);
   \coordinate (b) at ($ #1 +(90:\trad) $);
   \coordinate (c) at ($ #1 +(-150:\trad) $);
 
   \draw[allow upside down]
-    ($ (a)!0.5!(c) $) --
     (a) -- node[sloped, above] {\shapestyle #3}
     (b) -- node[sloped, above] {\shapestyle #4}
     (c) -- node[sloped, above] {\shapestyle #2}
-    (a) --
-    ($ (a)!0.5!(b) $);
+    cycle;
   \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
 }
 \newcommand{\downtriangle}[6]{%
@@ -73,12 +60,10 @@
   \coordinate (c) at ($ #1 +(-90:\trad) $);
 
   \draw[allow upside down]
-    ($ (a)!0.5!(c) $) --
     (a) -- node[sloped, above] {\shapestyle #2}
     (b) -- node[sloped, above] {\shapestyle #3}
     (c) -- node[sloped, above] {\shapestyle #4}
-    (a) --
-    ($ (a)!0.5!(b) $);
+    cycle;
   \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
 }
 \newcommand{\lefttriangle}[6]{%
@@ -87,12 +72,10 @@
   \coordinate (c) at ($ #1 +(-60:\trad) $);
 
   \draw[allow upside down]
-    ($ (a)!0.5!(c) $) --
     (a) -- node[sloped, above] {\shapestyle #3}
     (b) -- node[sloped, above] {\shapestyle #4}
     (c) -- node[sloped, above] {\shapestyle #2}
-    (a) --
-    ($ (a)!0.5!(b) $);
+    cycle;
   \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
 }
 \newcommand{\righttriangle}[6]{%
@@ -101,12 +84,10 @@
   \coordinate (c) at ($ #1 +(0:\trad) $);
 
   \draw[allow upside down]
-    ($ (a)!0.5!(c) $) --
     (a) -- node[sloped, above] {\shapestyle #2}
     (b) -- node[sloped, above] {\shapestyle #3}
     (c) -- node[sloped, above] {\shapestyle #4}
-    (a) --
-    ($ (a)!0.5!(b) $);
+    cycle;
   \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
 }
 
