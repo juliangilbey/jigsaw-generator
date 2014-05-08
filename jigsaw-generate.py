@@ -91,10 +91,13 @@ else:
     dsubs['title'] = ''
 random.seed(dsubs['title'])
 
+# Read the card content
+# Three types of cards: pairs, edges, cards (which are single cards
+# for sorting activities)
 if 'pairs' in layout:
     if 'pairs' in data:
         pairs = data['pairs']
-        if layout['pairs'] == 'any':
+        if layout['pairs'] == 0:
             if len(pairs) == 0:
                 sys.exit("Puzzle type {} needs at least one pair".format(layout['typename']))
         else:
@@ -112,6 +115,7 @@ if 'edges' in layout:
         if len(edges) > layout['edges']:
             print("Warning: more than {} edges given; extra will be ignored".format(layout['edges']),
                   file=sys.stderr)
+            edges = edges[:layout['edges']]
         elif len(edges) < layout['edges']:
             print("Warning: fewer than {} edges given; remainder will be blank".format(layout['edges']),
                   file=sys.stderr)
@@ -121,13 +125,34 @@ if 'edges' in layout:
 elif 'edges' in data:
     sys.exit("Puzzle type {} does not accept edges in data file".format(layout['typename']))
 
+if 'cards' in layout:
+    if 'cards' in data:
+        cards = data['cards']
+        if layout['cards'] == 0:
+            if len(cards) == 0:
+                sys.exit("Puzzle type {} needs at least one cards".format(layout['typename']))
+        else:
+            if len(cards) != layout['cards']:
+                sys.exit("Puzzle type {} needs exactly {} cards".\
+                             format(layout['typename'], layout['cards']))
+    else:
+        sys.exit("Puzzle type {} requires cards in data file".format(layout['typename']))
+elif 'cards' in data:
+    sys.exit("Puzzle type {} does not accept cards in data file".format(layout['typename']))
+
+
 dsubs['tablepairs'] = ''
 dsubs['tableedges'] = ''
+dsubs['tablecards'] = ''
 
 for p in pairs:
-    dsubs['tablepairs'] += r'{}&{}\\\hline{}'.format(p[0], p[1], "\n")
-for e in range(6):
-    dsubs['tableedges'] += r'\strut {}\\\hline{}'.format(edges[e], "\n")
+    dsubs['tablepairs'] += r'{}&{}\\\hline{}'.format(make_entry(p[0]),
+                                                     make_entry(p[1]), "\n")
+for e in edges:
+    dsubs['tableedges'] += r'\strut {}\\\hline{}'.format(make_entry(e), "\n")
+
+for c in cards:
+    dsubs['tablecards'] += r'\strut {}\\\hline{}'.format(make_entry(c), "\n")
 
 for i in range(6):
     if random.choice([True, False]):
