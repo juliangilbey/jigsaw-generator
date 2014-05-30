@@ -12,15 +12,6 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-# A utility function
-def _r(filename):
-    """Almost equivalent to shell file test [ -r FILE ]."""
-
-    try:
-        return os.path.isfile(filename) and os.access(filename, os.R_OK)
-    except:
-        return False
-
 parser = argparse.ArgumentParser()
 parser.add_argument("puzfile", metavar="puzzlefile[.yaml]",
                     help="yaml file containing puzzle data")
@@ -41,7 +32,7 @@ def losub(text, subs):
         if matchobj.group(1) in subs:
             return subs[matchobj.group(1)]
         else:
-            print("Unrecognised substitution: {}".format(matchobj.group(0)),
+            print("Unrecognised substitution: %s" % matchobj.group(0),
                   file=sys.stderr)
     return re.sub(r"<:=\s*(\S*)\s*:>", subtext, text)
 
@@ -49,7 +40,7 @@ def losub(text, subs):
 try:
     infile = open(puzfile)
 except:
-    sys.exit("Cannot open {} for reading".format(puzfile))
+    sys.exit("Cannot open %s for reading" % puzfile)
 
 headerf = open("template-header.tex")
 bodytablef = open("template-table.tex")
@@ -59,7 +50,7 @@ data = load(infile, Loader=Loader)
 if 'type' in data and data['type'] in knowntypes:
     puztype = data['type']
 elif 'type' in data:
-    sys.exit("Unrecognised jigsaw type {}".format(data['type']))
+    sys.exit("Unrecognised jigsaw type %s" % data['type'])
 else:
     sys.exit("No jigsaw type found in puzzle file")
 
@@ -99,46 +90,53 @@ if 'pairs' in layout:
         pairs = data['pairs']
         if layout['pairs'] == 0:
             if len(pairs) == 0:
-                sys.exit("Puzzle type {} needs at least one pair".format(layout['typename']))
+                sys.exit("Puzzle type %s needs at least one pair" %
+                         layout['typename'])
         else:
             if len(pairs) != layout['pairs']:
-                sys.exit("Puzzle type {} needs exactly {} pairs".\
-                             format(layout['typename'], layout['pairs']))
+                sys.exit("Puzzle type %s needs exactly %s pairs" %
+                         (layout['typename'], layout['pairs']))
     else:
-        sys.exit("Puzzle type {} requires pairs in data file".format(layout['typename']))
+        sys.exit("Puzzle type %s requires pairs in data file" %
+                 layout['typename'])
 elif 'pairs' in data:
-    sys.exit("Puzzle type {} does not accept pairs in data file".format(layout['typename']))
+    sys.exit("Puzzle type %s does not accept pairs in data file" %
+             layout['typename'])
 
 if 'edges' in layout:
     if 'edges' in data:
         edges = data['edges']
         if len(edges) > layout['edges']:
-            print("Warning: more than {} edges given; extra will be ignored".format(layout['edges']),
-                  file=sys.stderr)
+            print("Warning: more than %s edges given; extra will be ignored" %
+                  layout['edges'], file=sys.stderr)
             edges = edges[:layout['edges']]
         elif len(edges) < layout['edges']:
-            print("Warning: fewer than {} edges given; remainder will be blank".format(layout['edges']),
-                  file=sys.stderr)
+            print("Warning: fewer than %s edges given; remainder will be blank"
+                  % layout['edges'], file=sys.stderr)
             edges += [""] * (layout['edges'] - len(edges))
     else:
         edges = [""] * layout['edges']
 elif 'edges' in data:
-    sys.exit("Puzzle type {} does not accept edges in data file".format(layout['typename']))
+    sys.exit("Puzzle type %s does not accept edges in data file" %
+             layout['typename'])
 
 if 'cards' in layout:
     if 'cards' in data:
         cards = data['cards']
         if layout['cards'] == 0:
             if len(cards) == 0:
-                sys.exit("Puzzle type {} needs at least one cards".format(layout['typename']))
+                sys.exit("Puzzle type %s needs at least one cards" %
+                         layout['typename'])
         else:
             if len(cards) != layout['cards']:
-                sys.exit("Puzzle type {} needs exactly {} cards".\
-                             format(layout['typename'], layout['cards']))
+                sys.exit("Puzzle type %s needs exactly %s cards" %
+                         (layout['typename'], layout['cards']))
     else:
-        sys.exit("Puzzle type {} requires cards in data file".format(layout['typename']))
+        sys.exit("Puzzle type %s requires cards in data file" %
+                 layout['typename'])
 elif 'cards' in data:
-    sys.exit("Puzzle type {} does not accept cards in data file".format(layout['typename']))
+    sys.exit("Puzzle type %s does not accept cards in data file" %
+             layout['typename'])
 
 
 dsubs['tablepairs'] = ''
@@ -146,13 +144,13 @@ dsubs['tableedges'] = ''
 dsubs['tablecards'] = ''
 
 for p in pairs:
-    dsubs['tablepairs'] += r'{}&{}\\\hline{}'.format(make_entry(p[0]),
-                                                     make_entry(p[1]), "\n")
+    dsubs['tablepairs'] += (r'%s&%s\\ \hline%s' %
+                            (make_entry(p[0]), make_entry(p[1]), "\n"))
 for e in edges:
-    dsubs['tableedges'] += r'\strut {}\\\hline{}'.format(make_entry(e), "\n")
+    dsubs['tableedges'] += r'\strut %s\\ \hline%s' % (make_entry(e), "\n")
 
 for c in cards:
-    dsubs['tablecards'] += r'\strut {}\\\hline{}'.format(make_entry(c), "\n")
+    dsubs['tablecards'] += r'\strut %s\\ \hline%s' % (make_entry(c), "\n")
 
 for i in range(6):
     if random.choice([True, False]):
@@ -188,7 +186,7 @@ random.shuffle(triangleorder)
 # underline 6 and 9
 def cardnum(n):
     if n in [6, 9]:
-        return r'\underline{{{}}}'.format(n)
+        return r'\underline{%d}' % n
     else:
         return str(n)
 
@@ -204,24 +202,24 @@ for i in range(6):
     # What angle does the card number go in the solution?
     # angle of puzzle card + (orientation of sol card - orientation of
     # puz card) - rotation angle [undoing rotation]
-    angle = trianglepuzorient[j][1] + \
-            (trianglesolorient[i] - trianglepuzorient[j][0]) - \
-            120 * rot
+    angle = (trianglepuzorient[j][1] +
+             (trianglesolorient[i] - trianglepuzorient[j][0]) -
+             120 * rot)
     trianglesolcard[i].extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
-    dsubs['solutioncard' + str(i + 1)] = ('{{{}}}' * 5).\
-        format(*trianglesolcard[i])
-    dsubs['problemcard' + str(j + 1)] = ('{{{}}}' * 5).\
-        format(*trianglepuzcard[j])
+    dsubs['solutioncard' + str(i + 1)] = (('{%s}' * 5) %
+                                          tuple(trianglesolcard[i]))
+    dsubs['problemcard' + str(j + 1)] = (('{%s}' * 5) %
+                                         tuple(trianglepuzcard[j]))
 
 # Testing:
 # for i in range(6):
-#     print("Sol card {}: ({}, {}, {}), num angle {}".\
-#               format(i, trianglesolcard[i][0], trianglesolcard[i][1], trianglesolcard[i][2], trianglesolcard[i][4]))
+#     print("Sol card %d: (%s, %s, %s), num angle %d" %
+#            (i, trianglesolcard[i][0], trianglesolcard[i][1], trianglesolcard[i][2], trianglesolcard[i][4]))
 # 
 # for i in range(6):
-#     print("Puz card {}: ({}, {}, {}), num angle {}".\
-#               format(i, trianglepuzcard[i][0], trianglepuzcard[i][1], trianglepuzcard[i][2], trianglepuzcard[i][3]))
+#     print("Puz card %d: (%s, %s, %s), num angle %d" %
+#            (i, trianglepuzcard[i][0], trianglepuzcard[i][1], trianglepuzcard[i][2], trianglepuzcard[i][3]))
 
 btext = losub(bodytable, dsubs)
 print(btext, file=outtable)
