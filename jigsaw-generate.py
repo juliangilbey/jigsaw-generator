@@ -278,17 +278,21 @@ if 'triangleSolutionCards' in layout:
 
     trianglesolcard = []
     for card in layout['triangleSolutionCards']:
-        **************
+        newcard = []
+        for entry in card:
+            entrynum = int(entry[1:])
+            if entry[0] == 'Q':
+                newcard.append(pairs[entrynum][0])
+            elif entry[0] == 'A':
+                newcard.append(pairs[entrynum][1])
+            elif entry[0] == 'E':
+                newcard.append(edges[entrynum])
+            else:
+                printf("Unrecognised entry in layout file (triangleSolutionCards): %s"
+                       % card)
+        trianglesolcard.append(newcard)
 
-# This needs to go in a smallhexagon template module
-# List: base, side 2, side 3 (anticlockwise)
-trianglesolcard[0] = [pairs[0][0], edges[0], pairs[5][1]]
-trianglesolcard[1] = [edges[1], pairs[4][1], pairs[5][0]]
-trianglesolcard[2] = [pairs[3][1], pairs[4][0], edges[2]]
-trianglesolcard[3] = [pairs[3][0], edges[3], pairs[2][1]]
-trianglesolcard[4] = [edges[4], pairs[1][1], pairs[2][0]]
-trianglesolcard[5] = [pairs[0][1], pairs[1][0], edges[5]]
-
+********
 # List: direction of base side
 trianglesolorient = [180, 0, 180, 0, 180, 0]
 
