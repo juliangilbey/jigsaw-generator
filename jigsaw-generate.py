@@ -6,53 +6,16 @@ import os
 import re
 import argparse
 
-# These modules handle the different types of puzzle: jigsaw, card sort
-# and dominoes
-import jigsaw.jigsaw
-
 from yaml import load, dump
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import Loader, Dumper
 
-parser = argparse.ArgumentParser()
-parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
-                    help='yaml file containing puzzle data')
-args = parser.parse_args()
-if args.puzfile[-5:] == '.yaml':
-    puzfile = args.puzfile
-else:
-    puzfile = args.puzfile + '.yaml'
-puzbase = puzfile[:-5]
+#####################################################################
 
-try:
-    infile = open(puzfile)
-except:
-    sys.exit('Cannot open %s for reading' % puzfile)
-
-try:
-    data = load(infile, Loader=Loader)
-except yaml.YAMLError, exc:
-    if hasattr(exc, 'problem_mark'):
-        mark = exc.problem_mark
-        sys.exit('Error parsing puzzle data file\nError position: line %s, column %s' % (mark.line+1, mark.column+1))
-else:
-    sys.exit('Error parsing data file: %s' % exc)
-
-knowntypes = {
-    'smallhexagon': jigsaw.jigsaw
-}
-
-if 'type' in data and data['type'] in knowntypes:
-    puztype = data['type']
-elif 'type' in data:
-    sys.exit('Unrecognised jigsaw type %s' % data['type'])
-else:
-    sys.exit('No jigsaw type found in puzzle file')
-
-#########################
-
+# Functions.  These might get moved out to separate modules for
+# clarity at some point in the near future.
 
 # LaTeX font sizes
 sizes = [r'\tiny',
@@ -66,6 +29,7 @@ sizes = [r'\tiny',
          r'\huge',
          r'\Huge'
          ]
+normalsize = 4
 
 def losub(text, subs):
     """Substitute <: var :> strings in text using the dict subs"""
@@ -122,26 +86,87 @@ def make_entry(entry, defaultsize, hide):
     else:
         return "%s %s" % (sizes[defaultsize], entry)
 
+#####################################################################
 
-headerf = open('template-header.tex')
-bodytablef = open('template-table.tex')
+# The actions
 
+# Command line:
+#   jigsaw-generate [options] puzzlefile[.yaml]
+# There are no options at present, but this may change later
 
+# Step 1: Open the file
+
+parser = argparse.ArgumentParser()
+parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
+                    help='yaml file containing puzzle data')
+args = parser.parse_args()
+if args.puzfile[-5:] == '.yaml':
+    puzfile = args.puzfile
+else:
+    puzfile = args.puzfile + '.yaml'
+puzbase = puzfile[:-5]
+
+try:
+    infile = open(puzfile)
+except:
+    sys.exit('Cannot open %s for reading' % puzfile)
+
+try:
+    data = load(infile, Loader=Loader)
+except yaml.YAMLError, exc:
+    if hasattr(exc, 'problem_mark'):
+        mark = exc.problem_mark
+        sys.exit('Error parsing puzzle data file\nError position: line %s, column %s' % (mark.line+1, mark.column+1))
+else:
+    sys.exit('Error parsing data file: %s' % exc)
+
+knowntypes = {
+    'smallhexagon': jigsaw.jigsaw
+}
+
+if 'type' in data and data['type'] in knowntypes:
+    puztype = data['type']
+elif 'type' in data:
+    sys.exit('Unrecognised jigsaw type %s' % data['type'])
+else:
+    sys.exit('No jigsaw type found in puzzle file')
+
+# Step 2: Open template files and layout file.  ***FIXME*** At some
+# point, this should be modified to allow for local versions, and also
+# to search in the system directory for these files.  At present, they
+# are expected to be in the local directory.
 
 layoutf = open(puztype + '.yaml')
-bodypuzf = open('template-' + puztype + '-puzzle.tex')
-bodysolf = open('template-' + puztype + '-solution.tex')
 layout = load(layoutf, Loader=Loader)
 
-bodypuz = bodypuzf.read()
-bodysol = bodysolf.read()
+try:
+    headerf = open('template-' + puztype + '-header.tex')
+except:
+    headerf = open('template-header.tex')
+header = headerf.read()
+
+try:
+    bodytablef = open('template-' + puztype + '-table.tex')
+except:
+    bodytablef = open('template-table.tex')
 bodytable = bodytablef.read()
 
+# ***FIXME*** Hmm, card sorts or dominoes may not have a solution.
+# We'll come back to this point.
+bodypuzf = open('template-' + puztype + '-puzzle.tex')
+bodypuz = bodypuzf.read()
+
+bodysolf = open('template-' + puztype + '-solution.tex')
+bodysol = bodysolf.read()
+
+# ***FIXME*** The output filenames should be specifiable on the
+# command line.  Also, not every puzzle type may do all three of
+# these, so they should be conditional.
 outpuz = open(puzbase + '-puzzle.tex', 'w')
 outsol = open(puzbase + '-solution.tex', 'w')
 outtable = open(puzbase + '-table.tex', 'w')
 
-header = headerf.read()
+# ***FIXME*** Should all three have the same header?
 print(header, file=outpuz)
 print(header, file=outsol)
 print(header, file=outtable)
@@ -229,20 +254,31 @@ dsubs['tablecards'] = ''
 
 for p in pairs:
     dsubs['tablepairs'] += (r'%s&%s\\ \hline%s' %
-                            (make_entry(p[0]), make_entry(p[1]), '\n'))
+                            (make_entry(p[0], normalsize, False),
+                             make_entry(p[1], normalsize, False), '\n'))
 for e in edges:
-    dsubs['tableedges'] += r'\strut %s\\ \hline%s' % (make_entry(e), '\n')
+    dsubs['tableedges'] += (r'\strut %s\\ \hline%s' %
+                            (make_entry(e, normalsize, False), '\n'))
 
 for c in cards:
-    dsubs['tablecards'] += r'\strut %s\\ \hline%s' % (make_entry(c), '\n')
+    dsubs['tablecards'] += (r'\strut %s\\ \hline%s' %
+                            (make_entry(c, normalsize, False), '\n'))
 
-for i in range(6):
-    if random.choice([True, False]):
-        pairs[i][0], pairs[i][1] = pairs[i][1], pairs[i][0]
+if 'triangleSolutionCards' in layout:
+    numSolutionCards = len(layout['triangleSolutionCards'])
 
-trianglesolcard = [[]] * 6
-trianglepuzorient = [[]] * 6
-trianglepuzcard = [[]] * 6
+    if layout['flip']:
+        for p in pairs:
+            if random.choice([True, False]):
+                p[0], p[1] = p[1], p[0]
+
+    # We read the solution layout from the YAML file, and place the
+    # data into our lists.  We don't format them yet, as the
+    # formatting may be different for the puzzle and solution
+
+    trianglesolcard = []
+    for card in layout['triangleSolutionCards']:
+        **************
 
 # This needs to go in a smallhexagon template module
 # List: base, side 2, side 3 (anticlockwise)
@@ -257,6 +293,7 @@ trianglesolcard[5] = [pairs[0][1], pairs[1][0], edges[5]]
 trianglesolorient = [180, 0, 180, 0, 180, 0]
 
 # List: direction of base side, direction of card number (from vertical)
+trianglepuzorient = []
 trianglepuzorient[0] = [180,  30]
 trianglepuzorient[1] = [0  , -30]
 trianglepuzorient[2] = [180,  30]
@@ -273,6 +310,8 @@ def cardnum(n):
         return r'\underline{%s}' % n
     else:
         return str(n)
+
+trianglepuzcard = []
 
 # We will put solution card i in puzzle position triangleorder[i],
 # rotated by a random amount
