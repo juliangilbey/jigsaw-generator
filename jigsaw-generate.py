@@ -82,9 +82,16 @@ def make_entry(entry, defaultsize, hide):
         else:
             size = defaultsize
 
-        return "%s %s" % (sizes[size], entry['text'])
+        return '%s %s' % (sizes[size], entry['text'])
     else:
-        return "%s %s" % (sizes[defaultsize], entry)
+        return '%s %s' % (sizes[defaultsize], entry)
+
+# underline 6 and 9
+def cardnum(n):
+    if n in [6, 9]:
+        return r'\underline{%s}' % n
+    else:
+        return str(n)
 
 #####################################################################
 
@@ -113,15 +120,15 @@ except:
 
 try:
     data = load(infile, Loader=Loader)
-except yaml.YAMLError, exc:
+except yaml.YAMLError as exc:
     if hasattr(exc, 'problem_mark'):
         mark = exc.problem_mark
-        sys.exit('Error parsing puzzle data file\nError position: line %s, column %s' % (mark.line+1, mark.column+1))
-else:
-    sys.exit('Error parsing data file: %s' % exc)
+        sys.exit('Error parsing puzzle data file\n'
+                 'Error position: line %s, column %s' %
+                 (mark.line+1, mark.column+1))
 
 knowntypes = {
-    'smallhexagon': jigsaw.jigsaw
+    'smallhexagon'
 }
 
 if 'type' in data and data['type'] in knowntypes:
@@ -182,14 +189,14 @@ else:
 random.seed(dsubs['title'])
 
 if 'puzzleTextSize' in data:
-    puzzleTextSize = data['puzzleTextSize']
+    puzzle_text_size = data['puzzleTextSize']
 else:
-    puzzleTextSize = layout['puzzleTextSize']
+    puzzle_text_size = layout['puzzleTextSize']
 
 if 'solutionTextSize' in data:
-    solutionTextSize = data['solutionTextSize']
+    solution_text_size = data['solutionTextSize']
 else:
-    solutionTextSize = layout['solutionTextSize']
+    solution_text_size = layout['solutionTextSize']
 
 # Read the card content
 # Three types of cards: pairs, edges, cards (which are single cards
@@ -246,6 +253,8 @@ if 'cards' in layout:
 elif 'cards' in data:
     sys.exit('Puzzle type %s does not accept cards in data file' %
              layout['typename'])
+else:
+    cards = []
 
 
 dsubs['tablepairs'] = ''
@@ -265,7 +274,7 @@ for c in cards:
                             (make_entry(c, normalsize, False), '\n'))
 
 if 'triangleSolutionCards' in layout:
-    numSolutionCards = len(layout['triangleSolutionCards'])
+    num_triangle_cards = len(layout['triangleSolutionCards'])
 
     if layout['flip']:
         for p in pairs:
@@ -288,65 +297,53 @@ if 'triangleSolutionCards' in layout:
             elif entry[0] == 'E':
                 newcard.append(edges[entrynum])
             else:
-                printf("Unrecognised entry in layout file (triangleSolutionCards): %s"
-                       % card)
+                printf('Unrecognised entry in layout file '
+                       '(triangleSolutionCards):\n%s' % card)
         trianglesolcard.append(newcard)
 
-********
-# List: direction of base side
-trianglesolorient = [180, 0, 180, 0, 180, 0]
+    # List: direction of base side
+    trianglesolorient = layout['triangleSolutionOrientation']
 
-# List: direction of base side, direction of card number (from vertical)
-trianglepuzorient = []
-trianglepuzorient[0] = [180,  30]
-trianglepuzorient[1] = [0  , -30]
-trianglepuzorient[2] = [180,  30]
-trianglepuzorient[3] = [0,   -30]
-trianglepuzorient[4] = [180,  30]
-trianglepuzorient[5] = [0,   -30]
+    # List: direction of base side, direction of card number (from vertical)
+    trianglepuzorient = layout['trianglePuzzleOrientation']
 
-triangleorder = list(range(6))
-random.shuffle(triangleorder)
+    triangleorder = list(range(num_triangle_cards))
+    random.shuffle(triangleorder)
 
-# underline 6 and 9
-def cardnum(n):
-    if n in [6, 9]:
-        return r'\underline{%s}' % n
-    else:
-        return str(n)
+    trianglepuzcard = [[]] * num_triangle_cards
 
-trianglepuzcard = []
+    # We will put solution card i in puzzle position triangleorder[i],
+    # rotated by a random amount
+    for i in range(num_triangle_cards):
+        j = triangleorder[i]
+        rot = random.randint(0, 2) # anticlockwise rotation
+        trianglepuzcard[j] = [trianglesolcard[i][(3 - rot) % 3],
+                              trianglesolcard[i][(4 - rot) % 3],
+                              trianglesolcard[i][(5 - rot) % 3],
+                              cardnum(j + 1), trianglepuzorient[j][1]]
+        # What angle does the card number go in the solution?
+        # angle of puzzle card + (orientation of sol card - orientation of
+        # puz card) - rotation angle [undoing rotation]
+        angle = (trianglepuzorient[j][1] +
+                 (trianglesolorient[i] - trianglepuzorient[j][0]) -
+                 120 * rot)
+        trianglesolcard[i].extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
-# We will put solution card i in puzzle position triangleorder[i],
-# rotated by a random amount
-for i in range(6):
-    j = triangleorder[i]
-    rot = random.randint(0, 2) # anticlockwise rotation
-    trianglepuzcard[j] = [trianglesolcard[i][(3 - rot) % 3],
-                          trianglesolcard[i][(4 - rot) % 3],
-                          trianglesolcard[i][(5 - rot) % 3],
-                          cardnum(j + 1), trianglepuzorient[j][1]]
-    # What angle does the card number go in the solution?
-    # angle of puzzle card + (orientation of sol card - orientation of
-    # puz card) - rotation angle [undoing rotation]
-    angle = (trianglepuzorient[j][1] +
-             (trianglesolorient[i] - trianglepuzorient[j][0]) -
-             120 * rot)
-    trianglesolcard[i].extend([cardnum(j + 1), (angle + 180) % 360 - 180])
+        dsubs['solutioncard' + str(i + 1)] = (('{%s}' * 5) %
+                                              tuple(trianglesolcard[i]))
+        dsubs['problemcard' + str(j + 1)] = (('{%s}' * 5) %
+                                             tuple(trianglepuzcard[j]))
 
-    dsubs['solutioncard' + str(i + 1)] = (('{%s}' * 5) %
-                                          tuple(trianglesolcard[i]))
-    dsubs['problemcard' + str(j + 1)] = (('{%s}' * 5) %
-                                         tuple(trianglepuzcard[j]))
-
-# Testing:
-# for i in range(6):
-#     print('Sol card %s: (%s, %s, %s), num angle %s' %
-#            (i, trianglesolcard[i][0], trianglesolcard[i][1], trianglesolcard[i][2], trianglesolcard[i][4]))
-# 
-# for i in range(6):
-#     print('Puz card %s: (%s, %s, %s), num angle %s' %
-#            (i, trianglepuzcard[i][0], trianglepuzcard[i][1], trianglepuzcard[i][2], trianglepuzcard[i][3]))
+    # Testing:
+    # for i in range(6):
+    #     print('Sol card %s: (%s, %s, %s), num angle %s' %
+    #            (i, trianglesolcard[i][0], trianglesolcard[i][1],
+    #             trianglesolcard[i][2], trianglesolcard[i][4]))
+    # 
+    # for i in range(6):
+    #     print('Puz card %s: (%s, %s, %s), num angle %s' %
+    #            (i, trianglepuzcard[i][0], trianglepuzcard[i][1],
+    #             trianglepuzcard[i][2], trianglepuzcard[i][3]))
 
 btext = losub(bodytable, dsubs)
 print(btext, file=outtable)
