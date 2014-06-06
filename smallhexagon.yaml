@@ -1,15 +1,26 @@
 # Template file for smallhexagon jigsaw
 type: smallhexagon
 typename: small hexagon
+
+puzzleHeaderTeX: template-header.tex
+puzzleTemplateTeX: template-smallhexagon-puzzle.tex
+solutionHeaderTeX: template-header.tex
+solutionTemplateTeX: template-smallhexagon-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-table.tex
+puzzleHeaderMarkdown: template-header.md
+puzzleTemplateMarkdown: template-jigsaw-puzzle3.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-jigsaw-solution3.md
+
 pairs: 6
 edges: 6
-# Do we rotate individual tiles by default?
-rotate: true
-# Do we randomly flip individual questions and answers by default?
+# Do we shuffle the order of the pairs from the order given?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
 flip: true
-# Do we shuffle the questions by default from the order given?
-shuffleQus: false
-# Do we shuffle the edges by default from the order given?
+# Do we shuffle the order of the edges from the order given?
 shuffleEdges: false
 # Default text size on puzzle pieces
 puzzleTextSize: 5
