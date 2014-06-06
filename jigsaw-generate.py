@@ -184,7 +184,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
             else:
                 printf('Unrecognised entry in layout file '
                        '(triangleSolutionCards):\n%s' % card)
-                trianglesolcard.append(newcard)
+        trianglesolcard.append(newcard)
 
     # List: direction of base side
     trianglesolorient = layout['triangleSolutionOrientation']
@@ -226,7 +226,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
         dsubsmd['puzcards3'] = ''
         dsubsmd['puzcards4'] = ''
 
-    for t in trianglepuzcards:
+    for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
             mdentry = make_entry(entry, normalsize, False, usesize=False)
@@ -506,7 +506,7 @@ def generate_jigsaw(data, options):
         print(btext, file=outtable)
         outtable.close()
         ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outtablefile])
+                               outtablefile], stdout=subprocess.DEVNULL)
         if ret:
             print("Warning: lualatex %s failed, return value %s" %
                   (outtablefile, ret), file=sys.stderr)
@@ -516,7 +516,7 @@ def generate_jigsaw(data, options):
         print(ptext, file=outpuz)
         outpuz.close()
         ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outpuzfile])
+                               outpuzfile], stdout=subprocess.DEVNULL)
         if ret:
             print("Warning: lualatex %s failed, return value %s" %
                   (outpuzfile, ret), file=sys.stderr)
@@ -526,7 +526,7 @@ def generate_jigsaw(data, options):
         print(stext, file=outsol)
         outsol.close()
         ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outsolfile])
+                               outsolfile], stdout=subprocess.DEVNULL)
         if ret:
             print("Warning: lualatex %s failed, return value %s" %
                   (outsolfile, ret), file=sys.stderr)

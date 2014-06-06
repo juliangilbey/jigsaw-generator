@@ -4,7 +4,7 @@ The pairs match up as follows:
 |:------:|:------:|
 <: pairs :>
 
-The following edges did not match:
+The following triangle edges did not match any other edges:
 
 | Edge 1 |
 |:------:|

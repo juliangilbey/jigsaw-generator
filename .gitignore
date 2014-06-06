@@ -2,4 +2,5 @@
 *.aux
 *.pdf
 puzzle-*.tex
+puzzle-*.md
 auto
