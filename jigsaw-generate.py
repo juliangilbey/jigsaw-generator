@@ -115,6 +115,36 @@ def make_entry(entry, defaultsize, hide, usesize=True):
             # Force it to be a string
             return '%s' % entry
 
+def make_entry_md(entry, hide):
+    """Convert a YAML entry into a Markdown-formatted table entry
+
+    The YAML entry will either be a simple text entry, or it will be a
+    dictionary with required key "text" and optional entries "size"
+    and "hidden".
+
+    In the latter case, the result will be "(BLANK)" if "hidden" (from
+    the YAML file) is true and the make_entry parameter hide is True,
+    otherwise the text will be output.
+
+    The output will have the text with spaces around it, and "(BLANK)"
+    if the entry is blank.
+    """
+
+    if isinstance(entry, dict):
+        if 'text' not in entry:
+            print('No "text" field in entry in data file.  Rest of data is:',
+                  file=sys.stderr)
+            for f in entry:
+                print('  %s: %s' % (f, entry[f]), file=sys.stderr)
+            return ' (BROKEN ENTRY) '
+            
+        if hide and 'hidden' in entry and entry['hidden']:
+            return ' (BLANK) '
+
+        return ' %s ' % (entry['text'] if entry['text'] else '(BLANK)')
+    else:
+        return ' %s ' % (entry if entry else '(BLANK)')
+
 def cardnum(n):
     """Underline 6 and 9; return everything else as a string"""
     if n in [6, 9]:
@@ -137,33 +167,23 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
                                  make_entry(p[1], normalsize, False)))
         row = '|'
         for entry in p:
-            mdentry = make_entry(entry, normalsize, False, usesize=False)
-            if mdentry:
-                row += ' ' + mdentry + ' |'
-            else:
-                row += ' (BLANK) |'
+            row += make_entry_md(entry, False) + '|'
         dsubsmd['pairs'] += row + '\n'
         
     for e in edges:
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
                                 make_entry(e, normalsize, False))
-        mdentry = make_entry(e, normalsize, False, usesize=False)
-        if mdentry:
-            dsubsmd['edges'] += '| ' + mdentry + ' |\n'
-        else:
-            dsubsmd['edges'] += '| (BLANK) |\n'
+        dsubsmd['edges'] += '|' + make_entry_md(e, False) + '|\n'
 
     for c in cards:
         dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
                                 make_entry(c, normalsize, False))
-        mdentry = make_entry(c, normalsize, False, usesize=False)
-        if mdentry:
-            dsubsmd['cards'] += '| ' + mdentry + ' |\n'
-        else:
-            dsubsmd['cards'] += '| (BLANK) |\n'
-
+        dsubsmd['cards'] += '|' + make_entry_md(c, False) + '|\n'
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
+    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
+    solution_size = getopt(layout, data, {}, 'solutionTextSize')
+
     num_triangle_cards = len(layout['triangleSolutionCards'])
 
     # We read the solution layout from the YAML file, and place the
@@ -183,7 +203,8 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
                 newcard.append(edges[entrynum])
             else:
                 printf('Unrecognised entry in layout file '
-                       '(triangleSolutionCards):\n%s' % card)
+                       '(triangleSolutionCards):\n%s' % card,
+                       file=sys.stderr)
         trianglesolcard.append(newcard)
 
     # List: direction of base side
@@ -199,25 +220,32 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
 
     # We will put solution card i in puzzle position triangleorder[i],
     # rotated by a random amount
-    for i in range(num_triangle_cards):
+    for (i, solcard) in enumerate(trianglesolcard):
         j = triangleorder[i]
         rot = random.randint(0, 2) # anticlockwise rotation
-        trianglepuzcard[j] = [trianglesolcard[i][(3 - rot) % 3],
-                              trianglesolcard[i][(4 - rot) % 3],
-                              trianglesolcard[i][(5 - rot) % 3],
+        trianglepuzcard[j] = [solcard[(3 - rot) % 3],
+                              solcard[(4 - rot) % 3],
+                              solcard[(5 - rot) % 3],
                               cardnum(j + 1), trianglepuzorient[j][1]]
+        puzcard = trianglepuzcard[j]
         # What angle does the card number go in the solution?
         # angle of puzzle card + (orientation of sol card - orientation of
         # puz card) - rotation angle [undoing rotation]
         angle = (trianglepuzorient[j][1] +
                  (trianglesolorient[i] - trianglepuzorient[j][0]) -
                  120 * rot)
-        trianglesolcard[i].extend([cardnum(j + 1), (angle + 180) % 360 - 180])
+        solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
         dsubs['trisolcard' + str(i + 1)] = (('{%s}' * 5) %
-                                            tuple(trianglesolcard[i]))
+            (make_entry(solcard[0], solution_size, False),
+             make_entry(solcard[1], solution_size, False),
+             make_entry(solcard[2], solution_size, False),
+             solcard[3], solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
-                                            tuple(trianglepuzcard[j]))
+            (make_entry(puzcard[0], puzzle_size, True),
+             make_entry(puzcard[1], puzzle_size, True),
+             make_entry(puzcard[2], puzzle_size, True),
+             puzcard[3], puzcard[4]))
 
     # For the Markdown version, we only need to record the puzzle cards at
     # this point.
@@ -229,11 +257,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
-            mdentry = make_entry(entry, normalsize, False, usesize=False)
-            if mdentry:
-                row += ' ' + mdentry + ' |'
-            else:
-                row += ' (BLANK) |'
+            row += make_entry_md(entry, True) + '|'
         dsubsmd['puzcards3'] += row + '\n'
         dsubsmd['puzcards4'] += row + ' &nbsp; |\n'
 
@@ -246,6 +270,28 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     #     print('Puz card %s: (%s, %s, %s), num angle %s' %
     #            (i, card[0], card[1], card[2], card[3]))
 
+rerun_regex = re.compile(b'rerun ', re.I)
+
+def runlatex(file, options):
+    """Run (lua)latex on file"""
+
+    # We may use the options at a later point to specify the LaTeX
+    # engine to use, so including it now to reduce amount of code to
+    # modify later.
+    for count in range(4):
+        try:
+            output = subprocess.check_output(['lualatex',
+                                              '--interaction=nonstopmode',
+                                              file])
+        except CalledProcessError as cpe:
+            print("Warning: lualatex %s failed, return value %s" %
+                  (file, cpe.returncode), file=sys.stderr)
+            print("lualatex (error) output:", file=sys.stderr)
+            print(cpe.output, file=sys.stderr)
+            break
+
+        if not rerun_regex.search(output):
+            break
 
 
 #####################################################################
@@ -400,16 +446,6 @@ def generate_jigsaw(data, options):
         dsubs['title'] = ''
     random.seed(dsubs['title'])
 
-    if 'puzzleTextSize' in data:
-        puzzle_text_size = data['puzzleTextSize']
-    else:
-        puzzle_text_size = layout['puzzleTextSize']
-
-    if 'solutionTextSize' in data:
-        solution_text_size = data['solutionTextSize']
-    else:
-        solution_text_size = layout['solutionTextSize']
-
     # Read the card content
     # Three types of cards: pairs, edges, cards (which are single cards
     # for sorting activities)
@@ -505,31 +541,19 @@ def generate_jigsaw(data, options):
         btext = losub(bodytable, dsubs)
         print(btext, file=outtable)
         outtable.close()
-        ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outtablefile], stdout=subprocess.DEVNULL)
-        if ret:
-            print("Warning: lualatex %s failed, return value %s" %
-                  (outtablefile, ret), file=sys.stderr)
+        runlatex(outtablefile, options)
 
     if puzzletex:
         ptext = losub(bodypuz, dsubs)
         print(ptext, file=outpuz)
         outpuz.close()
-        ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outpuzfile], stdout=subprocess.DEVNULL)
-        if ret:
-            print("Warning: lualatex %s failed, return value %s" %
-                  (outpuzfile, ret), file=sys.stderr)
+        runlatex(outpuzfile, options)
 
     if solutiontex:
         stext = losub(bodysol, dsubs)
         print(stext, file=outsol)
         outsol.close()
-        ret = subprocess.call(['lualatex', '--interaction=batchmode',
-                               outsolfile], stdout=subprocess.DEVNULL)
-        if ret:
-            print("Warning: lualatex %s failed, return value %s" %
-                  (outsolfile, ret), file=sys.stderr)
+        runlatex(outsolfile, options)
 
     if puzzlemd:
         ptextmd = losub(bodypuzmd, dsubsmd)
