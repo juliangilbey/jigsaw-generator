@@ -252,6 +252,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
 
     if 'puzcards3' not in dsubsmd:
         dsubsmd['puzcards3'] = ''
+    if 'puzcards4' not in dsubsmd:
         dsubsmd['puzcards4'] = ''
 
     for t in trianglepuzcard:
