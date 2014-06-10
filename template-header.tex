@@ -16,6 +16,8 @@
 \usepackage{tikz}[2013/12/13 v3.0.0]
 \usetikzlibrary{calc}
 \tikzset{above/.default=6pt}
+\tikzset{regular/.style={sloped, above}}
+\tikzset{hidden/.style={sloped, above, fill=yellow!80!white}}
 
 % Usage of these macros:
 % First do: \setshapesize{size} where size is the side length of
@@ -85,17 +87,27 @@
   \node[circle,draw,thin,rotate=#6] at ($ #1 $) {#5};
 }
 
+\newcommand{\makestyles}[4]{%
+  \def#1{#3}
+  \def#2{#4}
+}
+
 \newcommand{\tiltedsquare}[8]{%
   \coordinate (a) at ($ #1 +({#2-135}:\srad) $);
   \coordinate (b) at ($ #1 +({#2-45}:\srad) $);
   \coordinate (c) at ($ #1 +({#2+45}:\srad) $);
   \coordinate (d) at ($ #1 +({#2+135}:\srad) $);
 
+  \makestyles\stylea\contenta#3
+  \makestyles\styleb\contentb#4
+  \makestyles\stylec\contentc#5
+  \makestyles\styled\contentd#6
+
   \draw[allow upside down]
-    (a) -- node[sloped, above] {#3}
-    (b) -- node[sloped, above] {#4}
-    (c) -- node[sloped, above] {#5}
-    (d) -- node[sloped, above] {#6}
+    (a) -- node[\stylea] {\contenta}
+    (b) -- node[\styleb] {\contentb}
+    (c) -- node[\stylec] {\contentc}
+    (d) -- node[\styled] {\contentd}
     cycle;
   \node[circle,draw,thin,rotate=#8] at ($ #1 $) {#7};
 }
