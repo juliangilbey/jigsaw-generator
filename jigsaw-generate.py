@@ -72,6 +72,13 @@ def make_entry(entry, defaultsize, hide):
     (from the YAML file) is true and the make_entry parameter hide is
     True, otherwise the text will be output.
 
+    In the latter case, the result will be '{regular}{}' if "hidden"
+    (from the YAML file) is true and the make_entry parameter hide is
+    "hide".  Otherwise, if hide is "mark", the result will be
+    '{hidden}{text}', and if hide is "", the result will be
+    '{regular}{text}'.  This will be handed on to the LaTeX file,
+    which is expected to interpret this.
+
     If there is a "size" key, this will be added to the defaultsize.
     The output will have the text with the appropriate LaTeX size
     command prepended, unless usesize is False.
@@ -83,10 +90,8 @@ def make_entry(entry, defaultsize, hide):
                   file=sys.stderr)
             for f in entry:
                 print('  %s: %s\n' % (f, entry[f]), file=sys.stderr)
-            return ''
+            return '{regular}{}'
             
-        if hide and 'hidden' in entry and entry['hidden']:
-            return ''
         if 'size' in entry:
             try:
                 size = defaultsize + int(entry['size'])
@@ -103,10 +108,21 @@ def make_entry(entry, defaultsize, hide):
         else:
             size = defaultsize
 
-        return '%s %s' % (sizes[size], entry['text'])
+        if 'hidden' in entry and entry['hidden']:
+            if hide == 'hide':
+                return '{regular}{}'
+            elif hide == 'mark':
+                return '{hidden}{%s %s}' % (sizes[size], entry['text'])
+            elif hide == 'ignore':
+                return '{regular}{%s %s}' % (sizes[size], entry['text'])
+            else:
+                # this shouldn't happen
+                sys.exit('This should not happen: bad hide parameter')
+        else:
+            return '{regular}{%s %s}' % (sizes[size], entry['text'])
 
     else:
-        return '%s %s' % (sizes[defaultsize], entry)
+        return '{regular}{%s %s}' % (sizes[defaultsize], entry)
 
 def make_entry_md(entry, hide):
     """Convert a YAML entry into a Markdown-formatted table entry
@@ -116,8 +132,9 @@ def make_entry_md(entry, hide):
     and "hidden".
 
     In the latter case, the result will be "(BLANK)" if "hidden" (from
-    the YAML file) is true and the make_entry parameter hide is True,
-    otherwise the text will be output.
+    the YAML file) is true and the make_entry parameter hide is "hide",
+    otherwise the text will be output, prepended with "(*) " if hide
+    is "mark" and not if hide is "ignore".
 
     The output will have the text with spaces around it, and "(BLANK)"
     if the entry is blank.
@@ -131,10 +148,20 @@ def make_entry_md(entry, hide):
                 print('  %s: %s' % (f, entry[f]), file=sys.stderr)
             return ' (BROKEN ENTRY) '
             
-        if hide and 'hidden' in entry and entry['hidden']:
-            return ' (BLANK) '
-
-        return ' %s ' % (entry['text'] if entry['text'] else '(BLANK)')
+        if 'hidden' in entry and entry['hidden']:
+            if hide == 'hide':
+                return ' (BLANK) '
+            elif hide == 'mark':
+                # it makes no sense to have empty text with hidden, so
+                # we don't check for this possibility
+                return ' (*) %s ' % entry['text']
+            elif hide == 'ignore':
+                return ' %s ' % entry['text']
+            else:
+                # this shouldn't happen
+                sys.exit('This should not happen: bad hide parameter')
+        else:  # not hidden
+            return ' %s ' % (entry['text'] if entry['text'] else '(BLANK)')
     else:
         return ' %s ' % (entry if entry else '(BLANK)')
 
@@ -156,7 +183,7 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
-                                (make_entry(p[0], normalsize, False),
+                                (make_entry(p[0], normalsize, 'ignore'),
                                  make_entry(p[1], normalsize, False)))
         row = '|'
         for entry in p:
