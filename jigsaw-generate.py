@@ -284,11 +284,11 @@ def runlatex(file, options):
             output = subprocess.check_output(['lualatex',
                                               '--interaction=nonstopmode',
                                               file])
-        except CalledProcessError as cpe:
+        except subprocess.CalledProcessError as cpe:
             print("Warning: lualatex %s failed, return value %s" %
                   (file, cpe.returncode), file=sys.stderr)
-            print("lualatex (error) output:", file=sys.stderr)
-            print(cpe.output, file=sys.stderr)
+            print("See the lualatex log file for more details.",
+                  file=sys.stderr)
             break
 
         if not rerun_regex.search(output):
