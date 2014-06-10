@@ -61,7 +61,7 @@ def losub(text, subs):
                   file=sys.stderr)
     return re.sub(r'<:\s*(\S*)\s*:>', subtext, text)
 
-def make_entry(entry, defaultsize, hide, usesize=True):
+def make_entry(entry, defaultsize, hide):
     """Convert a YAML entry into a LaTeX-formatted entry
 
     The YAML entry will either be a simple text entry, or it will be a
@@ -103,17 +103,10 @@ def make_entry(entry, defaultsize, hide, usesize=True):
         else:
             size = defaultsize
 
-        if usesize:
-            return '%s %s' % (sizes[size], entry['text'])
-        else:
-            # Force it to be a string
-            return '%s' % entry['text']
+        return '%s %s' % (sizes[size], entry['text'])
+
     else:
-        if usesize:
-            return '%s %s' % (sizes[defaultsize], entry)
-        else:
-            # Force it to be a string
-            return '%s' % entry
+        return '%s %s' % (sizes[defaultsize], entry)
 
 def make_entry_md(entry, hide):
     """Convert a YAML entry into a Markdown-formatted table entry
