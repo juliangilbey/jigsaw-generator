@@ -7,3 +7,5 @@
 * Show hidden items differently in solution
 
 * Handle including graphics
+
+* Handle longer text entries by automatically wrapping
