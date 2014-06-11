@@ -4,8 +4,6 @@
 * Change "sys.exit" in generate-jigsaw.py to exception-throwing -
    this will be needed for when we have a GUI, and it's also more pythonic
 
-* Show hidden items differently in solution
-
 * Handle including graphics
 
 * Handle longer text entries by automatically wrapping

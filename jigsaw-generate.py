@@ -39,12 +39,12 @@ normalsize = 4
 # Is any entry marked as hidden?
 exists_hidden = False
 
-def getopt(layout, data, options, opt):
+def getopt(layout, data, options, opt, default=None):
     """Determine the value of opt from various possible sources
 
     Check the command-line options first for this option, then the
     data, then finally the layout; return the first value found, or
-    None if the option is not found anywhere.
+    default if the option is not found anywhere.
     """
     if opt in options:
         return options[opt]
@@ -52,7 +52,7 @@ def getopt(layout, data, options, opt):
         return data[opt]
     if opt in layout:
         return layout[opt]
-    return None
+    return default
 
 def losub(text, subs):
     """Substitute <: var :> strings in text using the dict subs"""
@@ -533,11 +533,24 @@ def generate_jigsaw(data, options):
 
     # The following calls will add the appropriate substitution
     # variables to dsubs and dsubsmd
+    exists_hidden = False
+
     if tabletex or solutionmd:
         make_table(pairs, edges, cards, dsubs, dsubsmd)
 
     if 'triangleSolutionCards' in layout:
         make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
+
+    if exists_hidden:
+        dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'
+        dsubs['hiddennotetable'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+        dsubsmd['hiddennotemd'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+    else:
+        dsubs['hiddennotesolution'] = ''
+        dsubs['hiddennotetable'] = ''
+        dsubs['hiddennotemd'] = ''
+
+    dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
 
     if tabletex:
         btext = losub(bodytable, dsubs)

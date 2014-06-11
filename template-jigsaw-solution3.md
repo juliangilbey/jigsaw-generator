@@ -1,5 +1,7 @@
 The pairs match up as follows:
 
+<: hiddennotemd :>
+
 | Edge 1 | Edge 2 |
 |:------:|:------:|
 <: pairs :>
