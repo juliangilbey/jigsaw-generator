@@ -36,6 +36,9 @@ sizes = [r'\tiny',
          ]
 normalsize = 4
 
+# Is any entry marked as hidden?
+exists_hidden = False
+
 def getopt(layout, data, options, opt):
     """Determine the value of opt from various possible sources
 
@@ -61,27 +64,29 @@ def losub(text, subs):
                   file=sys.stderr)
     return re.sub(r'<:\s*(\S*)\s*:>', subtext, text)
 
-def make_entry(entry, defaultsize, hide):
-    """Convert a YAML entry into a LaTeX-formatted entry
+def make_entry(entry, defaultsize, hide, style):
+    """Convert a YAML entry into a LaTeX or Markdown formatted entry
 
     The YAML entry will either be a simple text entry, or it will be a
     dictionary with required key "text" and optional entries "size"
     and "hidden".
 
-    In the latter case, the result will be an empty string if "hidden"
-    (from the YAML file) is true and the make_entry parameter hide is
-    True, otherwise the text will be output.
-
-    In the latter case, the result will be '{regular}{}' if "hidden"
-    (from the YAML file) is true and the make_entry parameter hide is
-    "hide".  Otherwise, if hide is "mark", the result will be
-    '{hidden}{text}', and if hide is "", the result will be
-    '{regular}{text}'.  This will be handed on to the LaTeX file,
-    which is expected to interpret this.
-
     If there is a "size" key, this will be added to the defaultsize.
-    The output will have the text with the appropriate LaTeX size
-    command prepended, unless usesize is False.
+
+    The "hide" parameter can be:
+      "hide": the text will be hidden if "hidden" is true
+      "mark": the text will be highlighted if "hidden" is true
+      "ignore": the "hidden" key will be ignored
+
+    The "style" parameter can be:
+      "table": outputs text with no size marker; highlighted hidden
+               text will be prepended with "(*)"
+      "tikz":  outputs {regular}{size text} or {hidden}{size text},
+               where {hidden} highlights the text
+      "md":    outputs text for Markdown: highlighted hidden text will
+               be prepended with "(*)"; blank text will be replaced by
+               "(BLANK)", and all entries will be surrounded on either
+               side by a blank space.  There is no size marker.
     """
 
     if isinstance(entry, dict):
@@ -90,7 +95,7 @@ def make_entry(entry, defaultsize, hide):
                   file=sys.stderr)
             for f in entry:
                 print('  %s: %s\n' % (f, entry[f]), file=sys.stderr)
-            return '{regular}{}'
+            return make_entry_util('', '', False, style)
             
         if 'size' in entry:
             try:
@@ -109,61 +114,37 @@ def make_entry(entry, defaultsize, hide):
             size = defaultsize
 
         if 'hidden' in entry and entry['hidden']:
+            exists_hidden = True
             if hide == 'hide':
-                return '{regular}{}'
+                return make_entry_util('', '', False, style)
             elif hide == 'mark':
-                return '{hidden}{%s %s}' % (sizes[size], entry['text'])
+                return make_entry_util(entry['text'], sizes[size], True, style)
             elif hide == 'ignore':
-                return '{regular}{%s %s}' % (sizes[size], entry['text'])
+                return make_entry_util(entry['text'], sizes[size], False, style)
             else:
                 # this shouldn't happen
                 sys.exit('This should not happen: bad hide parameter')
         else:
-            return '{regular}{%s %s}' % (sizes[size], entry['text'])
+            return make_entry_util(entry['text'], sizes[size], False, style)
 
     else:
-        return '{regular}{%s %s}' % (sizes[defaultsize], entry)
+        return make_entry_util(entry, sizes[defaultsize], False, style)
 
-def make_entry_md(entry, hide):
-    """Convert a YAML entry into a Markdown-formatted table entry
+def make_entry_util(text, size, mark_hidden, style):
+    """Create the output once the text, size, hide and style are determined
 
-    The YAML entry will either be a simple text entry, or it will be a
-    dictionary with required key "text" and optional entries "size"
-    and "hidden".
-
-    In the latter case, the result will be "(BLANK)" if "hidden" (from
-    the YAML file) is true and the make_entry parameter hide is "hide",
-    otherwise the text will be output, prepended with "(*) " if hide
-    is "mark" and not if hide is "ignore".
-
-    The output will have the text with spaces around it, and "(BLANK)"
-    if the entry is blank.
+    This should be called with mark_hidden being True or False; hidden
+    text should be replaced by '' before this function is called.
     """
 
-    if isinstance(entry, dict):
-        if 'text' not in entry:
-            print('No "text" field in entry in data file.  Rest of data is:',
-                  file=sys.stderr)
-            for f in entry:
-                print('  %s: %s' % (f, entry[f]), file=sys.stderr)
-            return ' (BROKEN ENTRY) '
-            
-        if 'hidden' in entry and entry['hidden']:
-            if hide == 'hide':
-                return ' (BLANK) '
-            elif hide == 'mark':
-                # it makes no sense to have empty text with hidden, so
-                # we don't check for this possibility
-                return ' (*) %s ' % entry['text']
-            elif hide == 'ignore':
-                return ' %s ' % entry['text']
-            else:
-                # this shouldn't happen
-                sys.exit('This should not happen: bad hide parameter')
-        else:  # not hidden
-            return ' %s ' % (entry['text'] if entry['text'] else '(BLANK)')
+    if mark_hidden:
+        if style == "table": return "(*) %s" % text
+        elif style == "tikz": return "{hidden}{%s %s}" % (size, text)
+        elif style == "md": return " (*) %s " % text
     else:
-        return ' %s ' % (entry if entry else '(BLANK)')
+        if style == "table": return "%s" % text
+        elif style == "tikz": return "{regular}{%s %s}" % (size, text)
+        elif style == "md": return " %s " % (text if text else "(BLANK)")
 
 def cardnum(n):
     """Underline 6 and 9; return everything else as a string"""
@@ -183,22 +164,22 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
-                                (make_entry(p[0], normalsize, 'ignore'),
-                                 make_entry(p[1], normalsize, False)))
+            (make_entry(p[0], normalsize, 'mark', 'table'),
+             make_entry(p[1], normalsize, 'mark', 'table')))
         row = '|'
         for entry in p:
-            row += make_entry_md(entry, False) + '|'
+            row += make_entry(entry, 0, 'mark', 'md') + '|'
         dsubsmd['pairs'] += row + '\n'
         
     for e in edges:
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(e, normalsize, False))
-        dsubsmd['edges'] += '|' + make_entry_md(e, False) + '|\n'
+                                make_entry(e, normalsize, 'mark', 'table'))
+        dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md') + '|\n'
 
     for c in cards:
         dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(c, normalsize, False))
-        dsubsmd['cards'] += '|' + make_entry_md(c, False) + '|\n'
+                                make_entry(c, normalsize, 'mark', 'table'))
+        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
@@ -257,14 +238,14 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
         solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
         dsubs['trisolcard' + str(i + 1)] = (('{%s}' * 5) %
-            (make_entry(solcard[0], solution_size, False),
-             make_entry(solcard[1], solution_size, False),
-             make_entry(solcard[2], solution_size, False),
+            (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
+             make_entry(solcard[1], solution_size, 'mark', 'tikz'),
+             make_entry(solcard[2], solution_size, 'mark', 'tikz'),
              solcard[3], solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
-            (make_entry(puzcard[0], puzzle_size, True),
-             make_entry(puzcard[1], puzzle_size, True),
-             make_entry(puzcard[2], puzzle_size, True),
+            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
+             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
+             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
              puzcard[3], puzcard[4]))
 
     # For the Markdown version, we only need to record the puzzle cards at
@@ -278,7 +259,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
-            row += make_entry_md(entry, True) + '|'
+            row += make_entry(entry, 0, 'hide', 'md') + '|'
         dsubsmd['puzcards3'] += row + '\n'
         dsubsmd['puzcards4'] += row + ' &nbsp; |\n'
 

@@ -5,7 +5,8 @@ title: A trial puzzle
 pairs:
     - - text: Q1
         size: 3
-      - A1
+      - text: A1
+        hidden: true
     - [Q2, A2]
     - [Q3, A3]
     - [Q4, A4]
