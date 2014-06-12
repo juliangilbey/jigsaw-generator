@@ -114,6 +114,7 @@ def make_entry(entry, defaultsize, hide, style):
             size = defaultsize
 
         if 'hidden' in entry and entry['hidden']:
+            global exists_hidden
             exists_hidden = True
             if hide == 'hide':
                 return make_entry_util('', '', False, style)
@@ -533,6 +534,7 @@ def generate_jigsaw(data, options):
 
     # The following calls will add the appropriate substitution
     # variables to dsubs and dsubsmd
+    global exists_hidden
     exists_hidden = False
 
     if tabletex or solutionmd:

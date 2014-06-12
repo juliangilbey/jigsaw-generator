@@ -2,6 +2,7 @@
 type: smallhexagon
 contributor: Julian
 title: A trial puzzle
+note: This is a silly example of a puzzle
 pairs:
     - - text: Q1
         size: 3
