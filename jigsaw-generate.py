@@ -139,13 +139,33 @@ def make_entry_util(text, size, mark_hidden, style):
     """
 
     if mark_hidden:
-        if style == "table": return "(*) %s" % text
-        elif style == "tikz": return "{hidden}{%s %s}" % (size, text)
-        elif style == "md": return " (*) %s " % text
+        if style == "table":
+            return "(*) %s" % img2tex(text)
+        elif style == "tikz":
+            return "{hidden}{%s %s}" % (size, img2tex(text))
+        elif style == "md":
+            return " (*) %s " % text
     else:
-        if style == "table": return "%s" % text
-        elif style == "tikz": return "{regular}{%s %s}" % (size, text)
-        elif style == "md": return " %s " % (text if text else "(BLANK)")
+        if style == "table":
+            return img2tex(text)
+        elif style == "tikz":
+            return "{regular}{%s %s}" % (size, img2tex(text))
+        elif style == "md":
+            return " %s " % (text if text else "(BLANK)")
+
+img_re = re.compile(r'!\[([^\]]*)\]\(([^\)]*\)')
+
+def img2tex(text):
+    text = str(text)  # just in case the text is purely numeric
+    images = img_re.search(text):
+    while images:
+        img, caption = images.groups()
+        if caption:
+            text = img_re.sub(repl, text, count=1)
+        else:
+            text = img_re.sub(repl, text, count=1)
+
+        images = img_re.search(text):
 
 def cardnum(n):
     """Underline 6 and 9; return everything else as a string"""
