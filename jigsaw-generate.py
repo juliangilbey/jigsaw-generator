@@ -153,19 +153,22 @@ def make_entry_util(text, size, mark_hidden, style):
         elif style == "md":
             return " %s " % (text if text else "(BLANK)")
 
-img_re = re.compile(r'!\[([^\]]*)\]\(([^\)]*\)')
+img_re = re.compile(r'!\[([^\]]*)\]\(([^\)]*)\)')
 
 def img2tex(text):
     text = str(text)  # just in case the text is purely numeric
-    images = img_re.search(text):
+    images = img_re.search(text)
     while images:
-        img, caption = images.groups()
+        caption, img = images.groups()
         if caption:
-            text = img_re.sub(repl, text, count=1)
+            text = img_re.sub(r'\imagecap{%s}{%s}' % (img, caption),
+                              text, count=1)
         else:
-            text = img_re.sub(repl, text, count=1)
+            text = img_re.sub(r'\image{%s}' % img, text, count=1)
 
-        images = img_re.search(text):
+        images = img_re.search(text)
+
+    return text
 
 def cardnum(n):
     """Underline 6 and 9; return everything else as a string"""
@@ -573,6 +576,7 @@ def generate_jigsaw(data, options):
         dsubs['hiddennotemd'] = ''
 
     dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
+    dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
 
     if tabletex:
         btext = losub(bodytable, dsubs)

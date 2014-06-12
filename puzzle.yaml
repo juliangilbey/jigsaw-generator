@@ -8,9 +8,9 @@ pairs:
         size: 3
       - text: A1
         hidden: true
-    - [Q2, A2]
+    - [Q2, 'A2: ![goosey](goose.png)']
     - [Q3, A3]
-    - [Q4, A4]
+    - ['Q4: ![](goose.png)', A4]
     - [Q5, A5]
     - [Q6, A6]
 edges:

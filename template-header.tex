@@ -19,6 +19,21 @@
 \tikzset{regular/.style={sloped, above}}
 \tikzset{hidden/.style={sloped, above, fill=yellow!80!white}}
 
+\newsavebox\templateimagebox
+\newdimen\templateimagewd
+
+\newcommand{\image}[1]{\includegraphics{#1}}
+% There might be a nicer way to do the following, but I haven't yet
+% found it.
+\newcommand{\imagecap}[2]{%
+  \savebox{\templateimagebox}{\includegraphics{#1}}%
+  \setlength{\templateimagewd}{\wd\templateimagebox}%
+  \hbox to \templateimagewd{%
+    \begin{minipage}{\templateimagewd}%
+      \usebox{\templateimagebox}\\
+      \hbox to \templateimagewd{\hss #2\hss}%
+    \end{minipage}}}
+
 % Usage of these macros:
 % First do: \setshapesize{size} where size is the side length of
 % the triangle/square given in cm with no units
