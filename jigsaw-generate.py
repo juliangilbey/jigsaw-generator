@@ -206,6 +206,13 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
         dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
+    """Handle triangular-shaped jigsaw pieces, putting in the Qs and As
+
+    Read the puzzle layout and the puzzle data, and fill in questions
+    and answers for any triangular-shaped pieces, preparing the output
+    substitution variables in the process.
+    """
+
     puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
     solution_size = getopt(layout, data, {}, 'solutionTextSize')
 
@@ -295,6 +302,106 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     # for (i, card) in enumerate(trianglepuzcard):
     #     print('Puz card %s: (%s, %s, %s), num angle %s' %
     #            (i, card[0], card[1], card[2], card[3]))
+
+def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
+    """Handle square-shaped jigsaw pieces, putting in the Qs and As
+
+    Read the puzzle layout and the puzzle data, and fill in questions
+    and answers for any square-shaped pieces, preparing the output
+    substitution variables in the process.
+
+    This is very similar to the make_triangles function.
+    """
+
+    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
+    solution_size = getopt(layout, data, {}, 'solutionTextSize')
+
+    num_square_cards = len(layout['squareSolutionCards'])
+
+    # We read the solution layout from the YAML file, and place the
+    # data into our lists.  We don't format them yet, as the
+    # formatting may be different for the puzzle and solution
+
+    squaresolcard = []
+    for card in layout['squareSolutionCards']:
+        newcard = []
+        for entry in card:
+            entrynum = int(entry[1:])
+            if entry[0] == 'Q':
+                newcard.append(pairs[entrynum][0])
+            elif entry[0] == 'A':
+                newcard.append(pairs[entrynum][1])
+            elif entry[0] == 'E':
+                newcard.append(edges[entrynum])
+            else:
+                printf('Unrecognised entry in layout file '
+                       '(squareSolutionCards):\n%s' % card,
+                       file=sys.stderr)
+        squaresolcard.append(newcard)
+
+    # List: direction of base side
+    squaresolorient = layout['squareSolutionOrientation']
+
+    # List: direction of base side, direction of card number (from vertical)
+    squarepuzorient = layout['squarePuzzleOrientation']
+
+    squareorder = list(range(num_square_cards))
+    random.shuffle(squareorder)
+
+    squarepuzcard = [[]] * num_square_cards
+
+    # We will put solution card i in puzzle position squareorder[i],
+    # rotated by a random amount
+    for (i, solcard) in enumerate(squaresolcard):
+        j = squareorder[i]
+        rot = random.randint(0, 3) # anticlockwise rotation
+        squarepuzcard[j] = [solcard[(4 - rot) % 4],
+                            solcard[(5 - rot) % 4],
+                            solcard[(6 - rot) % 4],
+                            solcard[(7 - rot) % 4],
+                            cardnum(j + 1), squarepuzorient[j][1]]
+        puzcard = squarepuzcard[j]
+        # What angle does the card number go in the solution?
+        # angle of puzzle card + (orientation of sol card - orientation of
+        # puz card) - rotation angle [undoing rotation]
+        angle = (squarepuzorient[j][1] +
+                 (squaresolorient[i] - squarepuzorient[j][0]) -
+                 90 * rot)
+        solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
+
+        dsubs['sqsolcard' + str(i + 1)] = (('{%s}' * 6) %
+            (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
+             make_entry(solcard[1], solution_size, 'mark', 'tikz'),
+             make_entry(solcard[2], solution_size, 'mark', 'tikz'),
+             make_entry(solcard[3], solution_size, 'mark', 'tikz'),
+             solcard[4], solcard[5]))
+        dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
+            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
+             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
+             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
+             make_entry(puzcard[3], puzzle_size, 'hide', 'tikz'),
+             puzcard[4], puzcard[5]))
+
+    # For the Markdown version, we only need to record the puzzle cards at
+    # this point.
+
+    if 'puzcards4' not in dsubsmd:
+        dsubsmd['puzcards4'] = ''
+
+    for t in squarepuzcard:
+        row = '|'
+        for entry in t[0:4]:
+            row += make_entry(entry, 0, 'hide', 'md') + '|'
+        dsubsmd['puzcards4'] += row + '\n'
+
+    # Testing:
+    # for (i, card) in enumerate(squaresolcard):
+    #     print('Sol card %s: (%s, %s, %s, %s), num angle %s' %
+    #            (i, card[0], card[1], card[2], card[3], card[5]))
+    # 
+    # for (i, card) in enumerate(squarepuzcard):
+    #     print('Puz card %s: (%s, %s, %s), num angle %s' %
+    #            (i, card[0], card[1], card[2], card[3], card[4]))
 
 rerun_regex = re.compile(b'rerun ', re.I)
 
@@ -565,6 +672,9 @@ def generate_jigsaw(data, options):
 
     if 'triangleSolutionCards' in layout:
         make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
+
+    if 'squareSolutionCards' in layout:
+        make_squares(data, layout, flippedpairs, edges, dsubs, dsubsmd)
 
     if exists_hidden:
         dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'
