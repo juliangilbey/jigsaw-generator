@@ -46,9 +46,11 @@
 % \lefttriangle: right, top, bottom
 % \righttriangle: left, bottom, top
 
+\newlength\sidelength % side length
 \newlength\trad % triangle circumradius
 \newlength\srad % square circumradius
 \newcommand{\setshapesize}[1]{%
+ \pgfmathsetlength\sidelength{#1*72.27/2.54}
  \pgfmathsetlength\trad{(#1*72.27/2.54) / sqrt(3)}
  \pgfmathsetlength\srad{(#1*72.27/2.54) / sqrt(2)}
 }

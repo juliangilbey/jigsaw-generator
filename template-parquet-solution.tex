@@ -1,0 +1,52 @@
+\input template-header
+\begin{document}
+
+\begin{center}
+  \textbf{<: title :>}
+
+  \medskip
+
+  \textbf{SOLUTION}
+
+  \medskip
+
+  <: hiddennotesolution :>
+
+  \bigskip
+
+  \setshapesize{6}
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  % origin is at point of symmetry
+  \righttriangle{1.5*(0,\trad) + (60:\trad)}
+    {{regular}{A1}}{{regular}{Q2}}{{regular}{E1}}{1}{0}
+  \tiltedsquare{(0,0.5*\trad) + 0.5*(30:\trad) + 0.5*(30:\sidelength)}{30}
+    {{regular}{Q3}}{{regular}{E2}}{{regular}{A2}}{{regular}{Q11}}{2}{0}
+  \lefttriangle{(0.5*\sidelength+\trad,0)}
+    {{regular}{A3}}{{regular}{Q4}}{{regular}{E3}}{3}{0}
+  \tiltedsquare{(0,-0.5*\trad) + 0.5*(-30:\trad) + 0.5*(-30:\sidelength)}{-30}
+    {{regular}{Q5}}{{regular}{E4}}{{regular}{A4}}{{regular}{Q12}}{4}{0}
+  \righttriangle{-1.5*(0,\trad) + (-60:\trad)}
+    {{regular}{Q6}}{{regular}{E5}}{{regular}{A5}}{5}{0}
+  \lefttriangle{-1.5*(0,\trad) + (-120:\trad)}
+    {{regular}{Q7}}{{regular}{E6}}{{regular}{A6}}{6}{0}
+  \tiltedsquare{(0,-0.5*\trad) + 0.5*(-150:\trad) + 0.5*(-150:\sidelength)}{30}
+    {{regular}{A7}}{{regular}{Q13}}{{regular}{Q8}}{{regular}{E7}}{7}{0}
+  \righttriangle{(-0.5*\sidelength-\trad,0)}
+    {{regular}{E8}}{{regular}{A8}}{{regular}{Q9}}{8}{0}
+  \tiltedsquare{(0,0.5*\trad) + 0.5*(150:\trad) + 0.5*(150:\sidelength)}{-30}
+    {{regular}{A9}}{{regular}{Q14}}{{regular}{Q10}}{{regular}{E9}}{9}{0}
+  \lefttriangle{1.5*(0,\trad) + (120:\trad)}
+    {{regular}{Q1}}{{regular}{E10}}{{regular}{A10}}{10}{0}
+  \uptriangle{0.5*(0,\trad)}
+    {{regular}{A11}}{{regular}{A14}}{{regular}{Q15}}{11}{0}
+  \downtriangle{-0.5*(0,\trad)}
+    {{regular}{A15}}{{regular}{A13}}{{regular}{A12}}{12}{0}
+  \end{tikzpicture}
+\end{center}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
