@@ -1,9 +1,8 @@
 ## Jigsaw software for CMEP
 
 This software is designed to create Tarsia Formulator type
-mathematical jigsaws.  It is currently a work in progress, with the
-aim being to have the puzzle in a YAML file, and the software to turn
-it into a printable jigsaw.  In this way, it will be easy to create
-multiple jigsaw-style puzzles with ease
+mathematical jigsaws.  The puzzle data is stored in a YAML file, and
+the software turns it into a printable jigsaw.  In this way, it is
+easy to create multiple jigsaw-style puzzles.
 
-Julian Gilbey <J.Gilbey@dpmms.cam.ac.uk> February 2014
+Julian Gilbey <J.Gilbey@maths.cam.ac.uk>, <jdg@debian.org> June 2014
