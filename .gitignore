@@ -1,6 +1,6 @@
 *.log
 *.aux
 *.pdf
-puzzle-*.tex
-puzzle-*.md
+puzzle*.tex
+puzzle*.md
 auto
