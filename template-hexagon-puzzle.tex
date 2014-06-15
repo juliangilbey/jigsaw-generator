@@ -1,0 +1,70 @@
+% \input template-header
+% \testingtrue
+\begin{document}
+
+\begin{center}
+  \textbf{<: title :>}  (Page 1)
+
+  \medskip
+
+  <: puzzlenote :>
+
+  \bigskip
+
+  \setshapesize{8.5}
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  \lefttriangle {(120:\trad)} <: tripuzcard1 :> % {A18}{Q1}{E1}{1}{-30}
+  \righttriangle{(180:\trad)} <: tripuzcard2 :> % {E12}{A1}{Q2}{2}{30}
+  \lefttriangle {(-120:\trad)}<: tripuzcard3 :> % {Q19}{Q3}{A2}{3}{-30}
+  \righttriangle{(0,-\sidelength)+(180:\trad)} <: tripuzcard4 :> % {E11}{A3}{Q4}{4}{30}
+
+  \righttriangle{(60:\trad)}  <: tripuzcard5 :> % {Q5}{E10}{A4}{5}{30}
+  \lefttriangle {(0:\trad)}   <: tripuzcard6 :> % {A16}{Q17}{E2}{6}{-30}
+  \righttriangle{(-60:\trad)} <: tripuzcard7 :> % {Q18}{A17}{Q24}{7}{30}
+  \lefttriangle {(0,-\sidelength)+(0:\trad)}   <: tripuzcard8 :> % {A30}{Q25}{A24}{8}{-30}
+  \end{tikzpicture}
+
+  \newpage
+
+  \textbf{<: title :>}  (Page 2)
+
+  \bigskip
+
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  \lefttriangle {(120:\trad)} <: tripuzcard9 :>  % {A19}{A25}{Q26}{9}{-30}
+  \righttriangle{(180:\trad)} <: tripuzcard10 :> % {Q27}{A20}{A26}{10}{30}
+  \lefttriangle {(-120:\trad)}<: tripuzcard11 :> % {A5}{Q20}{Q6}{11}{-30}
+  \righttriangle{(0,-\sidelength)+(180:\trad)} <: tripuzcard12 :> % {Q7}{E9}{A6}{12}{30}
+
+  \righttriangle{(60:\trad)}  <: tripuzcard13 :> % {Q16}{E3}{A15}{13}{30}
+  \lefttriangle {(0:\trad)}   <: tripuzcard14 :> % {A14}{Q23}{Q15}{14}{-30}
+  \righttriangle{(-60:\trad)} <: tripuzcard15 :> % {Q30}{A23}{A29}{15}{30}
+  \lefttriangle {(0,-\sidelength)+(0:\trad)}   <: tripuzcard16 :> % {A22}{A28}{Q29}{16}{-30}
+  \end{tikzpicture}
+
+  \newpage
+
+  \textbf{<: title :>}  (Page 3)
+
+  \bigskip
+
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  \lefttriangle {(120:\trad)} <: tripuzcard17 :> % {A27}{Q28}{A21}{17}{-30}
+  \righttriangle{(180:\trad)} <: tripuzcard18 :> % {Q9}{A8}{Q21}{18}{30}
+  \lefttriangle {(-120:\trad)}<: tripuzcard19 :> % {A7}{Q8}{E8}{19}{-30}
+  \righttriangle{(0,-\sidelength)+(180:\trad)} <: tripuzcard20 :> % {Q14}{E4}{A13}{20}{30}
+
+  \righttriangle{(60:\trad)}  <: tripuzcard21 :> % {E5}{A12}{Q13}{21}{30}
+  \lefttriangle {(0:\trad)}   <: tripuzcard22 :> % {Q22}{Q12}{A11}{22}{-30}
+  \righttriangle{(-60:\trad)} <: tripuzcard23 :> %{E6}{A10}{Q11}{23}{30} 
+  \lefttriangle {(0,-\sidelength)+(0:\trad)}   <: tripuzcard24 :> % {A9}{Q10}{E7}{24}{-30}
+  \end{tikzpicture}
+
+\end{center}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

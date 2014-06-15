@@ -1,0 +1,83 @@
+# Template file for smallhexagon jigsaw
+category: jigsaw
+type: hexagon
+typename: hexagon
+
+puzzleHeaderTeX: template-header.tex
+puzzleTemplateTeX: template-hexagon-puzzle.tex
+solutionHeaderTeX: template-header.tex
+solutionTemplateTeX: template-hexagon-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-table.tex
+puzzleHeaderMarkdown: template-header.md
+puzzleTemplateMarkdown: template-jigsaw-puzzle3.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-jigsaw-solution.md
+
+pairs: 30
+edges: 12
+# Do we shuffle the order of the pairs from the order given?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
+flip: true
+# Do we shuffle the order of the edges from the order given?
+shuffleEdges: false
+# Default text size on puzzle pieces
+puzzleTextSize: 5
+# Default text size on solution pieces
+solutionTextSize: 3
+triangleSolutionCards:
+  - [A18, Q1, E1]
+  - [E12, A1, Q2]
+  - [Q19, Q3, A2]
+  - [E11, A3, Q4]
+  - [Q5, E10, A4]
+  - [A16, Q17, E2]
+  - [Q18, A17, Q24]
+  - [A30, Q25, A24]
+  - [A19, A25, Q26]
+  - [Q27, A20, A26]
+  - [A5, Q20, Q6]
+  - [Q7, E9, A6]
+  - [Q16, E3, A15]
+  - [A14, Q23, Q15]
+  - [Q30, A23, A29]
+  - [A22, A28, Q29]
+  - [A27, Q28, A21]
+  - [Q9, A8, Q21]
+  - [A7, Q8, E8]
+  - [Q14, E4, A13]
+  - [E5, A12, Q13]
+  - [Q22, Q12, A11]
+  - [E6, A10, Q11]
+  - [A9, Q10, E7]
+
+triangleSolutionOrientation: [0, 180, 0, 180, 0, 0, 180, 0, 180, 0, 180,
+  0, 180, 0, 180, 0, 180, 0, 180, 0, 180, 0, 180, 0]
+
+trianglePuzzleOrientation:
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
