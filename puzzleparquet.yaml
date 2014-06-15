@@ -1,0 +1,32 @@
+# A trial jigsaw puzzle
+type: parquet
+contributor: Julian
+title: A trial parquet puzzle
+note: This is a silly example of a puzzle
+pairs:
+    - [Q1, A1]
+    - [Q2, A2]
+    - [Q3, A3]
+    - [Q4, A4]
+    - [Q5, A5]
+    - [Q6, A6]
+    - [Q7, A7]
+    - [Q8, A8]
+    - [Q9, A9]
+    - [Q10, A10]
+    - [Q11, A11]
+    - [Q12, A12]
+    - [Q13, A13]
+    - [Q14, A14]
+    - [Q15, A15]
+edges:
+    - E1
+    - E2
+    - E3
+    - E4
+    - E5
+    - E6
+    - E7
+    - E8
+    - E9
+    - E10

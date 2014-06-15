@@ -6,7 +6,7 @@ The pairs match up as follows:
 |:------:|:------:|
 <: pairs :>
 
-The following triangle edges did not match any other edges:
+The following border edges did not match any other edges:
 
 | Edge 1 |
 |:------:|

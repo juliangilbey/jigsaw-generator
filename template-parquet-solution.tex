@@ -1,4 +1,5 @@
-\input template-header
+% \input template-header
+% \testingtrue
 \begin{document}
 
 \begin{center}
@@ -18,29 +19,29 @@
   \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
   % origin is at point of symmetry
   \righttriangle{1.5*(0,\trad) + (60:\trad)}
-    {{regular}{A1}}{{regular}{Q2}}{{regular}{E1}}{1}{0}
+    <: trisolcard1 :> % {A1}{Q2}{E10}{1}{270}
   \tiltedsquare{(0,0.5*\trad) + 0.5*(30:\trad) + 0.5*(30:\sidelength)}{30}
-    {{regular}{Q3}}{{regular}{E2}}{{regular}{A2}}{{regular}{Q11}}{2}{0}
+    <: sqsolcard1 :>  % {Q3}{E9}{A2}{Q11}{2}{30}
   \lefttriangle{(0.5*\sidelength+\trad,0)}
-    {{regular}{A3}}{{regular}{Q4}}{{regular}{E3}}{3}{0}
+    <: trisolcard2 :> % {E8}{A3}{Q4}{3}{90}
   \tiltedsquare{(0,-0.5*\trad) + 0.5*(-30:\trad) + 0.5*(-30:\sidelength)}{-30}
-    {{regular}{Q5}}{{regular}{E4}}{{regular}{A4}}{{regular}{Q12}}{4}{0}
+    <: sqsolcard2 :>  % {Q5}{E7}{A4}{Q12}{4}{-30}
   \righttriangle{-1.5*(0,\trad) + (-60:\trad)}
-    {{regular}{Q6}}{{regular}{E5}}{{regular}{A5}}{5}{0}
+    <: trisolcard3 :> % {Q6}{E6}{A5}{5}{270}
   \lefttriangle{-1.5*(0,\trad) + (-120:\trad)}
-    {{regular}{Q7}}{{regular}{E6}}{{regular}{A6}}{6}{0}
+    <: trisolcard4 :> % {A6}{Q7}{E5}{6}{90}
   \tiltedsquare{(0,-0.5*\trad) + 0.5*(-150:\trad) + 0.5*(-150:\sidelength)}{30}
-    {{regular}{A7}}{{regular}{Q13}}{{regular}{Q8}}{{regular}{E7}}{7}{0}
+    <: sqsolcard3 :>  % {A7}{Q13}{Q8}{E4}{7}{30}
   \righttriangle{(-0.5*\sidelength-\trad,0)}
-    {{regular}{E8}}{{regular}{A8}}{{regular}{Q9}}{8}{0}
+    <: trisolcard5 :> % {E3}{A8}{Q9}{8}{270}
   \tiltedsquare{(0,0.5*\trad) + 0.5*(150:\trad) + 0.5*(150:\sidelength)}{-30}
-    {{regular}{A9}}{{regular}{Q14}}{{regular}{Q10}}{{regular}{E9}}{9}{0}
+    <: sqsolcard4 :>  % {A9}{Q14}{Q10}{E2}{9}{-30}
   \lefttriangle{1.5*(0,\trad) + (120:\trad)}
-    {{regular}{Q1}}{{regular}{E10}}{{regular}{A10}}{10}{0}
+    <: trisolcard6 :> % {Q1}{E1}{A10}{10}{90}
   \uptriangle{0.5*(0,\trad)}
-    {{regular}{A11}}{{regular}{A14}}{{regular}{Q15}}{11}{0}
+    <: trisolcard7 :> % {Q15}{A11}{A14}{11}{0}
   \downtriangle{-0.5*(0,\trad)}
-    {{regular}{A15}}{{regular}{A13}}{{regular}{A12}}{12}{0}
+    <: trisolcard8 :> % {A15}{A13}{A12}{12}{180}
   \end{tikzpicture}
 \end{center}
 

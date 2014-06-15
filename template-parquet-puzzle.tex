@@ -1,0 +1,47 @@
+% \input template-header
+% \testingtrue
+\begin{document}
+
+\begin{center}
+  \textbf{<: title :>}  (Page 1)
+
+  \medskip
+
+  <: puzzlenote :>
+
+  \bigskip
+
+  \setshapesize{8.5}
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  \lefttriangle {(120:\trad)} <: tripuzcard1 :> % {A11}{A14}{Q15}{11}{-30}
+  \righttriangle{(180:\trad)} <: tripuzcard2 :> % {Q1}{E10}{A10}{10}{30}
+  \lefttriangle {(-120:\trad)}<: tripuzcard3 :> % {E8}{A8}{Q9}{8}{-30}
+  \righttriangle{(0,-\sidelength)+(180:\trad)} <: tripuzcard4 :> % {A15}{A13}{A12}{12}{30}
+
+  \righttriangle{(60:\trad)}  <: tripuzcard5 :> % {A1}{Q2}{E1}{1}{30}
+  \lefttriangle {(0:\trad)}   <: tripuzcard6 :> % {A3}{Q4}{E3}{3}{-30}
+  \righttriangle{(-60:\trad)} <: tripuzcard7 :> % {Q6}{E5}{A5}{5}{30}
+  \lefttriangle {(0,-\sidelength)+(0:\trad)}   <: tripuzcard8 :> % {Q7}{E6}{A6}{6}{-30}
+  \end{tikzpicture}
+
+  \newpage
+
+  \textbf{<: title :>}  (Page 2)
+
+  \bigskip
+
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  \upsquare{0.5*(-\sidelength,\sidelength)}  <: sqpuzcard1 :> % {Q3}{E2}{A2}{Q11}{2}{0}
+  \upsquare{0.5*(\sidelength,\sidelength)}   <: sqpuzcard2 :> % {Q5}{E4}{A4}{Q12}{4}{0}
+  \upsquare{0.5*(-\sidelength,-\sidelength)} <: sqpuzcard3 :> % {A7}{Q13}{Q8}{E7}{7}{0}
+  \upsquare{0.5*(\sidelength,-\sidelength)}  <: sqpuzcard4 :> % {A9}{Q14}{Q10}{E9}{9}{0}
+  \end{tikzpicture}
+
+\end{center}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

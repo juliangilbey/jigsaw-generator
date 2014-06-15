@@ -21,6 +21,8 @@
 
 \newsavebox\templateimagebox
 \newdimen\templateimagewd
+\newif\iftesting  % say \testingtrue to have \uptriangle etc. use
+                  % simple parameters like {Q1} instead of {{regular}{Q1}}
 
 \newcommand{\image}[1]{\includegraphics{#1}}
 % There might be a nicer way to do the following, but I haven't yet
@@ -55,19 +57,28 @@
  \pgfmathsetlength\srad{(#1*72.27/2.54) / sqrt(2)}
 }
 
-\newcommand{\makestyles}[4]{%
+\newcommand{\makestyles}[3]{%
+  \iftesting
+    \def#1{regular}
+    \def#2{#3}
+  \else
+    % split #3 into {style}{text}
+    \makestylesa#1#2#3
+  \fi
+}
+\newcommand{\makestylesa}[4]{%
   \def#1{#3}
   \def#2{#4}
 }
 
 \newcommand{\tiltedtriangle}[7]{%
-  \coordinate (a) at ($ #1 +({120-#2}:\trad) $);
-  \coordinate (b) at ($ #1 +({240-#2}:\trad) $);
-  \coordinate (c) at ($ #1 +(-#2:\trad) $);
+  \coordinate (a) at ($ #1 +({#2-150}:\trad) $);
+  \coordinate (b) at ($ #1 +({#2-30}:\trad) $);
+  \coordinate (c) at ($ #1 +({#2+90}:\trad) $);
 
-  \makestyles\stylea\contenta#3
-  \makestyles\styleb\contentb#4
-  \makestyles\stylec\contentc#5
+  \makestyles\stylea\contenta{#3}
+  \makestyles\styleb\contentb{#4}
+  \makestyles\stylec\contentc{#5}
 
   \draw[allow upside down]
     (a) -- node[\stylea] {\contenta}
@@ -78,16 +89,16 @@
 }
 
 \newcommand{\uptriangle}[6]{%
-  \tiltedtriangle{#1}{150}{#2}{#3}{#4}{#5}{#6}
+  \tiltedtriangle{#1}{0}{#2}{#3}{#4}{#5}{#6}
 }
 \newcommand{\downtriangle}[6]{%
-  \tiltedtriangle{#1}{90}{#2}{#3}{#4}{#5}{#6}
+  \tiltedtriangle{#1}{180}{#2}{#3}{#4}{#5}{#6}
 }
 \newcommand{\lefttriangle}[6]{%
-  \tiltedtriangle{#1}{60}{#2}{#3}{#4}{#5}{#6}
+  \tiltedtriangle{#1}{90}{#2}{#3}{#4}{#5}{#6}
 }
 \newcommand{\righttriangle}[6]{%
-  \tiltedtriangle{#1}{0}{#2}{#3}{#4}{#5}{#6}
+  \tiltedtriangle{#1}{270}{#2}{#3}{#4}{#5}{#6}
 }
 
 \newcommand{\tiltedsquare}[8]{%
@@ -96,10 +107,10 @@
   \coordinate (c) at ($ #1 +({#2+45}:\srad) $);
   \coordinate (d) at ($ #1 +({#2+135}:\srad) $);
 
-  \makestyles\stylea\contenta#3
-  \makestyles\styleb\contentb#4
-  \makestyles\stylec\contentc#5
-  \makestyles\styled\contentd#6
+  \makestyles\stylea\contenta{#3}
+  \makestyles\styleb\contentb{#4}
+  \makestyles\stylec\contentc{#5}
+  \makestyles\styled\contentd{#6}
 
   \draw[allow upside down]
     (a) -- node[\stylea] {\contenta}

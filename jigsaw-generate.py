@@ -1,4 +1,12 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
+
+"""
+jigsaw-generate.py
+Copyright (C) 2014 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>, <jdg@debian.org>
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see the LICENSE file for details.
+"""
 
 import random
 import sys
@@ -19,7 +27,8 @@ except ImportError:
 # to separate modules for clarity at some point in the near future.
 
 knowntypes = {
-    'smallhexagon'
+    'smallhexagon',
+    'parquet'
 }
 
 # LaTeX font sizes
@@ -226,7 +235,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for card in layout['triangleSolutionCards']:
         newcard = []
         for entry in card:
-            entrynum = int(entry[1:])
+            entrynum = int(entry[1:]) - 1  # -1 to convert to 0-based arrays
             if entry[0] == 'Q':
                 newcard.append(pairs[entrynum][0])
             elif entry[0] == 'A':
@@ -272,12 +281,14 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
             (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
              make_entry(solcard[1], solution_size, 'mark', 'tikz'),
              make_entry(solcard[2], solution_size, 'mark', 'tikz'),
-             solcard[3], solcard[4]))
+             "%s %s" % (sizes[max(solution_size-2, 0)], solcard[3]),
+             solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
             (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
              make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
              make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
-             puzcard[3], puzcard[4]))
+             "%s %s" % (sizes[max(puzzle_size-2, 0)], puzcard[3]),
+             puzcard[4]))
 
     # For the Markdown version, we only need to record the puzzle cards at
     # this point.
@@ -316,6 +327,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
     solution_size = getopt(layout, data, {}, 'solutionTextSize')
 
+    num_triangle_cards = len(layout['triangleSolutionCards'])
     num_square_cards = len(layout['squareSolutionCards'])
 
     # We read the solution layout from the YAML file, and place the
@@ -326,7 +338,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     for card in layout['squareSolutionCards']:
         newcard = []
         for entry in card:
-            entrynum = int(entry[1:])
+            entrynum = int(entry[1:]) - 1  # -1 to convert to 0-based arrays
             if entry[0] == 'Q':
                 newcard.append(pairs[entrynum][0])
             elif entry[0] == 'A':
@@ -359,7 +371,8 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
                             solcard[(5 - rot) % 4],
                             solcard[(6 - rot) % 4],
                             solcard[(7 - rot) % 4],
-                            cardnum(j + 1), squarepuzorient[j][1]]
+                            cardnum(j + num_triangle_cards + 1),
+                            squarepuzorient[j][1]]
         puzcard = squarepuzcard[j]
         # What angle does the card number go in the solution?
         # angle of puzzle card + (orientation of sol card - orientation of
@@ -367,20 +380,23 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
         angle = (squarepuzorient[j][1] +
                  (squaresolorient[i] - squarepuzorient[j][0]) -
                  90 * rot)
-        solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
+        solcard.extend([cardnum(j + num_triangle_cards + 1),
+                        (angle + 180) % 360 - 180])
 
         dsubs['sqsolcard' + str(i + 1)] = (('{%s}' * 6) %
             (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
              make_entry(solcard[1], solution_size, 'mark', 'tikz'),
              make_entry(solcard[2], solution_size, 'mark', 'tikz'),
              make_entry(solcard[3], solution_size, 'mark', 'tikz'),
-             solcard[4], solcard[5]))
+             "%s %s" % (sizes[max(solution_size-2, 0)], solcard[4]),
+             solcard[5]))
         dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
             (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
              make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
              make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
              make_entry(puzcard[3], puzzle_size, 'hide', 'tikz'),
-             puzcard[4], puzcard[5]))
+             "%s %s" % (sizes[max(puzzle_size-2, 0)], puzcard[4]),
+             puzcard[5]))
 
     # For the Markdown version, we only need to record the puzzle cards at
     # this point.
@@ -683,7 +699,7 @@ def generate_jigsaw(data, options):
     else:
         dsubs['hiddennotesolution'] = ''
         dsubs['hiddennotetable'] = ''
-        dsubs['hiddennotemd'] = ''
+        dsubsmd['hiddennotemd'] = ''
 
     dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
     dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')

@@ -12,7 +12,7 @@ tableTemplateTeX: template-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-jigsaw-puzzle3.md
 solutionHeaderMarkdown: template-header.md
-solutionTemplateMarkdown: template-jigsaw-solution3.md
+solutionTemplateMarkdown: template-jigsaw-solution.md
 
 pairs: 6
 edges: 6
@@ -28,18 +28,18 @@ puzzleTextSize: 5
 # Default text size on solution pieces
 solutionTextSize: 5
 triangleSolutionCards:
-  - [A0, Q1, E5]
-  - [E4, A1, Q2]
-  - [Q3, E3, A2]
-  - [A3, Q4, E2]
-  - [E1, A4, Q5]
-  - [Q0, E0, A5]
-triangleSolutionOrientation: [180, 0, 180, 0, 180, 0]
+  - [A1, Q2, E6]
+  - [E5, A2, Q3]
+  - [Q4, E4, A3]
+  - [A4, Q5, E3]
+  - [E2, A5, Q6]
+  - [Q1, E1, A6]
+triangleSolutionOrientation: [270, 90, 270, 90, 270, 90]
 
 trianglePuzzleOrientation:
-  - [180,  30]
-  - [0  , -30]
-  - [180,  30]
-  - [0,   -30]
-  - [180,  30]
-  - [0,   -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]

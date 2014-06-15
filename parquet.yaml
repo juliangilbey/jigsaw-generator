@@ -1,0 +1,60 @@
+# Template file for smallhexagon jigsaw
+category: jigsaw
+type: parquet
+typename: parquet
+
+puzzleHeaderTeX: template-header.tex
+puzzleTemplateTeX: template-parquet-puzzle.tex
+solutionHeaderTeX: template-header.tex
+solutionTemplateTeX: template-parquet-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-table.tex
+puzzleHeaderMarkdown: template-header.md
+puzzleTemplateMarkdown: template-jigsaw-puzzle4.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-jigsaw-solution.md
+
+pairs: 15
+edges: 10
+# Do we shuffle the order of the pairs from the order given?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
+flip: true
+# Do we shuffle the order of the edges from the order given?
+shuffleEdges: false
+# Default text size on puzzle pieces
+puzzleTextSize: 5
+# Default text size on solution pieces
+solutionTextSize: 4
+triangleSolutionCards:
+  - [A1, Q2, E10]
+  - [E8, A3, Q4]
+  - [Q6, E6, A5]
+  - [A6, Q7, E5]
+  - [E3, A8, Q9]
+  - [Q1, E1, A10]
+  - [Q15, A11, A14]
+  - [A15, A13, A12]
+triangleSolutionOrientation: [270, 90, 270, 90, 270, 90, 0, 180]
+squareSolutionCards:
+  - [Q3, E9, A2, Q11]
+  - [Q5, E7, A4, Q12]
+  - [A7, Q13, Q8, E4]
+  - [A9, Q14, Q10, E2]
+squareSolutionOrientation: [30, -30, 30, -30]
+
+trianglePuzzleOrientation:
+  - [90,  -30]
+  - [270,  30]
+  - [90,  -30]
+  - [270,  30]
+  - [270,  30]
+  - [90 , -30]
+  - [270,  30]
+  - [90,  -30]
+squarePuzzleOrientation:
+  - [0, 0]
+  - [0, 0]
+  - [0, 0]
+  - [0, 0]
