@@ -26,12 +26,6 @@ except ImportError:
 # Utility functions and global definitions.  These might get moved out
 # to separate modules for clarity at some point in the near future.
 
-knowntypes = {
-    'smallhexagon',
-    'hexagon',
-    'parquet'
-}
-
 # LaTeX font sizes
 sizes = [r'\tiny',
          r'\scriptsize',
@@ -485,12 +479,6 @@ def main():
                      'Error position: line %s, column %s' %
                      (mark.line+1, mark.column+1))
 
-    if 'type' in data:
-        if data['type'] not in knowntypes:
-            sys.exit('Unrecognised jigsaw type %s' % data['type'])
-    else:
-        sys.exit('No jigsaw type found in puzzle file')
-
     generate_jigsaw(data, options)
 
 
@@ -513,10 +501,23 @@ def generate_jigsaw(data, options):
     # system directory (wherever that may be) for these files.  At
     # present, they are expected to be in the local directory.
 
-    puztype = data['type']
+    if 'type' in data:
+        puztype = data['type']
+        ### ***FIXME*** this is OS-specific and relies on filesystem
+        ### layout; perhaps change to wheel system and use its
+        ### facilities for file finding; see
+        ### http://pythonwheels.com/ as a starting point
+        ### The same goes for every occurrence of open('template/' + ...)
+        try:
+            layoutf = open('templates/' + puztype + '.yaml')
+        except:
+            sys.exit('Unrecognised jigsaw type %s' % data['type'])
+    else:
+        sys.exit('No jigsaw type found in puzzle file')
+
+
     puzbase = options['puzbase']
 
-    layoutf = open(puztype + '.yaml')
     try:
         layout = load(layoutf, Loader=Loader)
     except yaml.YAMLError as exc:
@@ -531,50 +532,51 @@ def generate_jigsaw(data, options):
     # to produce.
 
     if 'puzzleTemplateTeX' in layout:
-        bodypuz = open(layout['puzzleTemplateTeX']).read()
+        bodypuz = open('templates/' + layout['puzzleTemplateTeX']).read()
         outpuzfile = puzbase + '-puzzle.tex'
         outpuz = open(outpuzfile, 'w')
-        header = open(layout['puzzleHeaderTeX']).read()
+        header = open('templates/' + layout['puzzleHeaderTeX']).read()
         print(header, file=outpuz)
         puzzletex = True
     else:
         puzzletex = False
 
     if 'solutionTemplateTeX' in layout:
-        bodysol = open(layout['solutionTemplateTeX']).read()
+        bodysol = open('templates/' + layout['solutionTemplateTeX']).read()
         outsolfile = puzbase + '-solution.tex'
         outsol = open(outsolfile, 'w')
-        header = open(layout['solutionHeaderTeX']).read()
+        header = open('templates/' + layout['solutionHeaderTeX']).read()
         print(header, file=outsol)
         solutiontex = True
     else:
         solutiontex = False
 
     if 'tableTemplateTeX' in layout:
-        bodytable = open(layout['tableTemplateTeX']).read()
+        bodytable = open('templates/' + layout['tableTemplateTeX']).read()
         outtablefile = puzbase + '-table.tex'
         outtable = open(outtablefile, 'w')
-        header = open(layout['tableHeaderTeX']).read()
+        header = open('templates/' + layout['tableHeaderTeX']).read()
         print(header, file=outtable)
         tabletex = True
     else:
         tabletex = False
 
     if 'puzzleTemplateMarkdown' in layout:
-        bodypuzmd = open(layout['puzzleTemplateMarkdown']).read()
+        bodypuzmd = open('templates/' + layout['puzzleTemplateMarkdown']).read()
         outpuzmdfile = puzbase + '-puzzle.md'
         outpuzmd = open(outpuzmdfile, 'w')
-        header = open(layout['puzzleHeaderMarkdown']).read()
+        header = open('templates/' + layout['puzzleHeaderMarkdown']).read()
         print(header, file=outpuzmd)
         puzzlemd = True
     else:
         puzzlemd = False
 
     if 'solutionTemplateMarkdown' in layout:
-        bodysolmd = open(layout['solutionTemplateMarkdown']).read()
+        bodysolmd = open('templates/' +
+                         layout['solutionTemplateMarkdown']).read()
         outsolmdfile = puzbase + '-solution.md'
-        outsolmd = open(outsolmdfile, 'w')
-        header = open(layout['solutionHeaderMarkdown']).read()
+        outsolmd = open('templates/' + outsolmdfile, 'w')
+        header = open('templates/' + layout['solutionHeaderMarkdown']).read()
         print(header, file=outsolmd)
         solutionmd = True
     else:
