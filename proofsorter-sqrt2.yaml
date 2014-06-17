@@ -1,0 +1,33 @@
+# A trial proofsort
+type: cardsort
+contributor: Julian
+title: $\sqrt{2}$ is irrational
+note: Sort the cards into order to prove that $\sqrt{2}$ is irrational
+
+# puzzle size
+rows: 6
+columns: 1
+# Do we shuffle the order of the cards from the order given when
+# producing the problem?  Say "true" for a proof sorting activity.
+shuffleCards: true
+# Does this puzzle require production of a solution?  If so, the cards
+# must be given in the correct order initially.
+produceSolution: true
+# Default text size on cards
+cardTextSize: 6
+
+cards:
+  - Suppose, for a contradiction, that $\sqrt{2}$ is rational.
+  - That is, we can write $\sqrt{2} = \frac{m}{n}$ where $m$ and $n$
+    are integers and where $n \neq 0$.
+  - Squaring, we have $2 = \frac{m^2}{n^2}$.
+  - Multiply across to get $2n^2 = m^2$.
+  - In the prime factorisations of $m^2$ and $n^2$, $2$ occurs to an
+    even power.
+  - In the prime factorisation of $2n^2$, $2$ occurs to an odd power.
+  - But prime factorisations are unique, so $2$ should appear to the
+    same power in both $2n^2$ and $m^2$.
+  - This is a contradiction, so our original assumption that
+    $\sqrt{2}$ is rational must be wrong.
+  - So $\sqrt{2}$ is irrational.
+

@@ -181,14 +181,12 @@ def cardnum(n):
     else:
         return str(n)
 
-def make_table(pairs, edges, cards, dsubs, dsubsmd):
-    """Create table substitutions for the pairs, edges and cards"""
+def make_table(pairs, edges, dsubs, dsubsmd):
+    """Create table substitutions for the pairs and edges"""
     dsubs['tablepairs'] = ''
     dsubs['tableedges'] = ''
-    dsubs['tablecards'] = ''
     dsubsmd['pairs'] = ''
     dsubsmd['edges'] = ''
-    dsubsmd['cards'] = ''
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
@@ -203,11 +201,6 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
                                 make_entry(e, normalsize, 'mark', 'table'))
         dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md') + '|\n'
-
-    for c in cards:
-        dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(c, normalsize, 'mark', 'table'))
-        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     """Handle triangular-shaped jigsaw pieces, putting in the Qs and As
@@ -479,11 +472,11 @@ def main():
                      'Error position: line %s, column %s' %
                      (mark.line+1, mark.column+1))
 
-    generate_jigsaw(data, options)
+    generate(data, options)
 
 
-def generate_jigsaw(data, options):
-    """Generate jigsaw output from data, using options passed to this function.
+def generate(data, options):
+    """Generate output from data, using options passed to this function.
 
     Thus function is presently called from main(), but might well be
     called from a GUI at some point in the future, which is why it has
@@ -515,9 +508,6 @@ def generate_jigsaw(data, options):
     else:
         sys.exit('No jigsaw type found in puzzle file')
 
-
-    puzbase = options['puzbase']
-
     try:
         layout = load(layoutf, Loader=Loader)
     except yaml.YAMLError as exc:
@@ -527,9 +517,27 @@ def generate_jigsaw(data, options):
                      'Error position: line %s, column %s' %
                      (puztype, mark.line+1, mark.column+1))
 
+    category = layout['category']
+    try:
+        generator = {
+            'jigsaw': generate_jigsaw,
+            'cardsort': generate_cardsort
+            }[category]
+    except KeyError:
+        sys.exit('Unrecognised category in %s layout file: %s' %
+                 (puztype, category))
+
+    generator(data, options, layout)
+
+
+def generate_jigsaw(data, options, layout):
+    """Generate output from data for jigsaw-type puzzles."""
+
     # ***FIXME*** The output filenames should be specifiable on the
     # command line.  Also, there should be options for which outputs
     # to produce.
+
+    puzbase = options['puzbase']
 
     if 'puzzleTemplateTeX' in layout:
         bodypuz = open('templates/' + layout['puzzleTemplateTeX']).read()
@@ -600,7 +608,7 @@ def generate_jigsaw(data, options):
 
     # Read the card content
     # Three types of cards: pairs, edges, cards (which are single cards
-    # for sorting activities)
+    # for sorting activities, and do not appear in jigsaw types)
     if 'pairs' in layout:
         if 'pairs' in data:
             pairs = data['pairs']
@@ -642,32 +650,14 @@ def generate_jigsaw(data, options):
     else:
         edges = []  # so that later bits of code don't barf
 
-    if 'cards' in layout:
-        if 'cards' in data:
-            cards = data['cards']
-            if layout['cards'] == 0:  # which means any number of cards
-                if len(cards) == 0:
-                    sys.exit('Puzzle type %s needs at least one card' %
-                             layout['typename'])
-            else:
-                if len(cards) != layout['cards']:
-                    sys.exit('Puzzle type %s needs exactly %s cards' %
-                             (layout['typename'], layout['cards']))
-        else:
-            sys.exit('Puzzle type %s requires cards in data file' %
-                     layout['typename'])
-    elif 'cards' in data:
+    if 'cards' in data:
         sys.exit('Puzzle type %s does not accept cards in data file' %
                  layout['typename'])
-    else:
-        cards = []
 
     if getopt(layout, data, options, 'shufflePairs'):
         random.shuffle(pairs)
     if getopt(layout, data, options, 'shuffleEdges'):
         random.shuffle(edges)
-    if getopt(layout, data, options, 'shuffleCards'):
-        random.shuffle(cards)
 
     # We preserve the original pairs data for the table; we only flip
     # the questions and answers (if requested) for the puzzle cards
@@ -687,7 +677,7 @@ def generate_jigsaw(data, options):
     exists_hidden = False
 
     if tabletex or solutionmd:
-        make_table(pairs, edges, cards, dsubs, dsubsmd)
+        make_table(pairs, edges, dsubs, dsubsmd)
 
     if 'triangleSolutionCards' in layout:
         make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
@@ -735,8 +725,40 @@ def generate_jigsaw(data, options):
         print(stextmd, file=outsolmd)
         outsolmd.close()
 
+def generate_cardsort(data, options, layout):
+    """Generate cards for a cardsort activity"""
+    ...
+
+    if 'cards' in layout:
+        if 'cards' in data:
+            cards = data['cards']
+            if layout['cards'] == 0:  # which means any number of cards
+                if len(cards) == 0:
+                    sys.exit('Puzzle type %s needs at least one card' %
+                             layout['typename'])
+            else:
+                if len(cards) != layout['cards']:
+                    sys.exit('Puzzle type %s needs exactly %s cards' %
+                             (layout['typename'], layout['cards']))
+        else:
+            sys.exit('Puzzle type %s requires cards in data file' %
+                     layout['typename'])
+    elif 'cards' in data:
+        sys.exit('Puzzle type %s does not accept cards in data file' %
+                 layout['typename'])
+    else:
+        cards = []
+
+    if getopt(layout, data, options, 'shuffleCards'):
+        random.shuffle(cards)
+
+    for c in cards:
+        dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
+                                make_entry(c, normalsize, 'mark', 'table'))
+        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 # This allows this script to be invoked directly and also (hopefully
 # at some later stage) for the functions to be called via a GUI
 if __name__ == '__main__':
     main()
+

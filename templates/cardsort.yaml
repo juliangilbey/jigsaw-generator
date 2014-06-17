@@ -1,0 +1,22 @@
+# Template file for generic card sort activity
+category: cardsort
+type: cardsort
+typename: card sort
+
+cardsortHeaderTeX: template-header.tex
+cardsortTemplateTeX: template-cardsort.tex
+cardsortHeaderMarkdown: template-cardsort-header.md
+cardsortTemplateMarkdown: template-cardsort.md
+
+# size of puzzle should be specified in the puzzle file - we just give
+# a fallback here
+rows: 6
+columns: 2
+# Do we shuffle the order of the cards from the order given when
+# producing the problem?  Say "true" for a proof sorting activity.
+shuffleCards: true
+# Does this puzzle require production of a solution?  If so, the cards
+# must be given in the correct order initially.
+produceSolution: true
+# Default text size on cards
+cardTextSize: 5
