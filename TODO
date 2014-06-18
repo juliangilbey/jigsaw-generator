@@ -1,3 +1,5 @@
+* There's probably a bug, in that things may well break if we don't
+   try to create TeX files.  Go through and check for this.
 
 * Create GUI front-end for editing jigsaw files
 
