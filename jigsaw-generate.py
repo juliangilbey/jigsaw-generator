@@ -924,7 +924,7 @@ def generate_cardsort(data, options, layout):
     if bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
-            bodytable = opentemplate(bodytable).read()
+            bodytable = opentemplate(bodytablefile).read()
             outtablefile = puzbase + '-table.tex'
             outtable = open(outtablefile, 'w')
             header = opentemplate(headerfile).read()
@@ -962,7 +962,7 @@ def generate_cardsort(data, options, layout):
             if headerfile:
                 bodysolmd = opentemplate(bodysolmdfile).read()
                 outsolmdfile = puzbase + '-solution.md'
-                outsolmd = opentemplate(outsolmdfile, 'w')
+                outsolmd = open(outsolmdfile, 'w')
                 header = opentemplate(headerfile).read()
                 print(header, file=outsolmd)
                 solutionmd = True
@@ -1188,7 +1188,7 @@ def generate_cardsort(data, options, layout):
     if tabletex:
         make_table(pairs, edges, cards, dsubs, dsubsmd)
 
-    if layout['category'] == cardsort:
+    if layout['category'] == 'cardsort':
         make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
                             puztemplatemd, soltemplatemd, dsubs, dsubsmd)
     else:
