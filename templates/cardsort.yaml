@@ -7,6 +7,8 @@ puzzleHeaderTeX: template-header.tex
 puzzleTemplateTeX: template-cardsort-puzzle.tex
 solutionHeaderTeX: template-header.tex
 solutionTemplateTeX: template-cardsort-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-cardsort-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
 solutionHeaderMarkdown: template-cardsort-header.md

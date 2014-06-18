@@ -1,0 +1,39 @@
+% \input template-header
+% \testingtrue
+%%% BEGIN DOCUMENT
+\usepackage{lastpage}
+
+% there will be something here to set the sizes of boxes depending on
+% the values of <: rows :> and <: columns :>
+
+\begin{document}
+
+\begin{center}
+%%% BEGIN PAGE
+  \textbf{<: title :>} (Page \thepage\ of \pageref{LastPage})
+
+  \medskip
+
+  <: puzzlenote :>
+
+  \bigskip
+
+  % \begin{tikzpicture}
+  [Beginning of page]
+
+%%% BEGIN ITEM
+\card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+%%% END PAGE
+
+  [End of page]
+
+  % \end{tikzpicture}
+%%% END DOCUMENT
+\end{center}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1011,12 +1011,12 @@ def generate_cardsort(data, options, layout):
     # The "item" section would normally consist of the single line
     # something like:
     # 
-    # \macro{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+    # \card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
 
     # where the rownum and colnum are clear, the card number will be
     # from 1 upwards in order in the puzzle, and the content is the
     # actual text (with size and hidden indicators as with the
-    # jigsaw), and \macro is an appropriate TeX command which typesets
+    # jigsaw), and \card is an appropriate TeX command which typesets
     # the requested card.  The Markdown "item" section is likewise
     # substituted with these variables.
 
