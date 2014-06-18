@@ -454,23 +454,20 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
     """
 
     dosoln = layout['produceSolution']
-    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
-    if dosoln:
-        solution_size = getopt(layout, data, {}, 'solutionTextSize')
+    size = getopt(layout, data, {}, 'textSize')
 
     rows = getopt(layout, data, {}, 'rows')
     columns = getopt(layout, data, {}, 'columns')
-    dsubs[rows] = rows
-    dsubsmd[rows] = rows
-    dsubs[columns] = columns
-    dsubsmd[columns] = columns
+    dsubs['rows'] = rows
+    dsubsmd['rows'] = rows
+    dsubs['columns'] = columns
+    dsubsmd['columns'] = columns
 
     num_cards = len(cards)
     cardorder = list(range(num_cards))
-    invcardorder = {j: i for (i, j) in enumerate(cardorder)}
-
     if layout['shuffleCards']:
         random.shuffle(cardorder)
+    invcardorder = {j: i for (i, j) in enumerate(cardorder)}
 
     puzbody = puztemplate['begin_document']
     puzbodymd = puztemplatemd['begin_document']
@@ -484,7 +481,7 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         row = (i % (rows * columns)) // columns + 1
         col = i % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': cardorder[i] + 1 }
+                    'cardnum': i + 1 }
         solsubs = { 'rownum': row, 'colnum': col,
                     'cardnum': invcardorder[i] + 1 }
         puzsubsmd = dict(puzsubs)
@@ -498,27 +495,27 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
             if dosoln: solbody += soltemplate['begin_page']
         
         puzsubs['content'] = make_entry(cards[cardorder[i]],
-                                        puzzle_size, 'hide', 'tikz')
+                                        size, 'hide', 'tikz')
         puzbody += dosub(puztemplate['item'], puzsubs)
         puzsubsmd['content'] = make_entry(cards[cardorder[i]],
                                           0, 'hide', 'md')
         puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
         if dosoln:
-            solsubs['content'] = make_entry(cards[invcardorder[i]],
-                                            solution_size, 'mark', 'tikz')
+            solsubs['content'] = make_entry(cards[i],
+                                            size, 'mark', 'tikz')
             solbody += dosub(soltemplate['item'], solsubs)
-            solsubsmd['content'] = make_entry(cards[invcardorder[i]],
+            solsubsmd['content'] = make_entry(cards[i],
                                               0, 'mark', 'md')
             solbodymd += dosub(soltemplatemd['item'], solsubsmd)
 
     puzbody += puztemplate['end_page']
     if dosoln: solbody += soltemplate['end_page']
 
-    puzbody = puztemplate['end_document']
-    puzbodymd = puztemplatemd['end_document']
+    puzbody += puztemplate['end_document']
+    puzbodymd += puztemplatemd['end_document']
     if dosoln:
-        solbody = soltemplate['end_document']
-        solbodymd = soltemplatemd['end_document']
+        solbody += soltemplate['end_document']
+        solbodymd += soltemplatemd['end_document']
 
     dsubs['puzbody'] = puzbody
     dsubsmd['puzbody'] = puzbodymd
@@ -744,8 +741,8 @@ def generate_jigsaw(data, options, layout):
     # The Markdown output files are much simpler, as they are intended
     # to be embedded in larger documents, for those who cannot access
     # the PDF files.
-    dsubs = dict()
-    dsubsmd = dict()
+    dsubs = {}
+    dsubsmd = {}
 
     if 'title' in data:
         dsubs['title'] = data['title']
@@ -1027,17 +1024,17 @@ def generate_cardsort(data, options, layout):
     # final card occurs at the end of a page), and before the first
     # card of a page, the begin page content will be output.
 
-    puztemplate = dict()
-    puztemplatemd = dict()
-    soltemplate = dict()
-    soltemplatemd = dict()
+    puztemplate = {}
+    puztemplatemd = {}
+    soltemplate = {}
+    soltemplatemd = {}
 
     if puzzletex:
-        templatematch = re.search('^%%% BEGIN DOCUMENT.*?$(.*?)'
-                                  '^%%% BEGIN PAGE.*?$(.*?)'
-                                  '^%%% BEGIN ITEM.*?$(.*?)'
-                                  '^%%% END PAGE.*?$(.*?)'
-                                  '^%%% END DOCUMENT.*?$(.*?)',
+        templatematch = re.search('^%%% BEGIN DOCUMENT.*?^(.*?)'
+                                  '^%%% BEGIN PAGE.*?^(.*?)'
+                                  '^%%% BEGIN ITEM.*?^(.*?)'
+                                  '^%%% END PAGE.*?^(.*?)'
+                                  '^%%% END DOCUMENT.*?^(.*)',
                                   bodypuz, re.M | re.S)
         if templatematch:
             puztemplate['begin_document'] = templatematch.group(1)
@@ -1049,11 +1046,11 @@ def generate_cardsort(data, options, layout):
             sys.exit('TeX puzzle template does not have required structure')
 
         if layout['produceSolution']:
-            templatematch = re.search('^%%% BEGIN DOCUMENT.*?$(.*?)'
-                                      '^%%% BEGIN PAGE.*?$(.*?)'
-                                      '^%%% BEGIN ITEM.*?$(.*?)'
-                                      '^%%% END PAGE.*?$(.*?)'
-                                      '^%%% END DOCUMENT.*?$(.*?)',
+            templatematch = re.search('^%%% BEGIN DOCUMENT.*?^(.*?)'
+                                      '^%%% BEGIN PAGE.*?^(.*?)'
+                                      '^%%% BEGIN ITEM.*?^(.*?)'
+                                      '^%%% END PAGE.*?^(.*?)'
+                                      '^%%% END DOCUMENT.*?^(.*)',
                                       bodysol, re.M | re.S)
             if templatematch:
                 soltemplate['begin_document'] = templatematch.group(1)
@@ -1101,8 +1098,8 @@ def generate_cardsort(data, options, layout):
     # The Markdown output files are much simpler, as they are intended
     # to be embedded in larger documents, for those who cannot access
     # the PDF files.
-    dsubs = dict()
-    dsubsmd = dict()
+    dsubs = {}
+    dsubsmd = {}
 
     if 'title' in data:
         dsubs['title'] = data['title']
@@ -1209,7 +1206,7 @@ def generate_cardsort(data, options, layout):
 
     dsubs['puzbody'] = dosub(dsubs['puzbody'], dsubs)
     dsubsmd['puzbody'] = dosub(dsubsmd['puzbody'], dsubsmd)
-    if dosoln:
+    if layout['produceSolution']:
         dsubs['solbody'] = dosub(dsubs['solbody'], dsubs)
         dsubsmd['solbody'] = dosub(dsubsmd['solbody'], dsubsmd)
 

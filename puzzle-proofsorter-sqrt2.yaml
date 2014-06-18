@@ -16,7 +16,7 @@ shuffleCards: true
 # must be given in the correct order initially.
 produceSolution: true
 # Default text size on cards
-cardTextSize: 6
+textSize: 6
 
 cards:
   - Suppose, for a contradiction, that $\sqrt{2}$ is rational.

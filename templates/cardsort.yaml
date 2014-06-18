@@ -30,4 +30,4 @@ shuffleCards: true
 # must be given in the correct order initially.
 produceSolution: true
 # Default text size on cards
-cardTextSize: 5
+textSize: 5
