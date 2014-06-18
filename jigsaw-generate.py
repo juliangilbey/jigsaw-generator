@@ -58,15 +58,15 @@ def getopt(layout, data, options, opt, default=None):
         return layout[opt]
     return default
 
-def losub(text, subs):
+def dosub(text, subs):
     """Substitute <: var :> strings in text using the dict subs"""
     def subtext(matchobj):
         if matchobj.group(1) in subs:
-            return subs[matchobj.group(1)]
+            return str(subs[matchobj.group(1)])
         else:
             print('Unrecognised substitution: %s' % matchobj.group(0),
                   file=sys.stderr)
-    return re.sub(r'<:\s*(\S*)\s*:>', subtext, text)
+    return re.sub(r'<:\s*(\S*?)\s*:>', subtext, text)
 
 def opentemplate(name):
     """Searches for and then opens a template file.
@@ -81,10 +81,10 @@ def opentemplate(name):
     ### facilities for file finding; see
     ### http://pythonwheels.com/ as a starting point
     try:
-        f = open(layout['puzzleTemplateTeX'])
+        f = open(name)
     except:
-        try:
-            f = open('templates/' + layout['puzzleTemplateTeX'])
+        # try:
+        f = open('templates/' + name)
         ### ***FIXME*** Once I know how to write new exceptions, use
         ### that here so that I can throw a catchable exception should
         ### I wish to.  For the time being, each calling function will
@@ -171,6 +171,7 @@ def make_entry_util(text, size, mark_hidden, style):
     text should be replaced by '' before this function is called.
     """
 
+    text = text.rstrip()
     if mark_hidden:
         if style == 'table':
             return '(*) %s' % img2tex(text)
@@ -443,6 +444,89 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     #     print('Puz card %s: (%s, %s, %s), num angle %s' %
     #            (i, card[0], card[1], card[2], card[3], card[4]))
 
+
+def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
+                        puztemplatemd, soltemplatemd, dsubs, dsubsmd):
+    """Handle card sorting cards, making the content for puzzle and solution
+
+    The body content is returned via the dictionaries as dsubs['puzbody'],
+    dsubs['solbody'] and similarly for dsubsmd.
+    """
+
+    dosoln = layout['produceSolution']
+    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
+    if dosoln:
+        solution_size = getopt(layout, data, {}, 'solutionTextSize')
+
+    rows = getopt(layout, data, {}, 'rows')
+    columns = getopt(layout, data, {}, 'columns')
+    dsubs[rows] = rows
+    dsubsmd[rows] = rows
+    dsubs[columns] = columns
+    dsubsmd[columns] = columns
+
+    num_cards = len(cards)
+    cardorder = list(range(num_cards))
+    invcardorder = {j: i for (i, j) in enumerate(cardorder)}
+
+    if layout['shuffleCards']:
+        random.shuffle(cardorder)
+
+    puzbody = puztemplate['begin_document']
+    puzbodymd = puztemplatemd['begin_document']
+    if dosoln:
+        solbody = soltemplate['begin_document']
+        solbodymd = soltemplatemd['begin_document']
+
+    # We will put solution card i in puzzle position cardorder[i].
+    # We therefore use range() rather than iterating over the cards themselves.
+    for i in range(num_cards):
+        row = (i % (rows * columns)) // columns + 1
+        col = i % columns + 1
+        puzsubs = { 'rownum': row, 'colnum': col,
+                    'cardnum': cardorder[i] + 1 }
+        solsubs = { 'rownum': row, 'colnum': col,
+                    'cardnum': invcardorder[i] + 1 }
+        puzsubsmd = dict(puzsubs)
+        solsubsmd = dict(solsubs)
+
+        if i % (rows * columns) == 0:
+            if i > 0:
+                puzbody += puztemplate['end_page']
+                if dosoln: solbody += soltemplate['end_page']
+            puzbody += puztemplate['begin_page']
+            if dosoln: solbody += soltemplate['begin_page']
+        
+        puzsubs['content'] = make_entry(cards[cardorder[i]],
+                                        puzzle_size, 'hide', 'tikz')
+        puzbody += dosub(puztemplate['item'], puzsubs)
+        puzsubsmd['content'] = make_entry(cards[cardorder[i]],
+                                          0, 'hide', 'md')
+        puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
+        if dosoln:
+            solsubs['content'] = make_entry(cards[invcardorder[i]],
+                                            solution_size, 'mark', 'tikz')
+            solbody += dosub(soltemplate['item'], solsubs)
+            solsubsmd['content'] = make_entry(cards[invcardorder[i]],
+                                              0, 'mark', 'md')
+            solbodymd += dosub(soltemplatemd['item'], solsubsmd)
+
+    puzbody += puztemplate['end_page']
+    if dosoln: solbody += soltemplate['end_page']
+
+    puzbody = puztemplate['end_document']
+    puzbodymd = puztemplatemd['end_document']
+    if dosoln:
+        solbody = soltemplate['end_document']
+        solbodymd = soltemplatemd['end_document']
+
+    dsubs['puzbody'] = puzbody
+    dsubsmd['puzbody'] = puzbodymd
+    if dosoln:
+        dsubs['solbody'] = solbody
+        dsubsmd['solbody'] = solbodymd
+
+
 rerun_regex = re.compile(b'rerun ', re.I)
 
 def runlatex(file, options):
@@ -604,7 +688,7 @@ def generate_jigsaw(data, options, layout):
     if bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
-            bodytable = opentemplate(bodytable).read()
+            bodytable = opentemplate(bodytablefile).read()
             outtablefile = puzbase + '-table.tex'
             outtable = open(outtablefile, 'w')
             header = opentemplate(headerfile).read()
@@ -641,7 +725,7 @@ def generate_jigsaw(data, options, layout):
         if headerfile:
             bodysolmd = opentemplate(bodysolmdfile).read()
             outsolmdfile = puzbase + '-solution.md'
-            outsolmd = opentemplate(outsolmdfile, 'w')
+            outsolmd = open(outsolmdfile, 'w')
             header = opentemplate(headerfile).read()
             print(header, file=outsolmd)
             solutionmd = True
@@ -762,30 +846,30 @@ def generate_jigsaw(data, options, layout):
     dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
 
     if tabletex:
-        btext = losub(bodytable, dsubs)
+        btext = dosub(bodytable, dsubs)
         print(btext, file=outtable)
         outtable.close()
         runlatex(outtablefile, options)
 
     if puzzletex:
-        ptext = losub(bodypuz, dsubs)
+        ptext = dosub(bodypuz, dsubs)
         print(ptext, file=outpuz)
         outpuz.close()
         runlatex(outpuzfile, options)
 
     if solutiontex:
-        stext = losub(bodysol, dsubs)
+        stext = dosub(bodysol, dsubs)
         print(stext, file=outsol)
         outsol.close()
         runlatex(outsolfile, options)
 
     if puzzlemd:
-        ptextmd = losub(bodypuzmd, dsubsmd)
+        ptextmd = dosub(bodypuzmd, dsubsmd)
         print(ptextmd, file=outpuzmd)
         outpuzmd.close()
 
     if solutionmd:
-        stextmd = losub(bodysolmd, dsubsmd)
+        stextmd = dosub(bodysolmd, dsubsmd)
         print(stextmd, file=outsolmd)
         outsolmd.close()
 
@@ -833,6 +917,8 @@ def generate_cardsort(data, options, layout):
                 solutiontex = False
         else:
             solutiontex = False
+    else:
+        solutiontex = False
 
     bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
     if bodytablefile:
@@ -887,6 +973,8 @@ def generate_cardsort(data, options, layout):
                 solutionmd = False
         else:
             solutionmd = False
+    else:
+        solutionmd = False
 
     # Templates for card sorts are a little more complex, as the TeX
     # version needs explicit blocks for start of document, start of
@@ -920,11 +1008,17 @@ def generate_cardsort(data, options, layout):
     # line, and anything trailing content following the 'BEGIN
     # DOCUMENT' etc. will be ignored.
 
-    # The "item" section should normally consist of the single line:
-    # \macro{<: rownum :>}{<: colnum :>}{<: content :>}
-    # where the (optional) rownum and colnum will be filled in, as
-    # will the content, and \macro is an appropriate TeX command which
-    # typesets the requested card.
+    # The "item" section would normally consist of the single line
+    # something like:
+    # 
+    # \macro{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+
+    # where the rownum and colnum are clear, the card number will be
+    # from 1 upwards in order in the puzzle, and the content is the
+    # actual text (with size and hidden indicators as with the
+    # jigsaw), and \macro is an appropriate TeX command which typesets
+    # the requested card.  The Markdown "item" section is likewise
+    # substituted with these variables.
 
     # The cards will be produced from top (row 1) to bottom (row n)
     # and in each row from left (column 1) to right (column m).  After
@@ -932,6 +1026,11 @@ def generate_cardsort(data, options, layout):
     # up, the end page content will be output (but only once if the
     # final card occurs at the end of a page), and before the first
     # card of a page, the begin page content will be output.
+
+    puztemplate = dict()
+    puztemplatemd = dict()
+    soltemplate = dict()
+    soltemplatemd = dict()
 
     if puzzletex:
         templatematch = re.search('^%%% BEGIN DOCUMENT.*?$(.*?)'
@@ -941,13 +1040,30 @@ def generate_cardsort(data, options, layout):
                                   '^%%% END DOCUMENT.*?$(.*?)',
                                   bodypuz, re.M | re.S)
         if templatematch:
-            template_begin_document = templatematch.group(1)
-            template_begin_page = templatematch.group(2)
-            template_item = templatematch.group(3)
-            template_end_page = templatematch.group(4)
-            template_end_document = templatematch.group(5)
+            puztemplate['begin_document'] = templatematch.group(1)
+            puztemplate['begin_page'] = templatematch.group(2)
+            puztemplate['item'] = templatematch.group(3)
+            puztemplate['end_page'] = templatematch.group(4)
+            puztemplate['end_document'] = templatematch.group(5)
         else:
-            sys.exit('TeX template does not have required structure')
+            sys.exit('TeX puzzle template does not have required structure')
+
+        if layout['produceSolution']:
+            templatematch = re.search('^%%% BEGIN DOCUMENT.*?$(.*?)'
+                                      '^%%% BEGIN PAGE.*?$(.*?)'
+                                      '^%%% BEGIN ITEM.*?$(.*?)'
+                                      '^%%% END PAGE.*?$(.*?)'
+                                      '^%%% END DOCUMENT.*?$(.*?)',
+                                      bodysol, re.M | re.S)
+            if templatematch:
+                soltemplate['begin_document'] = templatematch.group(1)
+                soltemplate['begin_page'] = templatematch.group(2)
+                soltemplate['item'] = templatematch.group(3)
+                soltemplate['end_page'] = templatematch.group(4)
+                soltemplate['end_document'] = templatematch.group(5)
+            else:
+                sys.exit('TeX solution template does not have '
+                         'required structure')
 
     if puzzlemd:
         templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
@@ -955,11 +1071,25 @@ def generate_cardsort(data, options, layout):
                                     '^### END DOCUMENT.*?$(.*?)',
                                     bodypuzmd, re.M | re.S)
         if templatemdmatch:
-            templatemd_begin_document = templatemdmatch.group(1)
-            templatemd_item = templatemdmatch.group(2)
-            templatemd_end_document = templatemdmatch.group(3)
+            puztemplatemd['begin_document'] = templatemdmatch.group(1)
+            puztemplatemd['item'] = templatemdmatch.group(2)
+            puztemplatemd['end_document'] = templatemdmatch.group(3)
         else:
-            sys.exit('Markdown template does not have required structure')
+            sys.exit('Markdown puzzle template does not have '
+                     'required structure')
+
+        if layout['produceSolution']:
+            templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
+                                        '^### BEGIN ITEM.*?$(.*?)'
+                                        '^### END DOCUMENT.*?$(.*?)',
+                                        bodysolmd, re.M | re.S)
+            if templatemdmatch:
+                soltemplatemd['begin_document'] = templatemdmatch.group(1)
+                soltemplatemd['item'] = templatemdmatch.group(2)
+                soltemplatemd['end_document'] = templatemdmatch.group(3)
+            else:
+                sys.exit('Markdown solution template does not have '
+                         'required structure')
 
 
     # These dicts will contain the substitutions needed for the
@@ -1032,11 +1162,12 @@ def generate_cardsort(data, options, layout):
 
     if getopt(layout, data, options, 'shufflePairs'):
         random.shuffle(pairs)
-    # We preserve the original order for the solution and table
+    # We don't shuffle the cards yet, as we may need the original
+    # order for the solution and table
+    shuffledcards = cards[:]
     if getopt(layout, data, options, 'shuffleCards'):
-        shuffledcards = cards[:]
         random.shuffle(shuffledcards)
- 
+
     # We preserve the original pairs data for the table; we only flip
     # the questions and answers (if requested) for the puzzle cards
     if getopt(layout, data, options, 'flip'):
@@ -1058,7 +1189,8 @@ def generate_cardsort(data, options, layout):
         make_table(pairs, edges, cards, dsubs, dsubsmd)
 
     if layout['category'] == cardsort:
-        make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
+        make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
+                            puztemplatemd, soltemplatemd, dsubs, dsubsmd)
     else:
         ### ***FIXME***
         sys.exit('Haven\'t yet implemented dominoes')
@@ -1075,62 +1207,36 @@ def generate_cardsort(data, options, layout):
     dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
     dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
 
+    dsubs['puzbody'] = dosub(dsubs['puzbody'], dsubs)
+    dsubsmd['puzbody'] = dosub(dsubsmd['puzbody'], dsubsmd)
+    if dosoln:
+        dsubs['solbody'] = dosub(dsubs['solbody'], dsubs)
+        dsubsmd['solbody'] = dosub(dsubsmd['solbody'], dsubsmd)
+
     if tabletex:
-        btext = losub(bodytable, dsubs)
+        btext = dosub(bodytable, dsubs)
         print(btext, file=outtable)
         outtable.close()
         runlatex(outtablefile, options)
 
     if puzzletex:
-        ptext = losub(bodypuz, dsubs)
-        print(ptext, file=outpuz)
+        print(dsubs['puzbody'], file=outpuz)
         outpuz.close()
         runlatex(outpuzfile, options)
 
     if solutiontex:
-        stext = losub(bodysol, dsubs)
-        print(stext, file=outsol)
+        print(dsubs['solbody'], file=outsol)
         outsol.close()
         runlatex(outsolfile, options)
 
     if puzzlemd:
-        ptextmd = losub(bodypuzmd, dsubsmd)
-        print(ptextmd, file=outpuzmd)
+        print(dsubsmd['puzbody'], file=outpuzmd)
         outpuzmd.close()
 
     if solutionmd:
-        stextmd = losub(bodysolmd, dsubsmd)
-        print(stextmd, file=outsolmd)
+        print(dsubsmd['solbody'], file=outsolmd)
         outsolmd.close()
 
-    # *************** culled from elsewhere
-    if 'cards' in layout:
-        if 'cards' in data:
-            cards = data['cards']
-            if layout['cards'] == 0:  # which means any number of cards
-                if len(cards) == 0:
-                    sys.exit('Puzzle type %s needs at least one card' %
-                             layout['typename'])
-            else:
-                if len(cards) != layout['cards']:
-                    sys.exit('Puzzle type %s needs exactly %s cards' %
-                             (layout['typename'], layout['cards']))
-        else:
-            sys.exit('Puzzle type %s requires cards in data file' %
-                     layout['typename'])
-    elif 'cards' in data:
-        sys.exit('Puzzle type %s does not accept cards in data file' %
-                 layout['typename'])
-    else:
-        cards = []
-
-    if getopt(layout, data, options, 'shuffleCards'):
-        random.shuffle(cards)
-
-    for c in cards:
-        dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(c, normalsize, 'mark', 'table'))
-        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 # This allows this script to be invoked directly and also (hopefully
 # at some later stage) for the functions to be called via a GUI
