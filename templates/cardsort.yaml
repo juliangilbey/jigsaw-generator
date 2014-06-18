@@ -3,10 +3,14 @@ category: cardsort
 type: cardsort
 typename: card sort
 
-cardsortHeaderTeX: template-header.tex
-cardsortTemplateTeX: template-cardsort.tex
-cardsortHeaderMarkdown: template-cardsort-header.md
-cardsortTemplateMarkdown: template-cardsort.md
+puzzleHeaderTeX: template-header.tex
+puzzleTemplateTeX: template-cardsort-puzzle.tex
+solutionHeaderTeX: template-header.tex
+solutionTemplateTeX: template-cardsort-solution.tex
+puzzleHeaderMarkdown: template-cardsort-header.md
+puzzleTemplateMarkdown: template-cardsort-puzzle.md
+solutionHeaderMarkdown: template-cardsort-header.md
+solutionTemplateMarkdown: template-cardsort-solution.md
 
 # size of puzzle should be specified in the puzzle file - we just give
 # a fallback here

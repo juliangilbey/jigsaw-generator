@@ -68,7 +68,36 @@ def losub(text, subs):
                   file=sys.stderr)
     return re.sub(r'<:\s*(\S*)\s*:>', subtext, text)
 
+def opentemplate(name):
+    """Searches for and then opens a template file.
+
+    Search first in the current directory, then look in the templates
+    directory.  This is currently OS-dependent; this will need making
+    OS-independent in the near future.
+    """
+    
+    ### ***FIXME*** this is OS-specific and relies on filesystem
+    ### layout; perhaps change to wheel system and use its
+    ### facilities for file finding; see
+    ### http://pythonwheels.com/ as a starting point
+    try:
+        f = open(layout['puzzleTemplateTeX'])
+    except:
+        try:
+            f = open('templates/' + layout['puzzleTemplateTeX'])
+        ### ***FIXME*** Once I know how to write new exceptions, use
+        ### that here so that I can throw a catchable exception should
+        ### I wish to.  For the time being, each calling function will
+        ### have to catch the exception individually to produce a
+        ### sensible error message
+
+        # except:
+        #    sys.exit('Template file %s could not be found or opened' %
+        #             name)
+    return f
+
 def make_entry(entry, defaultsize, hide, style):
+
     """Convert a YAML entry into a LaTeX or Markdown formatted entry
 
     The YAML entry will either be a simple text entry, or it will be a
@@ -181,12 +210,14 @@ def cardnum(n):
     else:
         return str(n)
 
-def make_table(pairs, edges, dsubs, dsubsmd):
+def make_table(pairs, edges, cards, dsubs, dsubsmd):
     """Create table substitutions for the pairs and edges"""
     dsubs['tablepairs'] = ''
     dsubs['tableedges'] = ''
+    dsubs['tablecards'] = ''
     dsubsmd['pairs'] = ''
     dsubsmd['edges'] = ''
+    dsubsmd['cards'] = ''
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
@@ -201,6 +232,11 @@ def make_table(pairs, edges, dsubs, dsubsmd):
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
                                 make_entry(e, normalsize, 'mark', 'table'))
         dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md') + '|\n'
+
+    for c in cards:
+        dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
+                                make_entry(c, normalsize, 'mark', 'table'))
+        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     """Handle triangular-shaped jigsaw pieces, putting in the Qs and As
@@ -489,20 +525,10 @@ def generate(data, options):
 
     # Open template files and layout file.
 
-    # ***FIXME*** At some point, this should be modified to allow for
-    # local versions of template files, and also to search in the
-    # system directory (wherever that may be) for these files.  At
-    # present, they are expected to be in the local directory.
-
     if 'type' in data:
         puztype = data['type']
-        ### ***FIXME*** this is OS-specific and relies on filesystem
-        ### layout; perhaps change to wheel system and use its
-        ### facilities for file finding; see
-        ### http://pythonwheels.com/ as a starting point
-        ### The same goes for every occurrence of open('template/' + ...)
         try:
-            layoutf = open('templates/' + puztype + '.yaml')
+            layoutf = opentemplate(puztype + '.yaml')
         except:
             sys.exit('Unrecognised jigsaw type %s' % data['type'])
     else:
@@ -539,54 +565,91 @@ def generate_jigsaw(data, options, layout):
 
     puzbase = options['puzbase']
 
-    if 'puzzleTemplateTeX' in layout:
-        bodypuz = open('templates/' + layout['puzzleTemplateTeX']).read()
-        outpuzfile = puzbase + '-puzzle.tex'
-        outpuz = open(outpuzfile, 'w')
-        header = open('templates/' + layout['puzzleHeaderTeX']).read()
-        print(header, file=outpuz)
-        puzzletex = True
+    bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
+    if bodypuzfile:
+        headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
+        if headerfile:
+            bodypuz = opentemplate(bodypuzfile).read()
+            outpuzfile = puzbase + '-puzzle.tex'
+            outpuz = open(outpuzfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outpuz)
+            puzzletex = True
+        else:
+            print('puzzleTemplateTeX file specified but not puzzleHeaderTeX',
+                  file=sys.stderr)
+            puzzletex = False
     else:
         puzzletex = False
 
-    if 'solutionTemplateTeX' in layout:
-        bodysol = open('templates/' + layout['solutionTemplateTeX']).read()
-        outsolfile = puzbase + '-solution.tex'
-        outsol = open(outsolfile, 'w')
-        header = open('templates/' + layout['solutionHeaderTeX']).read()
-        print(header, file=outsol)
-        solutiontex = True
+    bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
+    if bodysolfile:
+        headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
+        if headerfile:
+            bodysol = opentemplate(bodysolfile).read()
+            outsolfile = puzbase + '-solution.tex'
+            outsol = open(outsolfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outsol)
+            solutiontex = True
+        else:
+            print('solutionTemplateTeX file specified '
+                  'but not solutionHeaderTeX',
+                  file=sys.stderr)
+            solutiontex = False
     else:
         solutiontex = False
 
-    if 'tableTemplateTeX' in layout:
-        bodytable = open('templates/' + layout['tableTemplateTeX']).read()
-        outtablefile = puzbase + '-table.tex'
-        outtable = open(outtablefile, 'w')
-        header = open('templates/' + layout['tableHeaderTeX']).read()
-        print(header, file=outtable)
-        tabletex = True
+    bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
+    if bodytablefile:
+        headerfile = getopt(layout, data, options, 'tableHeaderTeX')
+        if headerfile:
+            bodytable = opentemplate(bodytable).read()
+            outtablefile = puzbase + '-table.tex'
+            outtable = open(outtablefile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outtable)
+            tabletex = True
+        else:
+            print('tableTemplateTeX file specified but not tableHeaderTeX',
+                  file=sys.stderr)
+            tabletex = False
     else:
         tabletex = False
 
-    if 'puzzleTemplateMarkdown' in layout:
-        bodypuzmd = open('templates/' + layout['puzzleTemplateMarkdown']).read()
-        outpuzmdfile = puzbase + '-puzzle.md'
-        outpuzmd = open(outpuzmdfile, 'w')
-        header = open('templates/' + layout['puzzleHeaderMarkdown']).read()
-        print(header, file=outpuzmd)
-        puzzlemd = True
+    bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
+    if bodypuzmdfile:
+        headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
+        if headerfile:
+            bodypuzmd = opentemplate(bodypuzmdfile).read()
+            outpuzmdfile = puzbase + '-puzzle.md'
+            outpuzmd = open(outpuzmdfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outpuzmd)
+            puzzlemd = True
+        else:
+            print('puzzleTemplateMarkdown file specified '
+                  'but not puzzleHeaderMarkdown',
+                  file=sys.stderr)
+            puzzlemd = False
     else:
         puzzlemd = False
 
-    if 'solutionTemplateMarkdown' in layout:
-        bodysolmd = open('templates/' +
-                         layout['solutionTemplateMarkdown']).read()
-        outsolmdfile = puzbase + '-solution.md'
-        outsolmd = open('templates/' + outsolmdfile, 'w')
-        header = open('templates/' + layout['solutionHeaderMarkdown']).read()
-        print(header, file=outsolmd)
-        solutionmd = True
+    bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
+    if bodysolmdfile:
+        headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
+        if headerfile:
+            bodysolmd = opentemplate(bodysolmdfile).read()
+            outsolmdfile = puzbase + '-solution.md'
+            outsolmd = opentemplate(outsolmdfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outsolmd)
+            solutionmd = True
+        else:
+            print('solutionTemplateMarkdown file specified '
+                  'but not solutionHeaderMarkdown',
+                  file=sys.stderr)
+            solutionmd = False
     else:
         solutionmd = False
 
@@ -653,6 +716,7 @@ def generate_jigsaw(data, options, layout):
     if 'cards' in data:
         sys.exit('Puzzle type %s does not accept cards in data file' %
                  layout['typename'])
+    cards = []  # so later call to make_table doesn't break
 
     if getopt(layout, data, options, 'shufflePairs'):
         random.shuffle(pairs)
@@ -677,7 +741,7 @@ def generate_jigsaw(data, options, layout):
     exists_hidden = False
 
     if tabletex or solutionmd:
-        make_table(pairs, edges, dsubs, dsubsmd)
+        make_table(pairs, edges, cards, dsubs, dsubsmd)
 
     if 'triangleSolutionCards' in layout:
         make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
@@ -727,8 +791,319 @@ def generate_jigsaw(data, options, layout):
 
 def generate_cardsort(data, options, layout):
     """Generate cards for a cardsort activity"""
-    ...
+    
+    # ***FIXME*** The output filenames should be specifiable on the
+    # command line.  Also, there should be options for which outputs
+    # to produce.
 
+    puzbase = options['puzbase']
+
+    bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
+    if bodypuzfile:
+        headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
+        if headerfile:
+            bodypuz = opentemplate(bodypuzfile).read()
+            outpuzfile = puzbase + '-puzzle.tex'
+            outpuz = open(outpuzfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outpuz)
+            puzzletex = True
+        else:
+            print('puzzleTemplateTeX file specified but not puzzleHeaderTeX',
+                  file=sys.stderr)
+            puzzletex = False
+    else:
+        puzzletex = False
+
+    if layout['produceSolution']:
+        bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
+        if bodysolfile:
+            headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
+            if headerfile:
+                bodysol = opentemplate(bodysolfile).read()
+                outsolfile = puzbase + '-solution.tex'
+                outsol = open(outsolfile, 'w')
+                header = opentemplate(headerfile).read()
+                print(header, file=outsol)
+                solutiontex = True
+            else:
+                print('solutionTemplateTeX file specified '
+                      'but not solutionHeaderTeX',
+                      file=sys.stderr)
+                solutiontex = False
+        else:
+            solutiontex = False
+
+    bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
+    if bodytablefile:
+        headerfile = getopt(layout, data, options, 'tableHeaderTeX')
+        if headerfile:
+            bodytable = opentemplate(bodytable).read()
+            outtablefile = puzbase + '-table.tex'
+            outtable = open(outtablefile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outtable)
+            tabletex = True
+        else:
+            print('tableTemplateTeX file specified but not tableHeaderTeX',
+                  file=sys.stderr)
+            tabletex = False
+    else:
+        tabletex = False
+
+    bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
+    if bodypuzmdfile:
+        headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
+        if headerfile:
+            bodypuzmd = opentemplate(bodypuzmdfile).read()
+            outpuzmdfile = puzbase + '-puzzle.md'
+            outpuzmd = open(outpuzmdfile, 'w')
+            header = opentemplate(headerfile).read()
+            print(header, file=outpuzmd)
+            puzzlemd = True
+        else:
+            print('puzzleTemplateMarkdown file specified '
+                  'but not puzzleHeaderMarkdown',
+                  file=sys.stderr)
+            puzzlemd = False
+    else:
+        puzzlemd = False
+
+    if layout['produceSolution']:
+        bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
+        if bodysolmdfile:
+            headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
+            if headerfile:
+                bodysolmd = opentemplate(bodysolmdfile).read()
+                outsolmdfile = puzbase + '-solution.md'
+                outsolmd = opentemplate(outsolmdfile, 'w')
+                header = opentemplate(headerfile).read()
+                print(header, file=outsolmd)
+                solutionmd = True
+            else:
+                print('solutionTemplateMarkdown file specified '
+                      'but not solutionHeaderMarkdown',
+                      file=sys.stderr)
+                solutionmd = False
+        else:
+            solutionmd = False
+
+    # Templates for card sorts are a little more complex, as the TeX
+    # version needs explicit blocks for start of document, start of
+    # page, end of page and end of document.  The Markdown version
+    # likewise has a template for each item, so that styling needs -
+    # for example, that each card should live inside a <div> or <span>
+    # element - can be handled.
+
+    # So the TeX template must have the form:
+    # %%% BEGIN DOCUMENT
+    # ...
+    # %%% BEGIN PAGE
+    # ...
+    # %%% BEGIN ITEM
+    # ...
+    # %%% END PAGE
+    # ...
+    # %%% END DOCUMENT
+    # ...
+
+    # And the Markdown template has the form:
+    # ### BEGIN DOCUMENT
+    # ...
+    # ### BEGIN ITEM
+    # ...
+    # ### END DOCUMENT
+    # ...
+
+    # Any content before the initial '%%% BEGIN DOCUMENT' will be
+    # ignored.  Also, the '%%%' or '###' must appear at the start of a
+    # line, and anything trailing content following the 'BEGIN
+    # DOCUMENT' etc. will be ignored.
+
+    # The "item" section should normally consist of the single line:
+    # \macro{<: rownum :>}{<: colnum :>}{<: content :>}
+    # where the (optional) rownum and colnum will be filled in, as
+    # will the content, and \macro is an appropriate TeX command which
+    # typesets the requested card.
+
+    # The cards will be produced from top (row 1) to bottom (row n)
+    # and in each row from left (column 1) to right (column m).  After
+    # the final card on a page, and also after all the cards are used
+    # up, the end page content will be output (but only once if the
+    # final card occurs at the end of a page), and before the first
+    # card of a page, the begin page content will be output.
+
+    if puzzletex:
+        templatematch = re.search('^%%% BEGIN DOCUMENT.*?$(.*?)'
+                                  '^%%% BEGIN PAGE.*?$(.*?)'
+                                  '^%%% BEGIN ITEM.*?$(.*?)'
+                                  '^%%% END PAGE.*?$(.*?)'
+                                  '^%%% END DOCUMENT.*?$(.*?)',
+                                  bodypuz, re.M | re.S)
+        if templatematch:
+            template_begin_document = templatematch.group(1)
+            template_begin_page = templatematch.group(2)
+            template_item = templatematch.group(3)
+            template_end_page = templatematch.group(4)
+            template_end_document = templatematch.group(5)
+        else:
+            sys.exit('TeX template does not have required structure')
+
+    if puzzlemd:
+        templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
+                                    '^### BEGIN ITEM.*?$(.*?)'
+                                    '^### END DOCUMENT.*?$(.*?)',
+                                    bodypuzmd, re.M | re.S)
+        if templatemdmatch:
+            templatemd_begin_document = templatemdmatch.group(1)
+            templatemd_item = templatemdmatch.group(2)
+            templatemd_end_document = templatemdmatch.group(3)
+        else:
+            sys.exit('Markdown template does not have required structure')
+
+
+    # These dicts will contain the substitutions needed for the
+    # template files; the first is for the LaTeX output files, the
+    # second is for the Markdown output files.  These are only used
+    # for the document and page templates; we use separate ones for
+    # each item.
+
+    # The Markdown output files are much simpler, as they are intended
+    # to be embedded in larger documents, for those who cannot access
+    # the PDF files.
+    dsubs = dict()
+    dsubsmd = dict()
+
+    if 'title' in data:
+        dsubs['title'] = data['title']
+    else:
+        dsubs['title'] = ''
+    random.seed(dsubs['title'])
+
+    # Read the card content
+
+    # Two types of cards for cardsort-like puzzles: pairs (for domino
+    # cards) and cards (which are single cards for sorting
+    # activities); edges do not appear in this sort of activity
+    if 'pairs' in layout:
+        if 'pairs' in data:
+            pairs = data['pairs']
+            if layout['pairs'] == 0:  # which means any number of pairs
+                if len(pairs) == 0:
+                    sys.exit('Puzzle type %s needs at least one pair' %
+                             layout['typename'])
+            else:
+                if len(pairs) != layout['pairs']:
+                    sys.exit('Puzzle type %s needs exactly %s pairs' %
+                             (layout['typename'], layout['pairs']))
+        else:
+            sys.exit('Puzzle type %s requires pairs in data file' %
+                     layout['typename'])
+    elif 'pairs' in data:
+        sys.exit('Puzzle type %s does not accept pairs in data file' %
+                 layout['typename'])
+    else:
+        pairs = []  # so that later bits of code don't barf
+
+    if 'edges' in data:
+        sys.exit('Puzzle type %s does not accept edges in data file' %
+                 layout['typename'])
+    edges = []  # so that later bits of code don't barf
+
+    if 'cards' in layout:
+        if 'cards' in data:
+            cards = data['cards']
+            if layout['cards'] == 0:  # which means any number of cards
+                if len(cards) == 0:
+                    sys.exit('Puzzle type %s needs at least one card' %
+                             layout['typename'])
+            else:
+                if len(cards) != layout['cards']:
+                    sys.exit('Puzzle type %s needs exactly %s cards' %
+                             (layout['typename'], layout['cards']))
+        else:
+            sys.exit('Puzzle type %s requires cards in data file' %
+                     layout['typename'])
+    elif 'cards' in data:
+        sys.exit('Puzzle type %s does not accept cards in data file' %
+                 layout['typename'])
+    else:
+        cards = []  # so that later bits of code don't barf
+
+    if getopt(layout, data, options, 'shufflePairs'):
+        random.shuffle(pairs)
+    # We preserve the original order for the solution and table
+    if getopt(layout, data, options, 'shuffleCards'):
+        shuffledcards = cards[:]
+        random.shuffle(shuffledcards)
+ 
+    # We preserve the original pairs data for the table; we only flip
+    # the questions and answers (if requested) for the puzzle cards
+    if getopt(layout, data, options, 'flip'):
+        flippedpairs = []
+        for p in pairs:
+            if random.choice([True, False]):
+                flippedpairs.append([p[1], p[0]])
+            else:
+                flippedpairs.append([p[0], p[1]])
+    else:
+        flippedpairs = pairs
+
+    # The following calls will add the appropriate substitution
+    # variables to dsubs and dsubsmd
+    global exists_hidden
+    exists_hidden = False
+
+    if tabletex:
+        make_table(pairs, edges, cards, dsubs, dsubsmd)
+
+    if layout['category'] == cardsort:
+        make_triangles(data, layout, flippedpairs, edges, dsubs, dsubsmd)
+    else:
+        ### ***FIXME***
+        sys.exit('Haven\'t yet implemented dominoes')
+
+    if exists_hidden:
+        dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'
+        dsubs['hiddennotetable'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+        dsubsmd['hiddennotemd'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+    else:
+        dsubs['hiddennotesolution'] = ''
+        dsubs['hiddennotetable'] = ''
+        dsubsmd['hiddennotemd'] = ''
+
+    dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
+    dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
+
+    if tabletex:
+        btext = losub(bodytable, dsubs)
+        print(btext, file=outtable)
+        outtable.close()
+        runlatex(outtablefile, options)
+
+    if puzzletex:
+        ptext = losub(bodypuz, dsubs)
+        print(ptext, file=outpuz)
+        outpuz.close()
+        runlatex(outpuzfile, options)
+
+    if solutiontex:
+        stext = losub(bodysol, dsubs)
+        print(stext, file=outsol)
+        outsol.close()
+        runlatex(outsolfile, options)
+
+    if puzzlemd:
+        ptextmd = losub(bodypuzmd, dsubsmd)
+        print(ptextmd, file=outpuzmd)
+        outpuzmd.close()
+
+    if solutionmd:
+        stextmd = losub(bodysolmd, dsubsmd)
+        print(stextmd, file=outsolmd)
+        outsolmd.close()
+
+    # *************** culled from elsewhere
     if 'cards' in layout:
         if 'cards' in data:
             cards = data['cards']
