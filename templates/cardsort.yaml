@@ -4,9 +4,9 @@ type: cardsort
 typename: card sort
 
 puzzleHeaderTeX: template-header.tex
-puzzleTemplateTeX: template-cardsort-puzzle.tex
+puzzleTemplateTeX: template-cardsort-puzzle-numbered.tex
 solutionHeaderTeX: template-header.tex
-solutionTemplateTeX: template-cardsort-solution.tex
+solutionTemplateTeX: template-cardsort-solution-numbered.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
