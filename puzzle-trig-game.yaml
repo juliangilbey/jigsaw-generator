@@ -1,0 +1,60 @@
+# A trial proofsort
+type: cards
+contributor: Vicky
+title: Trig countdown
+
+# puzzle size
+rows: 8
+columns: 3
+# Do we shuffle the order of the cards from the order given when
+# producing the problem?  Say "true" for a proof sorting activity.
+# It probably does not make sense to say "false" here but still to
+# produce a solution.
+shuffleCards: false
+# Does this puzzle require production of a solution?  If so, the cards
+# must be given in the correct order initially.
+produceSolution: false
+# Default text size on cards
+textSize: 6
+
+cards:
+  - $\sin(\square)$
+  - $\cos(\square)$
+  - $\tan(\square)$
+  - $\sin(\square + \square)$
+  - $\cos(\square + \square)$
+  - $\tan(\square + \square)$
+  - $\sin(\frac{\square}{2})$
+  - $\cos(\frac{\square}{2})$
+  - $\tan(\frac{\square}{2})$
+
+  - $0$
+  - $\dfrac{\pi}{6}$
+  - $\dfrac{\pi}{4}$
+  - $\dfrac{\pi}{3}$
+  - $\dfrac{\pi}{2}$
+  - $\dfrac{2\pi}{3}$
+  - $\dfrac{3\pi}{4}$
+  - $\pi$
+  - $-\dfrac{\pi}{6}$
+  - $-\dfrac{\pi}{4}$
+  - $-\dfrac{\pi}{3}$
+  - $-\dfrac{\pi}{2}$
+  - $-\dfrac{2\pi}{3}$
+  - $-\dfrac{3\pi}{4}$
+  - $-\pi$
+
+  - $0$
+  - $1$
+  - $\dfrac{1}{2}$
+  - $\dfrac{\sqrt{3}}{2}$
+  - $-\dfrac{1}{2}$
+  - $\dfrac{1}{\sqrt{3}}$
+  - $-\dfrac{\sqrt{3}}{2}$
+  - $\dfrac{\sqrt{2 - \sqrt{3}}}{2}$
+  - $\dfrac{1}{\sqrt{2}}$
+  - $-\sqrt{3}$
+  - $\sqrt{2}$
+  - $-\dfrac{1}{\sqrt{2}}$
+  - $-1$
+  - $-\sqrt{2}$
