@@ -13,6 +13,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \let\ge=\geqslant  \let\le=\leqslant
+\usepackage{calc}
 \usepackage{tikz}[2013/12/13 v3.0.0]
 \usetikzlibrary{calc}
 \tikzset{above/.default=6pt}
@@ -85,7 +86,7 @@
     (b) -- node[\styleb] {\contentb}
     (c) -- node[\stylec] {\contentc}
     cycle;
-  \node[circle,draw,thin,rotate=#7] at ($ #1 $) {#6};
+  \node[circle,draw,thin,inner sep=1pt,rotate=#7] at ($ #1 $) {#6};
 }
 
 \newcommand{\uptriangle}[6]{%
@@ -118,16 +119,29 @@
     (c) -- node[\stylec] {\contentc}
     (d) -- node[\styled] {\contentd}
     cycle;
-  \node[circle,draw,thin,rotate=#8] at ($ #1 $) {#7};
+  \node[circle,draw,thin,inner sep=1pt,rotate=#8] at ($ #1 $) {#7};
 }
 
 \newcommand{\upsquare}[7]{%
   \tiltedsquare{#1}{0}{#2}{#3}{#4}{#5}{#6}{#7}
 }
 
-% a very temporary definition!
-\newcommand{\card}[4]{%
-  Card number #3 appears on row #1 column #2: #4\\
+\newdimen\cardwd
+\newdimen\cardht
+\newdimen\cardtxtwd
+
+% Card number #3 appears on row #1 column #2 with content #4
+% Top left is (0,0) in our drawing
+\newcommand{\numberedcard}[4]{%
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
+  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+
+  \makestyles\style\content{#4}
+
+  \draw (topl) node[anchor=north west,circle,draw,thin,inner sep=1pt] {#3}
+    rectangle (botr);
+  \node[text width=\cardtxtwd,align=center,\style] at
+     ($ (topl)!0.5!(botr) $) {\content};
 }
 
 \pagestyle{empty}

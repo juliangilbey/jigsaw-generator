@@ -481,9 +481,10 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         row = (i % (rows * columns)) // columns + 1
         col = i % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': i + 1 }
+                    'cardnum': '%s %s' % (sizes[max(size-2, 0)], i + 1) }
         solsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': invcardorder[i] + 1 }
+                    'cardnum': '%s %s' % (sizes[max(size-2, 0)],
+                                          invcardorder[i] + 1) }
         puzsubsmd = dict(puzsubs)
         solsubsmd = dict(solsubs)
 

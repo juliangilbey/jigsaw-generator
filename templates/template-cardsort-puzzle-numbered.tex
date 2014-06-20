@@ -10,34 +10,26 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 \usepackage{lastpage}
+% \chead{\begin{minipage}\centering \textbf{<: title :>}\\[\medskipamount]
+%   \ <: puzzlenote :>\ \\[\medskipamount]
+%   \small(Page \thepage\ of \pageref{LastPage})\end{minipage}}
 
-% there will be something here to set the sizes of boxes depending on
-% the values of <: rows :> and <: columns :>
+\setlength\cardwd{\textwidth / <: columns :>}
+\setlength\cardht{\textheight / <: rows :>}
+\setlength\cardtxtwd{4\cardwd/5} % text = 80% of card width
+
+\tikzset{every picture/.style={line width=3pt}}
 
 \begin{document}
 
-\begin{center}
 %%% BEGIN PAGE
-  \textbf{<: title :>} (Page \thepage\ of \pageref{LastPage})
-
-  \medskip
-
-  <: puzzlenote :>
-
-  \bigskip
-
-  % \begin{tikzpicture}
-  [Beginning of page]
-
+  \begin{tikzpicture}
 %%% BEGIN ITEM
-\card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+\numberedcard{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
 %%% END PAGE
-
-  [End of page]
-
-  % \end{tikzpicture}
+  \end{tikzpicture}
+  \newpage
 %%% END DOCUMENT
-\end{center}
 
 \end{document}
 
