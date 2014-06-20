@@ -126,24 +126,6 @@
   \tiltedsquare{#1}{0}{#2}{#3}{#4}{#5}{#6}{#7}
 }
 
-\newdimen\cardwd
-\newdimen\cardht
-\newdimen\cardtxtwd
-
-% Card number #3 appears on row #1 column #2 with content #4
-% Top left is (0,0) in our drawing
-\newcommand{\numberedcard}[4]{%
-  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
-  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
-
-  \makestyles\style\content{#4}
-
-  \draw (topl) node[anchor=north west,circle,draw,thin,inner sep=1pt] {#3}
-    rectangle (botr);
-  \node[text width=\cardtxtwd,align=center,\style] at
-     ($ (topl)!0.5!(botr) $) {\content};
-}
-
 \pagestyle{empty}
 
 
