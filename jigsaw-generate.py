@@ -571,16 +571,16 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
     size = getopt(layout, data, {}, 'textSize', 5)
     defaultlabelsize = getopt(layout, data, {}, 'labelSize', size - 2)
     defaultlabel = data['label'] if 'label' in data else ''
-    cardtitle = data['cardtitle'] if 'cardtitle' in data else ''
-    if 'cardtitle' in data:
-        if 'cardtitlesize' in data:
-            titlesize = data['cardtitlesize']
+    cardtitle = data['cardTitle'] if 'cardTitle' in data else ''
+    if 'cardTitle' in data:
+        if 'cardTitleSize' in data:
+            titlesize = data['cardTitleSize']
         else:
             titlesize = defaultlabelsize
-        dsubs['cardtitle'] = '%s %s' % (sizes[titlesize], data['cardtitle'])
+        dsubs['cardtitle'] = '%s %s' % (sizes[titlesize], data['cardTitle'])
     else:
         dsubs['cardtitle'] = ''
-    dsubsmd['cardtitle'] = data['cardtitle'] if 'cardtitle' in data else ''
+    dsubsmd['cardtitle'] = data['cardTitle'] if 'cardTitle' in data else ''
 
     rows = getopt(layout, data, {}, 'rows')
     columns = getopt(layout, data, {}, 'columns')

@@ -1,8 +1,7 @@
 # A trial proofsort
 type: cardsort
-contributor: Julian
 title: $\sqrt{2}$ is irrational
-note: Sort the cards into order to prove that $\sqrt{2}$ is irrational
+note: Sort the cards into order to prove that $\sqrt{2}$ is irrational.
 
 # puzzle size
 rows: 6
@@ -17,6 +16,9 @@ shuffleCards: true
 produceSolution: true
 # Default text size on cards
 textSize: 6
+# Card title
+cardTitle: CMEP - $\sqrt{2}$ is irrational
+cardTitleSize: 2
 
 cards:
   - Suppose, for a contradiction, that $\sqrt{2}$ is rational.

@@ -1,0 +1,43 @@
+# A trial proofsort
+type: cardsort
+title: $\sqrt{2}$ is irrational
+note: Sort the cards into order to prove the quadratic formula.
+# Use CMEP Markdown output
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP.md
+solutionTemplateMarkdown: template-cardsort-solution-CMEP.md
+
+# puzzle size
+rows: 5
+columns: 1
+# Do we shuffle the order of the cards from the order given when
+# producing the problem?  Say "true" for a proof sorting activity.
+# It probably does not make sense to say "false" here but still to
+# produce a solution.
+shuffleCards: true
+# Does this puzzle require production of a solution?  If so, the cards
+# must be given in the correct order initially.
+produceSolution: true
+# Default text size on cards
+textSize: 5
+# Card title
+cardTitle: CMEP - Quadratic formula proof
+cardTitleSize: 1
+
+cards:
+  - Consider $ax^2 + bx + c = 0$, where $a \neq 0$.
+  - Since $a \neq 0$, we can divide by $a$ to get
+    $$x^2 + \frac{b}{a} x + \frac{c}{a} = 0.$$
+  - We complete the square.
+  - This shows that the original equation is equivalent to
+    $$\left(x + \frac{b}{2a} \right)^2 - \frac{b^2}{4a^2} + \frac{c}{a} = 0.$$
+  - Since $x$ appears only once in the equation, we can rearrange this
+    to solve for $x$.
+  - 'Get the squared term on one side of the equation:
+    $$\left(x + \frac{b}{2a} \right)^2 = \frac{b^2}{4a^2} - \frac{c}{a}.$$'
+  - 'We can rewrite the right-hand side by putting it over a common denominator:
+    $$\left(x + \frac{b}{2a} \right)^2 = \frac{b^2 - 4ac}{4a^2}.$$'
+  - We can take the square root of both sides.
+  - Taking account of the possibility of positive and negative square roots, we see
+    $$x + \frac{b}{2a} = \frac{\pm\sqrt{b^2 - 4ac}}{2a}.$$
+  - Subtracting $\frac{b}{2a}$ from both sides and putting the right-hand side over a common denominator gives
+    $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.$$

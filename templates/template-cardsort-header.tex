@@ -33,11 +33,13 @@
 \newif\iftesting  % say \testingtrue to have \numberedcard etc. use
                   % simple parameters like {Q1} instead of {{regular}{Q1}}
 
-\newcommand{\image}[1]{\includegraphics{#1}}
+\usepackage[export]{adjustbox}
+
+\newcommand{\image}[1]{\includegraphics[max height=0.3\trad]{#1}}
 % There might be a nicer way to do the following, but I haven't yet
 % found it.
 \newcommand{\imagecap}[2]{%
-  \savebox{\templateimagebox}{\includegraphics{#1}}%
+  \savebox{\templateimagebox}{\includegraphics[max height=0.3\trad]{#1}}%
   \setlength{\templateimagewd}{\wd\templateimagebox}%
   \hbox to \templateimagewd{%
     \begin{minipage}{\templateimagewd}%
@@ -76,7 +78,7 @@
   \makestyles\style\content{#4}
 
   \draw (topl) rectangle (botr);
-  \node[text width=\cardtxtwd,align=center,\style] at
+  \node[text width=\cardtxtwd,align=flush center,\style] at
      ($ (topl)!0.5!(botr) $) {\content};
   \node[circle,draw,thin,inner sep=1pt]
      at ($ (topl)!0.5!(botl) + (\offset,0) $) {#3};
@@ -99,7 +101,7 @@
   \makestyles\style\content{#4}
 
   \draw (topl) rectangle (botr);
-  \node[text width=\cardtxtwd,align=center,\style] at
+  \node[text width=\cardtxtwd,align=flush center,\style] at
      ($ (topl)!0.5!(botr) $) {\content};
 
   \def\templabel{#5}

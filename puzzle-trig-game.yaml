@@ -1,10 +1,9 @@
 # A trial proofsort
 type: cards
-contributor: Vicky
 title: Trig countdown
 
 # puzzle size
-rows: 6
+rows: 5
 columns: 3
 # Do we shuffle the order of the cards from the order given when
 # producing the problem?  Say "true" for a proof sorting activity.
@@ -17,10 +16,10 @@ produceSolution: false
 # Default text size on cards
 textSize: 7
 # Card title
-cardtitle: CMEP - Trig countdown
+cardTitle: CMEP - Trig countdown
 
 cards:
-  - newlabel: Function
+  - newlabel: Function Card
   - $\sin(\square)$
   - $\cos(\square)$
   - $\tan(\square)$
@@ -31,7 +30,7 @@ cards:
   - $\cos(\frac{\square}{2})$
   - $\tan(\frac{\square}{2})$
 
-  - newlabel: Value
+  - newlabel: Value Card
     newpage: true
   - $0$
   - $\dfrac{\pi}{6}$
@@ -49,7 +48,7 @@ cards:
   - $-\dfrac{3\pi}{4}$
   - $-\pi$
 
-  - newlabel: Target
+  - newlabel: Target Card
     newpage: true
   - $0$
   - $1$
