@@ -1,4 +1,4 @@
-% \input template-header
+% \input template-cardsort-header
 % \testingtrue
 %%% BEGIN DOCUMENT
 
@@ -15,12 +15,15 @@
 
 \tikzset{every picture/.style={line width=3pt}}
 
+\def\cardtitle{<: cardtitle :>}
+
 \begin{document}
 
 %%% BEGIN PAGE
   \begin{tikzpicture}
 %%% BEGIN ITEM
-\unnumberedcard{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+\unnumberedcard{<: rownum :>}{<: colnum :>}{<: cardnum :>}
+   {<: text :>}{<: label :>}
 %%% END PAGE
   \end{tikzpicture}
   \newpage

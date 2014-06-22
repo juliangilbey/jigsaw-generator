@@ -96,15 +96,80 @@ def opentemplate(name):
         #             name)
     return f
 
-def make_entry(entry, defaultsize, hide, style):
+def check_special(c):
+    """Check whether a card is special
 
+    Special cards currently recognised are:
+
+    "- newpage: true"
+       this produces a new page in the PDF cards output, but nothing
+       in the table or Markdown outputs
+    "- newlabel: text"
+    "- newlabelsize: num"
+       these will change the default label
+
+    The function returns either None if the card is not special, or a
+    dict with entries (t, cont) where t is the type of special card
+    ('newpage', 'label' or 'labelsize') and cont is the related
+    content.
+
+    Multiple entries in one card are therefore permitted, but 'text'
+    is not permitted in such a card.
+
+    This function also performs some basic checks to ensure that the
+    card entries are well-formed.
+    """
+
+    if isinstance(c, dict):
+        special = False
+        if 'newpage' in c:
+            special = True
+            if c['newpage'] != True:
+                print('Invalid value for newpage card, only newpage: True '
+                      'permitted\nCard value: %s' % c['newpage'],
+                      file=sys.stderr)
+            c['newpage'] = True
+        if 'newlabel' in c:
+            special = True
+            if not isinstance(c['newlabel'], str):
+                print('Invalid value for newlabel card: it must be a string.\n'
+                      'Card value: %s' % c['newlabel'],
+                      file=sys.stderr)
+                del c['newlabel']
+        if 'newlabelsize' in c:
+            special = True
+            if not isinstance(c['newlabelsize'], int):
+                c['newlabelsize'] = int(c['newlabelsize'])
+        if special:
+            if 'text' in c:
+                print('Cannot have a special entry (newpage, newlabel, '
+                      'newlabelsize) and text\n'
+                      'on same card!  Ignoring special requests.',
+                      file=sys.stderr)
+                return None
+            else:
+                return c
+    else:
+        return None
+
+def make_entry(entry, defaultsize, hide, style,
+               defaultlabel='', defaultlabelsize=0):
     """Convert a YAML entry into a LaTeX or Markdown formatted entry
 
+    Returns the pair (text, label).
+
+    The text is the content to be used for the LaTeX or Markdown.  The
+    label is only of interest for card sorts and similar activities;
+    it is ignored for jigsaws.
+
     The YAML entry will either be a simple text entry, or it will be a
-    dictionary with required key "text" and optional entries "size"
-    and "hidden".
+    dictionary with required key "text" and optional entries "size",
+    "hidden" and "label".
 
     If there is a "size" key, this will be added to the defaultsize.
+
+    If there is a "label" key, this will override the current default
+    label; similarly for the "labelsize" key.
 
     The "hide" parameter can be:
       "hide": the text will be hidden if "hidden" is true
@@ -122,14 +187,16 @@ def make_entry(entry, defaultsize, hide, style):
                side by a blank space.  There is no size marker.
     """
 
+    label = make_entry_label(entry, style, defaultlabel, defaultlabelsize)
+
     if isinstance(entry, dict):
         if 'text' not in entry:
             print('No "text" field in entry in data file.  Rest of data is:\n',
                   file=sys.stderr)
             for f in entry:
                 print('  %s: %s\n' % (f, entry[f]), file=sys.stderr)
-            return make_entry_util('', '', False, style)
-            
+            return (make_entry_util('', '', False, style), label)
+
         if 'size' in entry:
             try:
                 size = defaultsize + int(entry['size'])
@@ -150,19 +217,23 @@ def make_entry(entry, defaultsize, hide, style):
             global exists_hidden
             exists_hidden = True
             if hide == 'hide':
-                return make_entry_util('', '', False, style)
+                return (make_entry_util('', '', False, style), '')
             elif hide == 'mark':
-                return make_entry_util(entry['text'], sizes[size], True, style)
+                return (make_entry_util(entry['text'], sizes[size],
+                                        True, style), label)
             elif hide == 'ignore':
-                return make_entry_util(entry['text'], sizes[size], False, style)
+                return (make_entry_util(entry['text'], sizes[size],
+                                        False, style), label)
             else:
                 # this shouldn't happen
                 sys.exit('This should not happen: bad hide parameter')
         else:
-            return make_entry_util(entry['text'], sizes[size], False, style)
+            return (make_entry_util(entry['text'], sizes[size],
+                                    False, style), label)
 
     else:
-        return make_entry_util(entry, sizes[defaultsize], False, style)
+        return (make_entry_util(entry, sizes[defaultsize], False, style),
+                label)
 
 def make_entry_util(text, size, mark_hidden, style):
     """Create the output once the text, size, hide and style are determined
@@ -186,6 +257,28 @@ def make_entry_util(text, size, mark_hidden, style):
             return '{regular}{%s %s}' % (size, img2tex(text))
         elif style == 'md':
             return ' %s ' % (text if text else '(BLANK)')
+
+def make_entry_label(entry, style, defaultlabel, defaultlabelsize):
+    if isinstance(entry, dict):
+        if 'label' in entry:
+            labeltext = entry['label'].rstrip()
+        else:
+            labeltext = defaultlabel.rstrip()
+
+        if 'labelsize' in entry:
+            labelsize = entry['labelsize']
+        else:
+            labelsize = defaultlabelsize
+    else:
+        labeltext = defaultlabel.rstrip()
+        labelsize = defaultlabelsize
+
+    if style == 'table':
+        return img2tex(labeltext)
+    elif style == 'tikz':
+        return '%s %s' % (sizes[labelsize], img2tex(labeltext))
+    elif style == 'md':
+        return labeltext
 
 img_re = re.compile(r'!\[([^\]]*)\]\(([^\)]*)\)')
 
@@ -222,22 +315,34 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
-            (make_entry(p[0], normalsize, 'mark', 'table'),
-             make_entry(p[1], normalsize, 'mark', 'table')))
+            (make_entry(p[0], normalsize, 'mark', 'table')[0],
+             make_entry(p[1], normalsize, 'mark', 'table')[0]))
         row = '|'
         for entry in p:
-            row += make_entry(entry, 0, 'mark', 'md') + '|'
+            row += make_entry(entry, 0, 'mark', 'md')[0] + '|'
         dsubsmd['pairs'] += row + '\n'
         
     for e in edges:
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(e, normalsize, 'mark', 'table'))
-        dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md') + '|\n'
+                                make_entry(e, normalsize, 'mark', 'table')[0])
+        dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md')[0] + '|\n'
 
+    # The next bit is only used for the PDF version of the table output,
+    # so we don't make too much effort over label handling
+    defaultlabel = dsubs['label'] if 'label' in dsubs else ''
     for c in cards:
-        dsubs['tablecards'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(c, normalsize, 'mark', 'table'))
-        dsubsmd['cards'] += '|' + make_entry(c, 0, 'mark', 'md') + '|\n'
+        s = check_special(c)
+        if s:
+            if 'newlabel' in c:
+                defaultlabel = c['newlabel']
+            continue
+        cont, label = make_entry(c, normalsize, 'mark', 'table',
+                                 defaultlabel, normalsize)
+        dsubs['tablecards'] += ((r'%s%s\\ \hline' '\n') %
+                                (('[' + label + '] ' if label else ''), cont))
+        cont, label = make_entry(c, 0, 'mark', 'md', defaultlabel)
+        dsubsmd['cards'] += ('| %s%s |\n' %
+                             (('[' + label + '] ' if label else ''), cont))
 
 def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     """Handle triangular-shaped jigsaw pieces, putting in the Qs and As
@@ -247,8 +352,8 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     substitution variables in the process.
     """
 
-    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
-    solution_size = getopt(layout, data, {}, 'solutionTextSize')
+    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize', 5)
+    solution_size = getopt(layout, data, {}, 'solutionTextSize', 5)
 
     num_triangle_cards = len(layout['triangleSolutionCards'])
 
@@ -303,15 +408,15 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
         solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
         dsubs['trisolcard' + str(i + 1)] = (('{%s}' * 5) %
-            (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
-             make_entry(solcard[1], solution_size, 'mark', 'tikz'),
-             make_entry(solcard[2], solution_size, 'mark', 'tikz'),
+            (make_entry(solcard[0], solution_size, 'mark', 'tikz')[0],
+             make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
+             make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
              '%s %s' % (sizes[max(solution_size-2, 0)], solcard[3]),
              solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
-            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
-             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
-             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
+            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
+             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
+             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
              '%s %s' % (sizes[max(puzzle_size-2, 0)], puzcard[3]),
              puzcard[4]))
 
@@ -326,7 +431,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
-            row += make_entry(entry, 0, 'hide', 'md') + '|'
+            row += make_entry(entry, 0, 'hide', 'md')[0] + '|'
         dsubsmd['puzcards3'] += row + '\n'
         dsubsmd['puzcards4'] += row + ' &nbsp; |\n'
 
@@ -349,8 +454,8 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     This is very similar to the make_triangles function.
     """
 
-    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize')
-    solution_size = getopt(layout, data, {}, 'solutionTextSize')
+    puzzle_size = getopt(layout, data, {}, 'puzzleTextSize', 5)
+    solution_size = getopt(layout, data, {}, 'solutionTextSize', 5)
 
     num_triangle_cards = len(layout['triangleSolutionCards'])
     num_square_cards = len(layout['squareSolutionCards'])
@@ -409,17 +514,17 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
                         (angle + 180) % 360 - 180])
 
         dsubs['sqsolcard' + str(i + 1)] = (('{%s}' * 6) %
-            (make_entry(solcard[0], solution_size, 'mark', 'tikz'),
-             make_entry(solcard[1], solution_size, 'mark', 'tikz'),
-             make_entry(solcard[2], solution_size, 'mark', 'tikz'),
-             make_entry(solcard[3], solution_size, 'mark', 'tikz'),
+            (make_entry(solcard[0], solution_size, 'mark', 'tikz')[0],
+             make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
+             make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
+             make_entry(solcard[3], solution_size, 'mark', 'tikz')[0],
              '%s %s' % (sizes[max(solution_size-2, 0)], solcard[4]),
              solcard[5]))
         dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
-            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz'),
-             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz'),
-             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz'),
-             make_entry(puzcard[3], puzzle_size, 'hide', 'tikz'),
+            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
+             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
+             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
+             make_entry(puzcard[3], puzzle_size, 'hide', 'tikz')[0],
              '%s %s' % (sizes[max(puzzle_size-2, 0)], puzcard[4]),
              puzcard[5]))
 
@@ -432,7 +537,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in squarepuzcard:
         row = '|'
         for entry in t[0:4]:
-            row += make_entry(entry, 0, 'hide', 'md') + '|'
+            row += make_entry(entry, 0, 'hide', 'md')[0] + '|'
         dsubsmd['puzcards4'] += row + '\n'
 
     # Testing:
@@ -451,10 +556,31 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
 
     The body content is returned via the dictionaries as dsubs['puzbody'],
     dsubs['solbody'] and similarly for dsubsmd.
+
+    Special card content does special things:
+
+    "- newpage: true"
+       this produces a new page in the PDF cards output, but nothing
+       in the table or Markdown outputs
+    "- newlabel: text"
+    "- newlabelsize: num"
+       these will change the default label
     """
 
     dosoln = layout['produceSolution']
-    size = getopt(layout, data, {}, 'textSize')
+    size = getopt(layout, data, {}, 'textSize', 5)
+    defaultlabelsize = getopt(layout, data, {}, 'labelSize', size - 2)
+    defaultlabel = data['label'] if 'label' in data else ''
+    cardtitle = data['cardtitle'] if 'cardtitle' in data else ''
+    if 'cardtitle' in data:
+        if 'cardtitlesize' in data:
+            titlesize = data['cardtitlesize']
+        else:
+            titlesize = defaultlabelsize
+        dsubs['cardtitle'] = '%s %s' % (sizes[titlesize], data['cardtitle'])
+    else:
+        dsubs['cardtitle'] = ''
+    dsubsmd['cardtitle'] = data['cardtitle'] if 'cardtitle' in data else ''
 
     rows = getopt(layout, data, {}, 'rows')
     columns = getopt(layout, data, {}, 'columns')
@@ -463,7 +589,22 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
     dsubs['columns'] = columns
     dsubsmd['columns'] = columns
 
-    num_cards = len(cards)
+    # We do a presift of the cards to identify the real cards as
+    # opposed to the special cards.  It would be more efficient to
+    # only read through the cards once, but that would make the code
+    # more complex than needed, and this part of the code is fairly
+    # fast anyway.
+
+    # When we are done, realcards will contain the indices of all real
+    # cards in the cards list.
+    realcards = []
+    for (i, c) in enumerate(cards):
+        if check_special(c):
+            continue
+        else:
+            realcards.append(i)
+
+    num_cards = len(realcards)
     cardorder = list(range(num_cards))
     if layout['shuffleCards']:
         random.shuffle(cardorder)
@@ -476,10 +617,28 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         solbodymd = soltemplatemd['begin_document']
 
     # We will put solution card i in puzzle position cardorder[i].
-    # We therefore use range() rather than iterating over the cards themselves.
-    for i in range(num_cards):
-        row = (i % (rows * columns)) // columns + 1
-        col = i % columns + 1
+    i = 0 
+    pagecards = 0
+    for c in cards:
+        s = check_special(c)
+        if s:
+            if 'newlabel' in c:
+                defaultlabel = c['newlabel']
+            if 'newlabelsize' in c:
+                defaultlabelsize = c['newlabelsize']
+            if 'newpage' in c:
+                # this would presumably only occur for non-shuffled cards;
+                # it would make no sense otherwise
+                if layout['shuffleCards']:
+                    print('newpage makes no sense for shuffled cards!'
+                          ' Ignoring', file=sys.stderr)
+                else:
+                    pagecards = 0
+                    # the next loop through will do the new page stuff
+            continue
+
+        row = (pagecards % (rows * columns)) // columns + 1
+        col = pagecards % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col,
                     'cardnum': '%s %s' % (sizes[max(size-2, 0)], i + 1) }
         solsubs = { 'rownum': row, 'colnum': col,
@@ -488,26 +647,35 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         puzsubsmd = dict(puzsubs)
         solsubsmd = dict(solsubs)
 
-        if i % (rows * columns) == 0:
+        if pagecards == 0:
             if i > 0:
                 puzbody += puztemplate['end_page']
-                if dosoln: solbody += soltemplate['end_page']
             puzbody += puztemplate['begin_page']
-            if dosoln: solbody += soltemplate['begin_page']
+        if dosoln and i % (rows * columns) == 0:
+            if i > 0:
+                solbody += soltemplate['end_page']
+            solbody += soltemplate['begin_page']
         
-        puzsubs['content'] = make_entry(cards[cardorder[i]],
-                                        size, 'hide', 'tikz')
+        puzsubs['text'], puzsubs['label'] = make_entry(
+            cards[realcards[cardorder[i]]], size, 'hide', 'tikz',
+            defaultlabel, defaultlabelsize)
         puzbody += dosub(puztemplate['item'], puzsubs)
-        puzsubsmd['content'] = make_entry(cards[cardorder[i]],
-                                          0, 'hide', 'md')
+        puzsubsmd['text'], puzsubsmd['label'] = make_entry(
+            cards[realcards[cardorder[i]]], 0, 'hide', 'md', defaultlabel)
         puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
         if dosoln:
-            solsubs['content'] = make_entry(cards[i],
-                                            size, 'mark', 'tikz')
+            solsubs['text'], solsubs['label'] = make_entry(
+                cards[realcards[i]], size, 'mark', 'tikz',
+                defaultlabel, defaultlabelsize)
             solbody += dosub(soltemplate['item'], solsubs)
-            solsubsmd['content'] = make_entry(cards[i],
-                                              0, 'mark', 'md')
+            solsubsmd['text'], solsubsmd['label'] = make_entry(
+                cards[realcards[i]], 0, 'mark', 'md', defaultlabel)
             solbodymd += dosub(soltemplatemd['item'], solsubsmd)
+
+        i += 1
+        pagecards += 1
+        if pagecards == rows * columns:
+            pagecards = 0
 
     puzbody += puztemplate['end_page']
     if dosoln: solbody += soltemplate['end_page']
@@ -1015,7 +1183,7 @@ def generate_cardsort(data, options, layout):
     # The "item" section would normally consist of the single line
     # something like:
     # 
-    # \card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: content :>}
+    # \card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: text :>}{<: label :>}
 
     # where the rownum and colnum are clear, the card number will be
     # from 1 upwards in order in the puzzle, and the content is the
@@ -1164,14 +1332,12 @@ def generate_cardsort(data, options, layout):
     else:
         cards = []  # so that later bits of code don't barf
 
+    # We don't shuffle the cards yet, as we need the original order
+    # for the solution and table.  Shuffling pairs is fine, though, as
+    # their original order is immaterial if shufflePairs is requested.
+
     if getopt(layout, data, options, 'shufflePairs'):
         random.shuffle(pairs)
-    # We don't shuffle the cards yet, as we may need the original
-    # order for the solution and table
-    shuffledcards = cards[:]
-    if getopt(layout, data, options, 'shuffleCards'):
-        random.shuffle(shuffledcards)
-
     # We preserve the original pairs data for the table; we only flip
     # the questions and answers (if requested) for the puzzle cards
     if getopt(layout, data, options, 'flip'):

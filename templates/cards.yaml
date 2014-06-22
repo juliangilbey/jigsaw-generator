@@ -27,3 +27,5 @@ shuffleCards: false
 produceSolution: false
 # Default text size on cards
 textSize: 5
+# Default label size on cards
+labelSize: 3

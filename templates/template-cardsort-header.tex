@@ -65,11 +65,13 @@
 \newdimen\offset
 \setlength\offset{6mm}
 
-% Card number #3 appears on row #1 column #2 with content #4
+% Card number #3 appears on row #1 column #2 with content #4 and label #5
 % Top left is (0,0) in our drawing
-\newcommand{\numberedcard}[4]{%
+\newcommand{\numberedcard}[5]{%
   \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
   \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (botl) at (topl |- botr);
+  \coordinate (topr) at (topl -| botr);
 
   \makestyles\style\content{#4}
 
@@ -77,23 +79,37 @@
   \node[text width=\cardtxtwd,align=center,\style] at
      ($ (topl)!0.5!(botr) $) {\content};
   \node[circle,draw,thin,inner sep=1pt]
-     at ($ (topl) + (\offset,-\offset) $) {#3};
+     at ($ (topl)!0.5!(botl) + (\offset,0) $) {#3};
+
+  \def\templabel{#5}
+  \ifx\templabel\empty
+  \else \node at ($ (botl)!0.5!(botr) + (0,\offset) $) {\templabel};
+  \fi
+  \ifx\cardtitle\empty
+  \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
 }
 
-% Card number #3 appears on row #1 column #2 with content #4
-% Top left is (0,0) in our drawing
-\newcommand{\unnumberedcard}[4]{%
+\newcommand{\unnumberedcard}[5]{%
   \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
   \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (botl) at (topl |- botr);
+  \coordinate (topr) at (topl -| botr);
 
   \makestyles\style\content{#4}
 
   \draw (topl) rectangle (botr);
   \node[text width=\cardtxtwd,align=center,\style] at
      ($ (topl)!0.5!(botr) $) {\content};
-}
 
-\pagestyle{empty}
+  \def\templabel{#5}
+  \ifx\templabel\empty
+  \else \node at ($ (botl)!0.5!(botr) + (0,\offset) $) {\templabel};
+  \fi
+  \ifx\cardtitle\empty
+  \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
+}
 
 
 %%% Local Variables: 

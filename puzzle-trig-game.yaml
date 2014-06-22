@@ -4,7 +4,7 @@ contributor: Vicky
 title: Trig countdown
 
 # puzzle size
-rows: 8
+rows: 6
 columns: 3
 # Do we shuffle the order of the cards from the order given when
 # producing the problem?  Say "true" for a proof sorting activity.
@@ -15,9 +15,12 @@ shuffleCards: false
 # must be given in the correct order initially.
 produceSolution: false
 # Default text size on cards
-textSize: 6
+textSize: 7
+# Card title
+cardtitle: CMEP - Trig countdown
 
 cards:
+  - newlabel: Function
   - $\sin(\square)$
   - $\cos(\square)$
   - $\tan(\square)$
@@ -28,6 +31,8 @@ cards:
   - $\cos(\frac{\square}{2})$
   - $\tan(\frac{\square}{2})$
 
+  - newlabel: Value
+    newpage: true
   - $0$
   - $\dfrac{\pi}{6}$
   - $\dfrac{\pi}{4}$
@@ -44,6 +49,8 @@ cards:
   - $-\dfrac{3\pi}{4}$
   - $-\pi$
 
+  - newlabel: Target
+    newpage: true
   - $0$
   - $1$
   - $\dfrac{1}{2}$

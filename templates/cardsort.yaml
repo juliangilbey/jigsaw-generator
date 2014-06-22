@@ -31,3 +31,5 @@ shuffleCards: true
 produceSolution: true
 # Default text size on cards
 textSize: 5
+# Default label size on cards
+labelSize: 3
