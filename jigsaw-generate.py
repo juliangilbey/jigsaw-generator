@@ -411,13 +411,13 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
             (make_entry(solcard[0], solution_size, 'mark', 'tikz')[0],
              make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
              make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
-             '%s %s' % (sizes[max(solution_size-2, 0)], solcard[3]),
+             '%s %s' % (sizes[max(solution_size-3, 0)], solcard[3]),
              solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
             (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
              make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
              make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
-             '%s %s' % (sizes[max(puzzle_size-2, 0)], puzcard[3]),
+             '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[3]),
              puzcard[4]))
 
     # For the Markdown version, we only need to record the puzzle cards at
@@ -518,14 +518,14 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
              make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
              make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
              make_entry(solcard[3], solution_size, 'mark', 'tikz')[0],
-             '%s %s' % (sizes[max(solution_size-2, 0)], solcard[4]),
+             '%s %s' % (sizes[max(solution_size-3, 0)], solcard[4]),
              solcard[5]))
         dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
             (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
              make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
              make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
              make_entry(puzcard[3], puzzle_size, 'hide', 'tikz')[0],
-             '%s %s' % (sizes[max(puzzle_size-2, 0)], puzcard[4]),
+             '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[4]),
              puzcard[5]))
 
     # For the Markdown version, we only need to record the puzzle cards at
@@ -569,14 +569,14 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
 
     dosoln = layout['produceSolution']
     size = getopt(layout, data, {}, 'textSize', 5)
-    defaultlabelsize = getopt(layout, data, {}, 'labelSize', size - 2)
+    defaultlabelsize = getopt(layout, data, {}, 'labelSize', max(size - 2,0))
     defaultlabel = data['label'] if 'label' in data else ''
     cardtitle = data['cardTitle'] if 'cardTitle' in data else ''
     if 'cardTitle' in data:
         if 'cardTitleSize' in data:
             titlesize = data['cardTitleSize']
         else:
-            titlesize = defaultlabelsize
+            titlesize = max(defaultlabelsize - 1, 0)
         dsubs['cardtitle'] = '%s %s' % (sizes[titlesize], data['cardTitle'])
     else:
         dsubs['cardtitle'] = ''
@@ -640,9 +640,9 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         row = (pagecards % (rows * columns)) // columns + 1
         col = pagecards % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': '%s %s' % (sizes[max(size-2, 0)], i + 1) }
+                    'cardnum': '%s %s' % (sizes[max(size-3, 0)], i + 1) }
         solsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': '%s %s' % (sizes[max(size-2, 0)],
+                    'cardnum': '%s %s' % (sizes[max(size-3, 0)],
                                           invcardorder[i] + 1) }
         puzsubsmd = dict(puzsubs)
         solsubsmd = dict(solsubs)
