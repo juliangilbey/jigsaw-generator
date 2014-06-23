@@ -3,9 +3,6 @@ type: cardsort
 resource: E1_RT5_1
 title: $\sqrt{2}$ is irrational
 note: Sort the cards into order to prove the quadratic formula.
-# Use CMEP Markdown output
-puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP.md
-solutionTemplateMarkdown: template-cardsort-solution-CMEP.md
 
 # puzzle size
 rows: 5
@@ -23,6 +20,10 @@ textSize: 5
 # Card title
 cardTitle: CMEP - Quadratic formula proof
 cardTitleSize: 1
+
+# Use CMEP Markdown output
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-1col.md
+solutionTemplateMarkdown: template-cardsort-solution-CMEP-1col.md
 
 cards:
   - Consider $ax^2 + bx + c = 0$, where $a \neq 0$.

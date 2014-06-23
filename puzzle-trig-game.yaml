@@ -19,6 +19,9 @@ textSize: 7
 # Card title
 cardTitle: CMEP - Trig countdown
 
+# Use CMEP Markdown output
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-3col.md
+
 cards:
   - newlabel: Function Card
   - $\sin(\square)$

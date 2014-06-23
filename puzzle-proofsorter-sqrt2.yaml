@@ -21,6 +21,10 @@ textSize: 6
 cardTitle: CMEP -- $\sqrt{2}$ is irrational
 cardTitleSize: 2
 
+# Use CMEP Markdown output
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-1col.md
+solutionTemplateMarkdown: template-cardsort-solution-CMEP-1col.md
+
 cards:
   - Suppose, for a contradiction, that $\sqrt{2}$ is rational.
   - That is, we can write $\sqrt{2} = \frac{m}{n}$ where $m$ and $n$
