@@ -1,5 +1,6 @@
 # A trial proofsort
 type: cardsort
+resource: PI3_RT5_2
 title: $\sqrt{2}$ is irrational
 note: Sort the cards into order to prove that $\sqrt{2}$ is irrational.
 
@@ -17,7 +18,7 @@ produceSolution: true
 # Default text size on cards
 textSize: 6
 # Card title
-cardTitle: CMEP - $\sqrt{2}$ is irrational
+cardTitle: CMEP -- $\sqrt{2}$ is irrational
 cardTitleSize: 2
 
 cards:

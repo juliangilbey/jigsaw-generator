@@ -1,5 +1,6 @@
 # A trial proofsort
 type: cardsort
+resource: E1_RT5_1
 title: $\sqrt{2}$ is irrational
 note: Sort the cards into order to prove the quadratic formula.
 # Use CMEP Markdown output
