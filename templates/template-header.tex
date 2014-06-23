@@ -27,11 +27,11 @@
 
 \usepackage[export]{adjustbox}
 
-\newcommand{\image}[1]{\includegraphics[max height=0.3\trad]{#1}}
+\newcommand{\image}[1]{\includegraphics[max height=0.3\trad, max width=0.8\sidelength]{#1}}
 % There might be a nicer way to do the following, but I haven't yet
 % found it.
 \newcommand{\imagecap}[2]{%
-  \savebox{\templateimagebox}{\includegraphics[max height=0.3\trad]{#1}}%
+  \savebox{\templateimagebox}{\includegraphics[max height=0.3\trad, max width=0.8\sidelength]{#1}}%
   \setlength{\templateimagewd}{\wd\templateimagebox}%
   \hbox to \templateimagewd{%
     \begin{minipage}{\templateimagewd}%
