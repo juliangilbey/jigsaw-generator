@@ -79,7 +79,7 @@
 
   \draw (topl) rectangle (botr);
   \node[text width=\cardtxtwd,align=flush center,\style] at
-     ($ (topl)!0.5!(botr) $) {\content};
+     ($ (topl)!0.5!(botr) $) {\content\par};
   \node[circle,draw,thin,inner sep=1pt]
      at ($ (topl)!0.5!(botl) + (\offset,0) $) {#3};
 
@@ -102,7 +102,7 @@
 
   \draw (topl) rectangle (botr);
   \node[text width=\cardtxtwd,align=flush center,\style] at
-     ($ (topl)!0.5!(botr) $) {\content};
+     ($ (topl)!0.5!(botr) $) {\content\par};
 
   \def\templabel{#5}
   \ifx\templabel\empty
@@ -113,6 +113,7 @@
   \fi
 }
 
+\setlength{\parindent}{0pt}
 
 %%% Local Variables: 
 %%% mode: latex
