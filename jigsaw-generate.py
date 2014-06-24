@@ -567,7 +567,7 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
        these will change the default label
     """
 
-    dosoln = layout['produceSolution']
+    dosoln = getopt(layout, data, {}, 'produceSolution', True)
     size = getopt(layout, data, {}, 'textSize', 5)
     defaultlabelsize = getopt(layout, data, {}, 'labelSize', max(size - 2,0))
     defaultlabel = data['label'] if 'label' in data else ''
@@ -1053,6 +1053,7 @@ def generate_cardsort(data, options, layout):
     # to produce.
 
     puzbase = options['puzbase']
+    dosoln = getopt(layout, data, {}, 'produceSolution', True)
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
     if bodypuzfile:
@@ -1071,7 +1072,7 @@ def generate_cardsort(data, options, layout):
     else:
         puzzletex = False
 
-    if layout['produceSolution']:
+    if dosoln:
         bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
         if bodysolfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
@@ -1127,7 +1128,7 @@ def generate_cardsort(data, options, layout):
     else:
         puzzlemd = False
 
-    if layout['produceSolution']:
+    if dosoln:
         bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
         if bodysolmdfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
@@ -1220,7 +1221,7 @@ def generate_cardsort(data, options, layout):
         else:
             sys.exit('TeX puzzle template does not have required structure')
 
-        if layout['produceSolution']:
+        if dosoln:
             templatematch = re.search('^%%% BEGIN DOCUMENT.*?^(.*?)'
                                       '^%%% BEGIN PAGE.*?^(.*?)'
                                       '^%%% BEGIN ITEM.*?^(.*?)'
@@ -1250,7 +1251,7 @@ def generate_cardsort(data, options, layout):
             sys.exit('Markdown puzzle template does not have '
                      'required structure')
 
-        if layout['produceSolution']:
+        if dosoln:
             templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
                                         '^### BEGIN ITEM.*?$(.*?)'
                                         '^### END DOCUMENT.*?$(.*?)',
@@ -1379,7 +1380,7 @@ def generate_cardsort(data, options, layout):
 
     dsubs['puzbody'] = dosub(dsubs['puzbody'], dsubs)
     dsubsmd['puzbody'] = dosub(dsubsmd['puzbody'], dsubsmd)
-    if layout['produceSolution']:
+    if dosoln:
         dsubs['solbody'] = dosub(dsubs['solbody'], dsubs)
         dsubsmd['solbody'] = dosub(dsubsmd['solbody'], dsubsmd)
 

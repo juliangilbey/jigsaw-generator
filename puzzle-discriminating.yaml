@@ -1,0 +1,35 @@
+# A trial proofsort
+type: cardsort
+resource: E1_RT7_3
+title: Discriminating
+note: 'ALWAYS, SOMETIMES or NEVER true: $ax^2+bx+c=0$'
+
+# puzzle size
+rows: 6
+columns: 1
+# Do we shuffle the order of the cards from the order given when
+# producing the problem?  Say "true" for a proof sorting activity.
+# It probably does not make sense to say "false" here but still to
+# produce a solution.
+shuffleCards: false
+# Does this puzzle require production of a solution?  If so, the cards
+# must be given in the correct order initially.
+produceSolution: false
+# Default text size on cards
+textSize: 6
+# Card title
+cardTitle: CMEP - Discriminating
+
+cards:
+  - If $a < 0$, then the equation has no real roots.
+  - If $b^2 - 4ac = 0$, then the equation has one repeated real root.
+  - If the equation has no real roots, then the equation $ax^2 + bx - c = 0$ has two distinct real roots.
+  - If $\frac{b^2}{a} < 4c$, then the equation has two distinct real roots.
+  - If $b = 0$, then the equation has one repeated real root.
+  - The equation has three real roots.
+  - If $c = 0$, then the equation has no real roots.
+  - The equation has the same number of real roots as $ax^2 - bx + c = 0$.
+  - If the equation has two distinct real roots, then $ac < \frac{b^2}{4}$.
+  - If $c > 0$, then the equation has two repeated real roots.
+  - The equation has the same number of real roots as the equation $cx^2 + bx + a = 0$.
+  - If the equation has no real roots, then the equation $-ax^2 - bx - c = 0$ has two distinct real roots.
