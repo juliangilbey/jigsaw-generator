@@ -606,7 +606,7 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
 
     num_cards = len(realcards)
     cardorder = list(range(num_cards))
-    if layout['shuffleCards']:
+    if getopt(layout, data, {}, 'shuffleCards', False):
         random.shuffle(cardorder)
     invcardorder = {j: i for (i, j) in enumerate(cardorder)}
 
