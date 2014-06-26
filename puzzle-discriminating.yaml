@@ -30,6 +30,6 @@ cards:
   - If $c = 0$, then the equation has no real roots.
   - The equation has the same number of real roots as $ax^2 - bx + c = 0$.
   - If the equation has two distinct real roots, then $ac < \frac{b^2}{4}$.
-  - If $c > 0$, then the equation has two repeated real roots.
+  - If $c > 0$, then the equation has two distinct real roots.
   - The equation has the same number of real roots as the equation $cx^2 + bx + a = 0$.
   - If the equation has no real roots, then the equation $-ax^2 - bx - c = 0$ has two distinct real roots.
