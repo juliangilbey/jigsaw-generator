@@ -15,6 +15,7 @@ import re
 import argparse
 import subprocess
 
+import yaml
 from yaml import load, dump
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
