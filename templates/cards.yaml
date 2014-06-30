@@ -4,7 +4,7 @@ type: cards
 typename: unsorted cards
 
 puzzleHeaderTeX: template-cardsort-header.tex
-puzzleTemplateTeX: template-cardsort-puzzle-unnumbered.tex
+puzzleTemplateTeX: template-cardsort-puzzle.tex
 tableHeaderTeX: template-cardsort-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
@@ -25,6 +25,8 @@ shuffleCards: false
 # Does this puzzle require production of a solution?  If so, the cards
 # must be given in the correct order initially.
 produceSolution: false
+# Do we number the cards?
+numberCards: true
 # Default text size on cards
 textSize: 5
 # Default label size on cards

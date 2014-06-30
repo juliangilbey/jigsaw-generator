@@ -277,7 +277,10 @@ def make_entry_label(entry, style, defaultlabel, defaultlabelsize):
     if style == 'table':
         return img2tex(labeltext)
     elif style == 'tikz':
-        return '%s %s' % (sizes[labelsize], img2tex(labeltext))
+        if labeltext:
+            return '%s %s' % (sizes[labelsize], img2tex(labeltext))
+        else:
+            return ''
     elif style == 'md':
         return labeltext
 
@@ -569,6 +572,7 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
     """
 
     dosoln = getopt(layout, data, {}, 'produceSolution', True)
+    numbering_cards = getopt(layout, data, {}, 'numberCards', True)
     size = getopt(layout, data, {}, 'textSize', 5)
     defaultlabelsize = getopt(layout, data, {}, 'labelSize', max(size - 2,0))
     defaultlabel = data['label'] if 'label' in data else ''
@@ -640,11 +644,15 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
 
         row = (pagecards % (rows * columns)) // columns + 1
         col = pagecards % columns + 1
-        puzsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': '%s %s' % (sizes[max(size-3, 0)], i + 1) }
-        solsubs = { 'rownum': row, 'colnum': col,
-                    'cardnum': '%s %s' % (sizes[max(size-3, 0)],
-                                          invcardorder[i] + 1) }
+        puzsubs = { 'rownum': row, 'colnum': col }
+        solsubs = { 'rownum': row, 'colnum': col }
+        if numbering_cards:
+            puzsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)], i + 1)
+            solsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)],
+                                            invcardorder[i] + 1)
+        else:
+            puzsubs['cardnum'] = ''
+            solsubs['cardnum'] = ''
         puzsubsmd = dict(puzsubs)
         solsubsmd = dict(solsubs)
 

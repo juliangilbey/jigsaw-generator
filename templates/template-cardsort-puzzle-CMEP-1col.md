@@ -1,10 +1,10 @@
 ### BEGIN DOCUMENT
 <: puzzlenote :>
 
-<div class="cards-1col">
+<div class="cards-single">
 ### BEGIN ITEM
 <div class="card2up">
-<: text :>
+  <: text :>
 </div>
 ### END DOCUMENT
 </div>

@@ -4,9 +4,9 @@ type: cardsort
 typename: card sort
 
 puzzleHeaderTeX: template-cardsort-header.tex
-puzzleTemplateTeX: template-cardsort-puzzle-numbered.tex
+puzzleTemplateTeX: template-cardsort-puzzle.tex
 solutionHeaderTeX: template-cardsort-header.tex
-solutionTemplateTeX: template-cardsort-solution-numbered.tex
+solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
@@ -29,6 +29,8 @@ shuffleCards: true
 # Does this puzzle require production of a solution?  If so, the cards
 # must be given in the correct order initially.
 produceSolution: true
+# Do we number the cards?
+numberCards: true
 # Default text size on cards
 textSize: 5
 # Default label size on cards
