@@ -22,7 +22,7 @@ textSize: 7
 cardTitle: CMEP - Trig countdown
 
 # Use CMEP Markdown output
-puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-3col.md
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP.md
 
 cards:
   - newlabel: Function Card
