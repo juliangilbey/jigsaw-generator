@@ -30,8 +30,8 @@
 
 \newsavebox\templateimagebox
 \newdimen\templateimagewd
-\newif\iftesting  % say \testingtrue to have \numberedcard etc. use
-                  % simple parameters like {Q1} instead of {{regular}{Q1}}
+\newif\iftesting  % say \testingtrue to have \card use simple
+                  % parameters like {Q1} instead of {{regular}{Q1}}
 
 \usepackage[export]{adjustbox}
 
@@ -94,6 +94,51 @@
   \fi
   \ifx\cardtitle\empty
   \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
+}
+
+% Domino number #3 appears on row #1 column #2 with left content #4,
+% right content #5, left label #6, right label #7
+% If card number is empty, don't draw circle around number
+% Top left is (0,0) in our drawing
+\newcommand{\domino}[7]{%
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
+  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (botl) at (topl |- botr);
+  \coordinate (topr) at (topl -| botr);
+  \coordinate (topm) at ($ (topl)!0.5!(topr) $);
+  \coordinate (botm) at ($ (botl)!0.5!(botr) $);
+
+  \makestyles\stylea\contenta{#4}
+  \makestyles\styleb\contentb{#5}
+
+  \draw (topl) rectangle (botr);
+  \draw [divider] (topm) -- (botm);
+
+  \node[text width=\cardtxtwd,align=flush center,\stylea] at
+     ($ (topl)!0.5!(botm) $) {\contenta\par};
+  \node[text width=\cardtxtwd,align=flush center,\styleb] at
+     ($ (topm)!0.5!(botr) $) {\contentb\par};
+  \def\templabel{#3}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt,fill=white]
+      at ($ (topl)!0.5!(botr) $) {#3};
+  \fi
+
+  \def\templabel{#6}
+  \ifx\templabel\empty
+  \else \node at ($ (botl)!0.5!(botm) + (0,\offset) $) {\templabel};
+  \fi
+
+  \def\templabel{#7}
+  \ifx\templabel\empty
+  \else \node at ($ (botm)!0.5!(botr) + (0,\offset) $) {\templabel};
+  \fi
+
+  \ifx\cardtitle\empty
+  \else
+    \node[fill=white] at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
   \fi
 }
 
