@@ -3,17 +3,18 @@
 %%% BEGIN DOCUMENT
 
 \chead{\begin{minipage}{\textwidth}
-  \centering \textbf{<: title :>}\\[\smallskipamount]
-  \ <: puzzlenote :>\ \\[\smallskipamount]
+  \centering \textbf{<: title :> (SOLUTION)}\\[\smallskipamount]
+  \ <: hiddennotesolution :>\ \\[\smallskipamount]
   \small(Page \thepage\ of \pageref{LastPage})\end{minipage}}
 
 \setlength\cardwd{\textwidth - 6pt}
 \setlength\cardwd{\cardwd / <: columns :>}
 \setlength\cardht{\textheight - 6pt}
 \setlength\cardht{\cardht / <: rows :>}
-\setlength\cardtxtwd{4\cardwd/5} % text = 80% of card width
+\setlength\cardtxtwd{2\cardwd/5} % each text = 40% of card width
 
 \tikzset{every picture/.style={line width=3pt}}
+\tikzset{divider/.style={line width=1pt}}
 
 \def\cardtitle{<: cardtitle :>}
 
@@ -22,7 +23,8 @@
 %%% BEGIN PAGE
   \begin{tikzpicture}
 %%% BEGIN ITEM
-\card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: text :>}{<: label :>}
+\domino{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: textL :>}{<: textR :>}
+  {<: labelL :>}{<: labelR :>}
 %%% END PAGE
   \end{tikzpicture}
   \newpage
