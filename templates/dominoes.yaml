@@ -1,0 +1,40 @@
+# Template file for generic card sort activity
+category: cardsort
+type: dominoes
+typename: dominoes
+
+puzzleHeaderTeX: template-cardsort-header.tex
+puzzleTemplateTeX: template-domino-puzzle.tex
+solutionHeaderTeX: template-cardsort-header.tex
+solutionTemplateTeX: template-domino-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-domino-table.tex
+puzzleHeaderMarkdown: template-header.md
+puzzleTemplateMarkdown: template-domino-puzzle.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-domino-solution.md
+
+# We accept an arbitrary number of cards
+cards: 0
+
+# size of puzzle should be specified in the puzzle file - we just give
+# a fallback here
+rows: 6
+columns: 2
+# Do we shuffle the order of the pairs from the order given when
+# producing the problem?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
+flip: true
+# Do we have "start" and "finish" cards?
+sentinel: true
+# And if we do, how will they be labelled?
+start: Start
+finish: Finish
+# Do we number the cards?
+numberCards: true
+# Default text size on cards (including sentinel cards, if any)
+textSize: 5
+# Default label size on cards
+labelSize: 3
