@@ -1,5 +1,5 @@
 # Template file for generic card sort activity
-category: cardsort
+category: dominoes
 type: dominoes
 typename: dominoes
 
@@ -14,8 +14,8 @@ puzzleTemplateMarkdown: template-domino-puzzle.md
 solutionHeaderMarkdown: template-header.md
 solutionTemplateMarkdown: template-domino-solution.md
 
-# We accept an arbitrary number of cards
-cards: 0
+# We accept an arbitrary number of pairs
+pairs: 0
 
 # size of puzzle should be specified in the puzzle file - we just give
 # a fallback here
@@ -27,8 +27,9 @@ shufflePairs: false
 # Do we randomly flip (swap) individual questions and answers (the
 # contents of the pairs) on the jigsaw?
 flip: true
-# Do we have "start" and "finish" cards?
-sentinel: true
+# Do we have "start" and "finish" cards (loop: false) or do the cards
+# go in a complete loop (loop: true)?
+loop: false
 # And if we do, how will they be labelled?
 start: Start
 finish: Finish
@@ -36,5 +37,3 @@ finish: Finish
 numberCards: true
 # Default text size on cards (including sentinel cards, if any)
 textSize: 5
-# Default label size on cards
-labelSize: 3

@@ -98,9 +98,9 @@ def opentemplate(name):
     return f
 
 def check_special(c):
-    """Check whether a card is special
+    """Check whether a card or domino is special
 
-    Special cards currently recognised are:
+    Special entries currently recognised are:
 
     "- newpage: true"
        this produces a new page in the PDF cards output, but nothing
@@ -109,16 +109,16 @@ def check_special(c):
     "- newlabelsize: num"
        these will change the default label
 
-    The function returns either None if the card is not special, or a
-    dict with entries (t, cont) where t is the type of special card
+    The function returns either None if the entry is not special, or a
+    dict with entries (t, cont) where t is the type of special entry
     ('newpage', 'label' or 'labelsize') and cont is the related
     content.
 
-    Multiple entries in one card are therefore permitted, but 'text'
-    is not permitted in such a card.
+    Multiple entries in one card/domino are therefore permitted, but
+    'text' is not permitted in such a card, and neither is domino data.
 
     This function also performs some basic checks to ensure that the
-    card entries are well-formed.
+    card or domino entries are well-formed.
     """
 
     if isinstance(c, dict):
@@ -126,15 +126,15 @@ def check_special(c):
         if 'newpage' in c:
             special = True
             if c['newpage'] != True:
-                print('Invalid value for newpage card, only newpage: True '
-                      'permitted\nCard value: %s' % c['newpage'],
+                print('Invalid value for newpage, only newpage: True '
+                      'permitted\nCard/Domino value: %s' % c['newpage'],
                       file=sys.stderr)
-            c['newpage'] = True
+                c['newpage'] = True
         if 'newlabel' in c:
             special = True
             if not isinstance(c['newlabel'], str):
-                print('Invalid value for newlabel card: it must be a string.\n'
-                      'Card value: %s' % c['newlabel'],
+                print('Invalid value for newlabel entry: it must be a string.\n'
+                      'Entry value: %s' % c['newlabel'],
                       file=sys.stderr)
                 del c['newlabel']
         if 'newlabelsize' in c:
@@ -554,7 +554,8 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     #            (i, card[0], card[1], card[2], card[3], card[4]))
 
 
-def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
+def make_cardsort_cards(data, layout, options,
+                        cards, puztemplate, soltemplate,
                         puztemplatemd, soltemplatemd, dsubs, dsubsmd):
     """Handle card sorting cards, making the content for puzzle and solution
 
@@ -701,6 +702,184 @@ def make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
         dsubs['solbody'] = solbody
         dsubsmd['solbody'] = solbodymd
 
+def make_domino_cards(data, layout, options,
+                      pairs, puztemplate, soltemplate,
+                      puztemplatemd, soltemplatemd, dsubs, dsubsmd):
+    """Handle domino cards, making the content for puzzle and solution
+
+    This is very similar to the make_cardsort_cards function.
+
+    The body content is returned via the dictionaries as dsubs['puzbody'],
+    dsubs['solbody'] and similarly for dsubsmd.
+    """
+
+    numbering_cards = getopt(layout, data, {}, 'numberCards', True)
+    size = getopt(layout, data, {}, 'textSize', 5)
+    # We don't use labels for dominoes, but the next two lines do no
+    # harm, and a labelsize is used to calculate the titlesize a few
+    # lines further on
+    defaultlabelsize = getopt(layout, data, {}, 'labelSize', max(size - 2,0))
+    defaultlabel = data['label'] if 'label' in data else ''
+    cardtitle = data['cardTitle'] if 'cardTitle' in data else ''
+    if 'cardTitle' in data:
+        if 'cardTitleSize' in data:
+            titlesize = data['cardTitleSize']
+        else:
+            titlesize = max(defaultlabelsize - 1, 0)
+        dsubs['cardtitle'] = '%s %s' % (sizes[titlesize], data['cardTitle'])
+    else:
+        dsubs['cardtitle'] = ''
+    dsubsmd['cardtitle'] = data['cardTitle'] if 'cardTitle' in data else ''
+
+    rows = getopt(layout, data, {}, 'rows')
+    columns = getopt(layout, data, {}, 'columns')
+    dsubs['rows'] = rows
+    dsubsmd['rows'] = rows
+    dsubs['columns'] = columns
+    dsubsmd['columns'] = columns
+
+    loop = getopt(layout, data, options, 'loop', True)
+    start = getopt(layout, data, options, 'start', 'Start')
+    finish = getopt(layout, data, options, 'finish', 'Finish')
+
+    # We temporarily append a terminal pair if we're not looping
+    if not loop:
+        pairs.append([finish, start])
+
+    # We do a presift of the domino pairs to identify the real pairs
+    # as opposed to the special ones.  It would be more efficient to
+    # only read through the dominoes once, but that would make the code
+    # more complex than needed, and this part of the code is fairly
+    # fast anyway.
+
+    # At present, there should not be any special domino pairs, but we
+    # leave this code (based on make_cardsort_cards) in case we later
+    # decide to allow this.
+
+    # When we are done, realpairs will contain the indices of all real
+    # pairs in the pairs list.
+    realpairs = []
+    for (i, p) in enumerate(pairs):
+        if check_special(p):
+            continue
+        else:
+            realpairs.append(i)
+
+    num_pairs = len(realpairs)
+    cardorder = list(range(num_pairs))
+    # In dominoes, we must shuffle the printing order!
+    random.shuffle(cardorder)
+    invcardorder = {j: i for (i, j) in enumerate(cardorder)}
+
+    # This is how the cards will be laid out (where n=num_pairs-1,
+    # where num_pairs is the number of pairs if loop == True and one
+    # more than this if loop == False (to take account of Start/Finish
+    # pair, where Start=An, Finish=Qn); note that our Q and A counting
+    # starts at 0:
+    # 
+    # Solution cards:
+    # solution card 0: An - Q0
+    # solution card 1: A0 - Q1
+    # ...
+    # solution card n-1: A(n-2) - Q(n-1)
+    # solution card n: A(n-1) - Qn
+
+    puzbody = puztemplate['begin_document']
+    puzbodymd = puztemplatemd['begin_document']
+    solbody = soltemplate['begin_document']
+    solbodymd = soltemplatemd['begin_document']
+
+    # We will put solution card i in puzzle position cardorder[i].
+    i = 0 
+    for p in pairs:
+        s = check_special(p)
+        if s:
+            print('Special cards are not accepted for dominoes',
+                  file=sys.stderr)
+            continue
+            # the following will never be executed, but it remains in
+            # case we decide to resurrect this behaviour
+            if 'newlabel' in p:
+                defaultlabel = p['newlabel']
+            if 'newlabelsize' in p:
+                defaultlabelsize = p['newlabelsize']
+            if 'newpage' in p:
+                # this does not make sense for dominoes
+                print('newpage makes no sense for dominoes! Ignoring.',
+                      file=sys.stderr)
+            continue
+
+        row = (i % (rows * columns)) // columns + 1
+        col = i % columns + 1
+        puzsubs = { 'rownum': row, 'colnum': col }
+        solsubs = { 'rownum': row, 'colnum': col }
+        if numbering_cards:
+            puzsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)], i + 1)
+            solsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)],
+                                            invcardorder[i] + 1)
+        else:
+            puzsubs['cardnum'] = ''
+            solsubs['cardnum'] = ''
+        puzsubsmd = dict(puzsubs)
+        solsubsmd = dict(solsubs)
+
+        if i % (rows * columns) == 0:
+            if i > 0:
+                puzbody += puztemplate['end_page']
+                solbody += soltemplate['end_page']
+            puzbody += puztemplate['begin_page']
+            solbody += soltemplate['begin_page']
+        
+        # on ith solution card, textL = A(l-1), textR = Q(l)
+        puzi = cardorder[i]
+        puzi1 = (cardorder[i] - 1 + num_pairs) % num_pairs
+        soli = i
+        soli1 = (i - 1 + num_pairs) % num_pairs
+
+        puzsubs['textL'], puzsubs['labelL'] = make_entry(
+            pairs[realpairs[puzi1]][1], size, 'hide', 'tikz',
+            defaultlabel, defaultlabelsize)
+        puzsubs['textR'], puzsubs['labelR'] = make_entry(
+            pairs[realpairs[puzi]][0], size, 'hide', 'tikz',
+            defaultlabel, defaultlabelsize)
+        puzbody += dosub(puztemplate['item'], puzsubs)
+        puzsubsmd['textL'], puzsubsmd['labelL'] = make_entry(
+            pairs[realpairs[puzi1]][1], 0, 'hide', 'md', defaultlabel)
+        puzsubsmd['textR'], puzsubsmd['labelR'] = make_entry(
+            pairs[realpairs[puzi]][0], 0, 'hide', 'md', defaultlabel)
+        puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
+        solsubs['textL'], solsubs['labelL'] = make_entry(
+            pairs[realpairs[soli1]][1], size, 'mark', 'tikz',
+            defaultlabel, defaultlabelsize)
+        solsubs['textR'], solsubs['labelR'] = make_entry(
+            pairs[realpairs[soli]][0], size, 'mark', 'tikz',
+            defaultlabel, defaultlabelsize)
+        solbody += dosub(soltemplate['item'], solsubs)
+        solsubsmd['textL'], solsubsmd['labelL'] = make_entry(
+            pairs[realpairs[soli1]][1], 0, 'mark', 'md', defaultlabel)
+        solsubsmd['textR'], solsubsmd['labelR'] = make_entry(
+            pairs[realpairs[soli]][0], 0, 'mark', 'md', defaultlabel)
+        solbodymd += dosub(soltemplatemd['item'], solsubsmd)
+
+        i += 1
+
+    puzbody += puztemplate['end_page']
+    solbody += soltemplate['end_page']
+
+    puzbody += puztemplate['end_document']
+    puzbodymd += puztemplatemd['end_document']
+    solbody += soltemplate['end_document']
+    solbodymd += soltemplatemd['end_document']
+
+    dsubs['puzbody'] = puzbody
+    dsubsmd['puzbody'] = puzbodymd
+    dsubs['solbody'] = solbody
+    dsubsmd['solbody'] = solbodymd
+
+    if not loop:
+        # We remove the temporarily appended terminal pair
+        pairs.pop()
+
 
 rerun_regex = re.compile(b'rerun ', re.I)
 
@@ -806,7 +985,8 @@ def generate(data, options):
     try:
         generator = {
             'jigsaw': generate_jigsaw,
-            'cardsort': generate_cardsort
+            'cardsort': generate_cardsort,
+            'dominoes': generate_cardsort
             }[category]
     except KeyError:
         sys.exit('Unrecognised category in %s layout file: %s' %
@@ -1055,14 +1235,18 @@ def generate_jigsaw(data, options, layout):
         outsolmd.close()
 
 def generate_cardsort(data, options, layout):
-    """Generate cards for a cardsort activity"""
-    
+    """Generate cards for a cardsort or domino activity"""
+
     # ***FIXME*** The output filenames should be specifiable on the
     # command line.  Also, there should be options for which outputs
     # to produce.
 
     puzbase = options['puzbase']
-    dosoln = getopt(layout, data, {}, 'produceSolution', True)
+    category = layout['category']
+    if category == 'cardsort':
+        dosoln = getopt(layout, data, {}, 'produceSolution', True)
+    else:
+        dosoln = True
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
     if bodypuzfile:
@@ -1158,12 +1342,12 @@ def generate_cardsort(data, options, layout):
     else:
         solutionmd = False
 
-    # Templates for card sorts are a little more complex, as the TeX
-    # version needs explicit blocks for start of document, start of
-    # page, end of page and end of document.  The Markdown version
-    # likewise has a template for each item, so that styling needs -
-    # for example, that each card should live inside a <div> or <span>
-    # element - can be handled.
+    # Templates for card sorts are a little more complex than for
+    # jigsaws, as the TeX version needs explicit blocks for start of
+    # document, start of page, end of page and end of document.  The
+    # Markdown version likewise has a template for each item, so that
+    # styling needs - for example, that each card should live inside a
+    # <div> or <span> element - can be handled.
 
     # So the TeX template must have the form:
     # %%% BEGIN DOCUMENT
@@ -1190,8 +1374,8 @@ def generate_cardsort(data, options, layout):
     # line, and anything trailing content following the 'BEGIN
     # DOCUMENT' etc. will be ignored.
 
-    # The "item" section would normally consist of the single line
-    # something like:
+    # The "item" section for card sorts would normally consist of the
+    # single line something like:
     # 
     # \card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: text :>}{<: label :>}
 
@@ -1201,6 +1385,11 @@ def generate_cardsort(data, options, layout):
     # jigsaw), and \card is an appropriate TeX command which typesets
     # the requested card.  The Markdown "item" section is likewise
     # substituted with these variables.
+
+    # For dominoes, essentially the same is true, except that the
+    # macro has 7 arguments, the last four being textL, textR, labelL,
+    # labelR, being the text for the left and right halves of the
+    # domino and the labels for the same.
 
     # The cards will be produced from top (row 1) to bottom (row n)
     # and in each row from left (column 1) to right (column m).  After
@@ -1369,11 +1558,13 @@ def generate_cardsort(data, options, layout):
         make_table(pairs, edges, cards, dsubs, dsubsmd)
 
     if layout['category'] == 'cardsort':
-        make_cardsort_cards(data, layout, cards, puztemplate, soltemplate,
+        make_cardsort_cards(data, layout, options,
+                            cards, puztemplate, soltemplate,
                             puztemplatemd, soltemplatemd, dsubs, dsubsmd)
     else:
-        ### ***FIXME***
-        sys.exit('Haven\'t yet implemented dominoes')
+        make_domino_cards(data, layout, options,
+                          flippedpairs, puztemplate, soltemplate,
+                          puztemplatemd, soltemplatemd, dsubs, dsubsmd)
 
     if exists_hidden:
         dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'

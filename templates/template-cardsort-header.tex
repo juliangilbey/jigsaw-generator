@@ -98,10 +98,10 @@
 }
 
 % Domino number #3 appears on row #1 column #2 with left content #4,
-% right content #5, left label #6, right label #7
+% right content #5
 % If card number is empty, don't draw circle around number
 % Top left is (0,0) in our drawing
-\newcommand{\domino}[7]{%
+\newcommand{\domino}[5]{%
   \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
   \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
   \coordinate (botl) at (topl |- botr);
@@ -124,16 +124,6 @@
   \else
     \node[circle,draw,thin,inner sep=1pt,fill=white]
       at ($ (topl)!0.5!(botr) $) {#3};
-  \fi
-
-  \def\templabel{#6}
-  \ifx\templabel\empty
-  \else \node at ($ (botl)!0.5!(botm) + (0,\offset) $) {\templabel};
-  \fi
-
-  \def\templabel{#7}
-  \ifx\templabel\empty
-  \else \node at ($ (botm)!0.5!(botr) + (0,\offset) $) {\templabel};
   \fi
 
   \ifx\cardtitle\empty

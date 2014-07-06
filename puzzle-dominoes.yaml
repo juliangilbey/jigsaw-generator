@@ -1,0 +1,41 @@
+# A trial domino activity
+type: dominoes
+title: A trial domino puzzle
+note: This is a silly example of a puzzle
+
+# puzzle size
+rows: 5
+columns: 2
+# Do we shuffle the order of the pairs from the order given when
+# producing the problem?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
+flip: true
+# Do we have "start" and "finish" cards (loop: false) or do the cards
+# go in a complete loop (loop: true)?
+loop: true
+# Do we number the cards?
+numberCards: true
+# Default text size on cards (including sentinel cards, if any)
+textSize: 5
+# Card title
+cardTitle: My dominoes
+
+pairs:
+    - [Q1, A1]
+    - [Q2, A2]
+    - [Q3, A3]
+    - [Q4, A4]
+    - [Q5, A5]
+    - [Q6, A6]
+    - [Q7, A7]
+    - [Q8, A8]
+    - [Q9, A9]
+    - [Q10, A10]
+    - [Q11, A11]
+    - [Q12, A12]
+    - [Q13, A13]
+    - [Q14, A14]
+    - [Q15, A15]
+    - [Q16, A16]
