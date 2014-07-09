@@ -11,6 +11,7 @@ under certain conditions; see the LICENSE file for details.
 import random
 import sys
 import os
+import os.path
 import re
 import argparse
 import subprocess
@@ -26,6 +27,10 @@ except ImportError:
 
 # Utility functions and global definitions.  These might get moved out
 # to separate modules for clarity at some point in the near future.
+
+# Template directory
+# This may change once we figure out how to do so ;-)
+templatedir = '/usr/share/jigsaw'
 
 # LaTeX font sizes
 sizes = [r'\tiny',
@@ -84,8 +89,11 @@ def opentemplate(name):
     try:
         f = open(name)
     except:
-        # try:
-        f = open('templates/' + name)
+        try:
+            f = open('templates/' + name)
+        except:
+            f = open(os.path.join(templatedir, name))
+
         ### ***FIXME*** Once I know how to write new exceptions, use
         ### that here so that I can throw a catchable exception should
         ### I wish to.  For the time being, each calling function will
