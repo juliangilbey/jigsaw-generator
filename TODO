@@ -6,4 +6,11 @@
 * Change "sys.exit" in generate-jigsaw.py to exception-throwing -
    this will be needed for when we have a GUI, and it's also more pythonic
 
-* Handle longer text entries by automatically wrapping
+* Handle longer text entries by automatically wrapping for jigsaws,
+   perhaps
+
+* Allow for alternate text for puzzle and solution, eg syntax could be:
+    "- puzzletext: (fill me in!)
+       puzzlesize: +1
+       solutiontext: answer
+       solutionsize: +1"
