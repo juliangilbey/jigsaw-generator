@@ -260,14 +260,14 @@ def make_entry_util(text, size, mark_hidden, style, blank):
         elif style == 'tikz':
             return '{hidden}{%s %s}' % (size, img2tex(text))
         elif style == 'md':
-            return ' (*) %s ' % text
+            return '(*) %s' % text
     else:
         if style == 'table':
             return img2tex(text)
         elif style == 'tikz':
             return '{regular}{%s %s}' % (size, img2tex(text))
         elif style == 'md':
-            return ' %s ' % (text if text else blank)
+            return '%s' % (text if text else blank)
 
 def make_entry_label(entry, style, defaultlabel, defaultlabelsize):
     if isinstance(entry, dict):
@@ -333,13 +333,13 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
              make_entry(p[1], normalsize, 'mark', 'table')[0]))
         row = '|'
         for entry in p:
-            row += make_entry(entry, 0, 'mark', 'md')[0] + '|'
+            row += ' ' + make_entry(entry, 0, 'mark', 'md')[0] + ' |'
         dsubsmd['pairs'] += row + '\n'
         
     for e in edges:
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
                                 make_entry(e, normalsize, 'mark', 'table')[0])
-        dsubsmd['edges'] += '|' + make_entry(e, 0, 'mark', 'md')[0] + '|\n'
+        dsubsmd['edges'] += '| ' + make_entry(e, 0, 'mark', 'md')[0] + ' |\n'
 
     # The next bit is only used for the PDF version of the table output,
     # so we don't make too much effort over label handling
@@ -445,7 +445,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
-            row += make_entry(entry, 0, 'hide', 'md')[0] + '|'
+            row += ' ' + make_entry(entry, 0, 'hide', 'md')[0] + ' |'
         dsubsmd['puzcards3'] += row + '\n'
         dsubsmd['puzcards4'] += row + ' &nbsp; |\n'
 
@@ -551,7 +551,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in squarepuzcard:
         row = '|'
         for entry in t[0:4]:
-            row += make_entry(entry, 0, 'hide', 'md')[0] + '|'
+            row += ' ' + make_entry(entry, 0, 'hide', 'md')[0] + ' |'
         dsubsmd['puzcards4'] += row + '\n'
 
     # Testing:
