@@ -162,7 +162,7 @@ def check_special(c):
         return None
 
 def make_entry(entry, defaultsize, hide, style,
-               defaultlabel='', defaultlabelsize=0):
+               defaultlabel='', defaultlabelsize=0, blank='(BLANK)'):
     """Convert a YAML entry into a LaTeX or Markdown formatted entry
 
     Returns the pair (text, label).
@@ -192,8 +192,10 @@ def make_entry(entry, defaultsize, hide, style,
                where {hidden} highlights the text
       "md":    outputs text for Markdown: highlighted hidden text will
                be prepended with "(*)"; blank text will be replaced by
-               "(BLANK)", and all entries will be surrounded on either
-               side by a blank space.  There is no size marker.
+               "(BLANK)" or the setting of the blank parameter, and
+               all entries will be surrounded on either side by a
+               blank space.  There is no size marker.
+
     """
 
     label = make_entry_label(entry, style, defaultlabel, defaultlabelsize)
@@ -204,7 +206,7 @@ def make_entry(entry, defaultsize, hide, style,
                   file=sys.stderr)
             for f in entry:
                 print('  %s: %s\n' % (f, entry[f]), file=sys.stderr)
-            return (make_entry_util('', '', False, style), label)
+            return (make_entry_util('', '', False, style, blank), label)
 
         if 'size' in entry:
             try:
@@ -226,25 +228,25 @@ def make_entry(entry, defaultsize, hide, style,
             global exists_hidden
             exists_hidden = True
             if hide == 'hide':
-                return (make_entry_util('', '', False, style), '')
+                return (make_entry_util('', '', False, style, blank), '')
             elif hide == 'mark':
                 return (make_entry_util(entry['text'], sizes[size],
-                                        True, style), label)
+                                        True, style, blank), label)
             elif hide == 'ignore':
                 return (make_entry_util(entry['text'], sizes[size],
-                                        False, style), label)
+                                        False, style, blank), label)
             else:
                 # this shouldn't happen
                 sys.exit('This should not happen: bad hide parameter')
         else:
             return (make_entry_util(entry['text'], sizes[size],
-                                    False, style), label)
+                                    False, style, blank), label)
 
     else:
-        return (make_entry_util(entry, sizes[defaultsize], False, style),
-                label)
+        return (make_entry_util(entry, sizes[defaultsize], False,
+                                style, blank), label)
 
-def make_entry_util(text, size, mark_hidden, style):
+def make_entry_util(text, size, mark_hidden, style, blank):
     """Create the output once the text, size, hide and style are determined
 
     This should be called with mark_hidden being True or False; hidden
@@ -265,7 +267,7 @@ def make_entry_util(text, size, mark_hidden, style):
         elif style == 'tikz':
             return '{regular}{%s %s}' % (size, img2tex(text))
         elif style == 'md':
-            return ' %s ' % (text if text else '(BLANK)')
+            return ' %s ' % (text if text else blank)
 
 def make_entry_label(entry, style, defaultlabel, defaultlabelsize):
     if isinstance(entry, dict):
@@ -679,7 +681,8 @@ def make_cardsort_cards(data, layout, options,
             defaultlabel, defaultlabelsize)
         puzbody += dosub(puztemplate['item'], puzsubs)
         puzsubsmd['text'], puzsubsmd['label'] = make_entry(
-            cards[realcards[cardorder[i]]], 0, 'hide', 'md', defaultlabel)
+            cards[realcards[cardorder[i]]], 0, 'hide', 'md', defaultlabel,
+            blank='&nbsp;')
         puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
         if dosoln:
             solsubs['text'], solsubs['label'] = make_entry(
@@ -687,7 +690,8 @@ def make_cardsort_cards(data, layout, options,
                 defaultlabel, defaultlabelsize)
             solbody += dosub(soltemplate['item'], solsubs)
             solsubsmd['text'], solsubsmd['label'] = make_entry(
-                cards[realcards[i]], 0, 'mark', 'md', defaultlabel)
+                cards[realcards[i]], 0, 'mark', 'md', defaultlabel,
+                blank='&nbsp;')
             solbodymd += dosub(soltemplatemd['item'], solsubsmd)
 
         i += 1
