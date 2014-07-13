@@ -54,7 +54,7 @@ triangleSolutionCards:
   - [A9, Q10, E7]
 
 triangleSolutionOrientation: [0, 180, 0, 180, 0, 0, 180, 0, 180, 0, 180,
-  0, 180, 0, 180, 0, 180, 0, 180, 0, 180, 0, 180, 0]
+  0, 180, 0, 180, 0, 180, 0, 180, 180, 0, 180, 0, 180]
 
 trianglePuzzleOrientation:
   - [90, -30]
