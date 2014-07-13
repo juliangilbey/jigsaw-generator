@@ -1,0 +1,67 @@
+# Template file for large triangle jigsaw
+category: jigsaw
+type: triangle
+typename: triangle
+
+puzzleHeaderTeX: template-header.tex
+puzzleTemplateTeX: template-triangle-puzzle.tex
+solutionHeaderTeX: template-header.tex
+solutionTemplateTeX: template-triangle-solution.tex
+tableHeaderTeX: template-header.tex
+tableTemplateTeX: template-table.tex
+puzzleHeaderMarkdown: template-header.md
+puzzleTemplateMarkdown: template-jigsaw-puzzle3.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-jigsaw-solution.md
+
+pairs: 18
+edges: 12
+# Do we shuffle the order of the pairs from the order given?
+shufflePairs: false
+# Do we randomly flip (swap) individual questions and answers (the
+# contents of the pairs) on the jigsaw?
+flip: true
+# Do we shuffle the order of the edges from the order given?
+shuffleEdges: false
+# Default text size on puzzle pieces
+puzzleTextSize: 5
+# Default text size on solution pieces
+solutionTextSize: 3
+triangleSolutionCards:
+  - [Q1, E12, E1]
+  - [A14, Q15, E2]
+  - [A1, A15, Q2]
+  - [Q3, E11, A2]
+  - [A12, Q13, E3]
+  - [Q14, A13, Q18]
+  - [Q17, A16, A18]
+  - [A3, Q16, Q4]
+  - [Q5, E10, A4]
+  - [E5, A11, E4]
+  - [Q12, Q11, A10]
+  - [E6, A9, Q10]
+  - [A17, Q9, A8]
+  - [E7, A7, Q8]
+  - [A5, Q7, Q6]
+  - [E8, E9, A6]
+
+triangleSolutionOrientation: [0, 0, 180, 0, 0, 180, 0, 180, 0,
+  0, 180, 0, 180, 0, 180, 0]
+
+trianglePuzzleOrientation:
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [270, 30]
+  - [90, -30]
+  - [270, 30]
+  - [90, -30]

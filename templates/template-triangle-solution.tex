@@ -1,0 +1,67 @@
+% \input template-header
+% \testingtrue
+\begin{document}
+
+\begin{center}
+  \textbf{<: title :>}
+
+  \medskip
+
+  \textbf{SOLUTION}
+
+  \medskip
+
+  <: hiddennotesolution :>
+
+  \bigskip
+
+  \setshapesize{4.2}
+  \begin{tikzpicture}[line width=3pt, rounded corners=1pt]
+  % Row 1
+  \uptriangle   {(0,2*\trad)}                     <: trisolcard1 :>
+    % {Q1}{E12}{E1}{1}{0}
+
+  % Row 2
+  \uptriangle   {(150:\trad)}                     <: trisolcard2 :>
+    % {A14}{Q15}{E2}{2}{0}
+  \downtriangle {(90:\trad)}                      <: trisolcard3 :>
+    % {A1}{A15}{Q2}{3}{180}
+  \uptriangle   {(30:\trad)}                      <: trisolcard4 :>
+    % {Q3}{E11}{A2}{4}{0}
+
+  % Row 3
+  \uptriangle   {(-\sidelength,0) + (-90:\trad)}  <: trisolcard5 :>
+    % {A12}{Q13}{E3}{5}{0}
+  \downtriangle {(-150:\trad)}                    <: trisolcard6 :>
+    % {Q14}{A13}{Q18}{6}{180}
+  \uptriangle   {(-90:\trad)}                     <: trisolcard7 :>
+    % {Q17}{A16}{A18}{7}{0}
+  \downtriangle {(-30:\trad)}                     <: trisolcard8 :>
+    % {A3}{Q16}{Q4}{8}{180}
+  \uptriangle   {(\sidelength,0) + (-90:\trad)}   <: trisolcard9 :>
+    % {Q5}{E10}{A4}{9}{0}
+
+  % Row 4
+  \uptriangle   {(-120:2\sidelength) + (150:\trad)} <: trisolcard10 :>
+    % {E5}{A11}{E4}{10}{0}
+  \downtriangle {(-120:\sidelength) + (-150:\trad)} <: trisolcard11 :>
+    % {Q12}{Q11}{A10}{11}{180}
+  \uptriangle   {(-120:\sidelength) + (-90:\trad)}  <: trisolcard12 :>
+    % {E6}{A9}{Q10}{12}{0}
+  \downtriangle {(0,-2*\trad)}                      <: trisolcard13 :>
+    % {A17}{Q9}{A8}{13}{180}
+  \uptriangle   {(-60:\sidelength) + (-90:\trad)}   <: trisolcard14 :>
+    % {E7}{A7}{Q8}{14}{0}
+  \downtriangle {(-60:\sidelength) + (-30:\trad)}   <: trisolcard15 :>
+    % {A5}{Q7}{Q6}{15}{180}
+  \uptriangle   {(-60:2\sidelength) + (30:\trad)}   <: trisolcard16 :>
+    % {E8}{E9}{A6}{16}{0}
+  \end{tikzpicture}
+\end{center}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
