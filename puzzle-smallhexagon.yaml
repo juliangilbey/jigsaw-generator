@@ -11,7 +11,9 @@ pairs:
     - [Q3, A3]
     - ['Q4: ![](goose.png)', A4]
     - [Q5, A5]
-    - [Q6, A6]
+    - - puzzletext: '?'
+        solutiontext: Q6
+      - A6
 edges:
     - E1
     - E2
