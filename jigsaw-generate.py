@@ -161,8 +161,9 @@ def check_special(c):
     else:
         return None
 
-def make_entry(entry, defaultsize, hide, style,
-               defaultlabel='', defaultlabelsize=0, blank='(BLANK)'):
+def make_entry(entry, defaultsize, style,
+               defaultlabel='', defaultlabelsize=0, blank='(BLANK)',
+               solution=False):
     """Convert a YAML entry into a LaTeX or Markdown formatted entry
 
     Returns the pair (text, label).
@@ -173,17 +174,43 @@ def make_entry(entry, defaultsize, hide, style,
 
     The YAML entry will either be a simple text entry, or it will be a
     dictionary with required key "text" and optional entries "size",
-    "hidden" and "label".
+    "hidden" and "label".  (The "text" key can optionally be replaced
+    by "puzzletext" and "solutiontext" keys; see below.)
 
     If there is a "size" key, this will be added to the defaultsize.
 
     If there is a "label" key, this will override the current default
     label; similarly for the "labelsize" key.
 
-    The "hide" parameter can be:
-      "hide": the text will be hidden if "hidden" is true
-      "mark": the text will be highlighted if "hidden" is true
-      "ignore": the "hidden" key will be ignored
+    An entry can also include keys which are specific for the puzzle
+    and solution:
+      "puzzletext", "puzzlesize": these are the equivalent of the
+        "text" and "size" keys for the puzzle
+      "solutiontext", "solutionsize": these are the equivalent of the
+        "text" and "size" keys for the solution
+
+    The "puzzletext" and "solutiontext" override the "text" key if
+    present, while the "puzzlesize" and "solutionsize" keys override
+    the "size" key if present.  The puzzle* keys are used by default,
+    unless solution=True, in which case the solution* keys are used.
+
+    This could be used, for example, to have "?" in the puzzle and the
+    correct solution in the solution.
+
+    If a solutiontext key is present, then "hidden" is regarded as
+    being true, unless hidden: false is explicitly specified.
+
+    If solution is False (the default, so we're creating the puzzle):
+      - if there is a "puzzletext" parameter, that will be used
+      - if not, then if "hidden" is true, the text will be hidden
+      - else, "text" will be used
+
+    If solution is True:
+      - if there is a "solutiontext" parameter, that will be used, and
+        the text will be highlighted unless "hidden" is explicitly
+        false
+      - if not, then "text" will be used; if "hidden" is true, the
+        text will be marked
 
     The "style" parameter can be:
       "table": outputs text with no size marker; highlighted hidden
@@ -195,56 +222,100 @@ def make_entry(entry, defaultsize, hide, style,
                "(BLANK)" or the setting of the blank parameter, and
                all entries will be surrounded on either side by a
                blank space.  There is no size marker.
-
     """
 
     label = make_entry_label(entry, style, defaultlabel, defaultlabelsize)
 
     if isinstance(entry, dict):
-        if 'text' not in entry:
-            print('No "text" field in entry in data file.  Rest of data is:\n',
-                  file=sys.stderr)
+        if 'text' not in entry and ('puzzletext' not in entry
+                                    or 'solutiontext' not in entry):
+            if 'puzzletext' in entry or 'solutiontext' in entry: 
+                print('Cannot have only one of "puzzletext" and "solutiontext"'
+                      'in an entry.\nRelevant entry is:\n',
+                      file=sys.stderr)
+            else:
+                print('No "text" field in entry in data file. '
+                      'Relevant entry is:\n',
+                      file=sys.stderr)
             for f in entry:
                 print('  %s: %s\n' % (f, entry[f]), file=sys.stderr)
             return (make_entry_util('', '', False, style, blank), label)
 
-        if 'size' in entry:
-            try:
-                size = defaultsize + int(entry['size'])
-                if size < 0:
-                    size = 0
-                if size >= len(sizes):
-                    size = len(sizes) - 1
-            except:
-                print('Unrecognised size entry for text %(text)s:\n'
-                      'size = %(size)s\n'
-                      'Defaulting to default size\n' %
-                      entry, file=sys.stderr)
-                size = defaultsize
-        else:
-            size = defaultsize
+        size = make_entry_size(entry, 'size', defaultsize, None,
+                               entry['text'] if 'text' in entry
+                               else entry['puzzletext'])
+
+        # if there is a solutiontext in the entry, this means that we
+        # regard 'hidden' as true, unless it is explicitly set to false
+        if 'solutiontext' in entry:
+            if 'hidden' not in entry:
+                entry['hidden'] = True
 
         if 'hidden' in entry and entry['hidden']:
             global exists_hidden
             exists_hidden = True
-            if hide == 'hide':
-                return (make_entry_util('', '', False, style, blank), '')
-            elif hide == 'mark':
+            hide = True
+        else:
+            hide = False
+
+        if solution: 
+            if 'solutiontext' in entry:
+                solnsize = make_entry_size(entry, 'solutionsize',
+                                           defaultsize, size,
+                                           entry['solutiontext'])
+                return (make_entry_util(entry['solutiontext'],
+                                        sizes[solnsize],
+                                        hide, style, blank), label)
+            else:
+                # We know by now that we have 'text' if we don't have
+                # 'solutiontext'
                 return (make_entry_util(entry['text'], sizes[size],
-                                        True, style, blank), label)
-            elif hide == 'ignore':
+                                        hide, style, blank), label)
+        else:
+            if 'puzzletext' in entry:
+                puzsize = make_entry_size(entry, 'puzzlesize',
+                                          defaultsize, size,
+                                          entry['puzzletext'])
+                return (make_entry_util(entry['puzzletext'],
+                                        sizes[puzsize],
+                                        False, style, blank), label)
+            elif hide:
+                return (make_entry_util('', '', False, style, blank), '')
+            else:
                 return (make_entry_util(entry['text'], sizes[size],
                                         False, style, blank), label)
-            else:
-                # this shouldn't happen
-                sys.exit('This should not happen: bad hide parameter')
-        else:
-            return (make_entry_util(entry['text'], sizes[size],
-                                    False, style, blank), label)
-
     else:
+        # just a plain entry, not a dict
         return (make_entry_util(entry, sizes[defaultsize], False,
                                 style, blank), label)
+
+def make_entry_size(entry, sizekey, defaultsize, entrysize, text):
+    """Return size corresponding to sizekey.
+
+    defaultsize is the global defaultsize for this puzzle.
+
+    The default if the sizekey is not found in entry or there is a
+    problem with it is entrysize if this is set or defaultsize
+    if not.
+
+    If there's an error, use text in the error message."""
+
+    if sizekey in entry:
+        try:
+            size = defaultsize + int(entry[sizekey])
+            if size < 0:
+                size = 0
+            if size >= len(sizes):
+                size = len(sizes) - 1
+        except:
+            print('Unrecognised size entry for text %s:\n'
+                  'size = %s\n'
+                  'Defaulting to default size\n' %
+                  (text, entry[sizekey]), file=sys.stderr)
+            size = entrysize if entrysize != None else defaultsize
+    else:
+        size = entrysize if entrysize != None else defaultsize
+    return size
 
 def make_entry_util(text, size, mark_hidden, style, blank):
     """Create the output once the text, size, hide and style are determined
@@ -329,17 +400,19 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
 
     for p in pairs:
         dsubs['tablepairs'] += ((r'%s&%s\\ \hline' '\n') %
-            (make_entry(p[0], normalsize, 'mark', 'table')[0],
-             make_entry(p[1], normalsize, 'mark', 'table')[0]))
+            (make_entry(p[0], normalsize, 'table', solution=True)[0],
+             make_entry(p[1], normalsize, 'table', solution=True)[0]))
         row = '|'
         for entry in p:
-            row += ' ' + make_entry(entry, 0, 'mark', 'md')[0] + ' |'
+            row += ' ' + make_entry(entry, 0, 'md', solution=True)[0] + ' |'
         dsubsmd['pairs'] += row + '\n'
         
     for e in edges:
         dsubs['tableedges'] += ((r'\strut %s\\ \hline' '\n') %
-                                make_entry(e, normalsize, 'mark', 'table')[0])
-        dsubsmd['edges'] += '| ' + make_entry(e, 0, 'mark', 'md')[0] + ' |\n'
+                                make_entry(e, normalsize, 'table',
+                                           solution=True)[0])
+        dsubsmd['edges'] += ('| ' + make_entry(e, 0, 'md', solution=True)[0] +
+                             ' |\n')
 
     # The next bit is only used for the PDF version of the table output,
     # so we don't make too much effort over label handling
@@ -350,11 +423,11 @@ def make_table(pairs, edges, cards, dsubs, dsubsmd):
             if 'newlabel' in c:
                 defaultlabel = c['newlabel']
             continue
-        cont, label = make_entry(c, normalsize, 'mark', 'table',
-                                 defaultlabel, normalsize)
+        cont, label = make_entry(c, normalsize, 'table',
+                                 defaultlabel, normalsize, solution=True)
         dsubs['tablecards'] += ((r'%s%s\\ \hline' '\n') %
                                 (('[' + label + '] ' if label else ''), cont))
-        cont, label = make_entry(c, 0, 'mark', 'md', defaultlabel)
+        cont, label = make_entry(c, 0, 'md', defaultlabel, solution=True)
         dsubsmd['cards'] += ('| %s%s |\n' %
                              (('[' + label + '] ' if label else ''), cont))
 
@@ -422,15 +495,15 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
         solcard.extend([cardnum(j + 1), (angle + 180) % 360 - 180])
 
         dsubs['trisolcard' + str(i + 1)] = (('{%s}' * 5) %
-            (make_entry(solcard[0], solution_size, 'mark', 'tikz')[0],
-             make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
-             make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
+            (make_entry(solcard[0], solution_size, 'tikz', solution=True)[0],
+             make_entry(solcard[1], solution_size, 'tikz', solution=True)[0],
+             make_entry(solcard[2], solution_size, 'tikz', solution=True)[0],
              '%s %s' % (sizes[max(solution_size-3, 0)], solcard[3]),
              solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
-            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
-             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
-             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
+            (make_entry(puzcard[0], puzzle_size, 'tikz')[0],
+             make_entry(puzcard[1], puzzle_size, 'tikz')[0],
+             make_entry(puzcard[2], puzzle_size, 'tikz')[0],
              '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[3]),
              puzcard[4]))
 
@@ -445,7 +518,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in trianglepuzcard:
         row = '|'
         for entry in t[0:3]:
-            row += ' ' + make_entry(entry, 0, 'hide', 'md')[0] + ' |'
+            row += ' ' + make_entry(entry, 0, 'md')[0] + ' |'
         dsubsmd['puzcards3'] += row + '\n'
         dsubsmd['puzcards4'] += row + ' &nbsp; |\n'
 
@@ -528,17 +601,17 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
                         (angle + 180) % 360 - 180])
 
         dsubs['sqsolcard' + str(i + 1)] = (('{%s}' * 6) %
-            (make_entry(solcard[0], solution_size, 'mark', 'tikz')[0],
-             make_entry(solcard[1], solution_size, 'mark', 'tikz')[0],
-             make_entry(solcard[2], solution_size, 'mark', 'tikz')[0],
-             make_entry(solcard[3], solution_size, 'mark', 'tikz')[0],
+            (make_entry(solcard[0], solution_size, 'tikz', solution=True)[0],
+             make_entry(solcard[1], solution_size, 'tikz', solution=True)[0],
+             make_entry(solcard[2], solution_size, 'tikz', solution=True)[0],
+             make_entry(solcard[3], solution_size, 'tikz', solution=True)[0],
              '%s %s' % (sizes[max(solution_size-3, 0)], solcard[4]),
              solcard[5]))
         dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
-            (make_entry(puzcard[0], puzzle_size, 'hide', 'tikz')[0],
-             make_entry(puzcard[1], puzzle_size, 'hide', 'tikz')[0],
-             make_entry(puzcard[2], puzzle_size, 'hide', 'tikz')[0],
-             make_entry(puzcard[3], puzzle_size, 'hide', 'tikz')[0],
+            (make_entry(puzcard[0], puzzle_size, 'tikz')[0],
+             make_entry(puzcard[1], puzzle_size, 'tikz')[0],
+             make_entry(puzcard[2], puzzle_size, 'tikz')[0],
+             make_entry(puzcard[3], puzzle_size, 'tikz')[0],
              '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[4]),
              puzcard[5]))
 
@@ -551,7 +624,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
     for t in squarepuzcard:
         row = '|'
         for entry in t[0:4]:
-            row += ' ' + make_entry(entry, 0, 'hide', 'md')[0] + ' |'
+            row += ' ' + make_entry(entry, 0, 'md')[0] + ' |'
         dsubsmd['puzcards4'] += row + '\n'
 
     # Testing:
@@ -677,21 +750,21 @@ def make_cardsort_cards(data, layout, options,
             solbody += soltemplate['begin_page']
         
         puzsubs['text'], puzsubs['label'] = make_entry(
-            cards[realcards[cardorder[i]]], size, 'hide', 'tikz',
+            cards[realcards[cardorder[i]]], size, 'tikz',
             defaultlabel, defaultlabelsize)
         puzbody += dosub(puztemplate['item'], puzsubs)
         puzsubsmd['text'], puzsubsmd['label'] = make_entry(
-            cards[realcards[cardorder[i]]], 0, 'hide', 'md', defaultlabel,
+            cards[realcards[cardorder[i]]], 0, 'md', defaultlabel,
             blank='&nbsp;')
         puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
         if dosoln:
             solsubs['text'], solsubs['label'] = make_entry(
-                cards[realcards[i]], size, 'mark', 'tikz',
-                defaultlabel, defaultlabelsize)
+                cards[realcards[i]], size, 'tikz',
+                defaultlabel, defaultlabelsize, solution=True)
             solbody += dosub(soltemplate['item'], solsubs)
             solsubsmd['text'], solsubsmd['label'] = make_entry(
-                cards[realcards[i]], 0, 'mark', 'md', defaultlabel,
-                blank='&nbsp;')
+                cards[realcards[i]], 0, 'md', defaultlabel,
+                blank='&nbsp;', solution=True)
             solbodymd += dosub(soltemplatemd['item'], solsubsmd)
 
         i += 1
@@ -849,28 +922,28 @@ def make_domino_cards(data, layout, options,
         soli1 = (i - 1 + num_pairs) % num_pairs
 
         puzsubs['textL'], puzsubs['labelL'] = make_entry(
-            pairs[realpairs[puzi1]][1], size, 'hide', 'tikz',
+            pairs[realpairs[puzi1]][1], size, 'tikz',
             defaultlabel, defaultlabelsize)
         puzsubs['textR'], puzsubs['labelR'] = make_entry(
-            pairs[realpairs[puzi]][0], size, 'hide', 'tikz',
+            pairs[realpairs[puzi]][0], size, 'tikz',
             defaultlabel, defaultlabelsize)
         puzbody += dosub(puztemplate['item'], puzsubs)
         puzsubsmd['textL'], puzsubsmd['labelL'] = make_entry(
-            pairs[realpairs[puzi1]][1], 0, 'hide', 'md', defaultlabel)
+            pairs[realpairs[puzi1]][1], 0, 'md', defaultlabel)
         puzsubsmd['textR'], puzsubsmd['labelR'] = make_entry(
-            pairs[realpairs[puzi]][0], 0, 'hide', 'md', defaultlabel)
+            pairs[realpairs[puzi]][0], 0, 'md', defaultlabel)
         puzbodymd += dosub(puztemplatemd['item'], puzsubsmd)
         solsubs['textL'], solsubs['labelL'] = make_entry(
-            pairs[realpairs[soli1]][1], size, 'mark', 'tikz',
-            defaultlabel, defaultlabelsize)
+            pairs[realpairs[soli1]][1], size, 'tikz',
+            defaultlabel, defaultlabelsize, solution=True)
         solsubs['textR'], solsubs['labelR'] = make_entry(
-            pairs[realpairs[soli]][0], size, 'mark', 'tikz',
-            defaultlabel, defaultlabelsize)
+            pairs[realpairs[soli]][0], size, 'tikz',
+            defaultlabel, defaultlabelsize, solution=True)
         solbody += dosub(soltemplate['item'], solsubs)
         solsubsmd['textL'], solsubsmd['labelL'] = make_entry(
-            pairs[realpairs[soli1]][1], 0, 'mark', 'md', defaultlabel)
+            pairs[realpairs[soli1]][1], 0, 'md', defaultlabel, solution=True)
         solsubsmd['textR'], solsubsmd['labelR'] = make_entry(
-            pairs[realpairs[soli]][0], 0, 'mark', 'md', defaultlabel)
+            pairs[realpairs[soli]][0], 0, 'md', defaultlabel, solution=True)
         solbodymd += dosub(soltemplatemd['item'], solsubsmd)
 
         i += 1
@@ -978,7 +1051,7 @@ def generate(data, options):
     if 'type' in data:
         puztype = data['type']
         try:
-            layoutf = opentemplate(puztype + '.yaml')
+            layoutf = opentemplate(puztype + '-layout.yaml')
         except:
             sys.exit('Unrecognised jigsaw type %s' % data['type'])
     else:
