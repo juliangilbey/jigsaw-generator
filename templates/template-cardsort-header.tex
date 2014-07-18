@@ -87,7 +87,7 @@
   \ifx\templabel\empty
   \else
     \node[circle,draw,thin,inner sep=1pt]
-      at ($ (topl)!0.5!(botl) + (\offset,0) $) {#3};
+      at ($ (topl) + (\offset,-\offset) $) {#3};
   \fi
 
   \def\templabel{#5}

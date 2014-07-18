@@ -1524,7 +1524,7 @@ def generate_cardsort(data, options, layout):
     if puzzlemd:
         templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
                                     '^### BEGIN ITEM.*?$(.*?)'
-                                    '^### END DOCUMENT.*?$(.*?)',
+                                    '^### END DOCUMENT.*?$(.*)',
                                     bodypuzmd, re.M | re.S)
         if templatemdmatch:
             puztemplatemd['begin_document'] = templatemdmatch.group(1)
@@ -1537,7 +1537,7 @@ def generate_cardsort(data, options, layout):
         if dosoln:
             templatemdmatch = re.search('^### BEGIN DOCUMENT.*?$(.*?)'
                                         '^### BEGIN ITEM.*?$(.*?)'
-                                        '^### END DOCUMENT.*?$(.*?)',
+                                        '^### END DOCUMENT.*?$(.*)',
                                         bodysolmd, re.M | re.S)
             if templatemdmatch:
                 soltemplatemd['begin_document'] = templatemdmatch.group(1)
