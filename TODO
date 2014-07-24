@@ -8,9 +8,3 @@
 
 * Handle longer text entries by automatically wrapping for jigsaws,
    perhaps
-
-* Allow for alternate text for puzzle and solution, eg syntax could be:
-    "- puzzletext: (fill me in!)
-       puzzlesize: +1
-       solutiontext: answer
-       solutionsize: +1"
