@@ -23,7 +23,7 @@ cardTitle: Calculation follow-me
 
 pairs:
   - ['Who has $3+4\times5$?', 'I have $23$']
-  - ['Who has $5+2\times7$?', 'I have $21$']
+  - ['Who has $5+2\times7$?', 'I have $19s$']
   - ['Who has $6+3\times8$?', 'I have $30$']
 
   - ['Who has $13-2\times3$?', 'I have $7$']
