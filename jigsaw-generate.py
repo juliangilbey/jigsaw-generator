@@ -441,6 +441,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
 
     puzzle_size = getopt(layout, data, {}, 'puzzleTextSize', 5)
     solution_size = getopt(layout, data, {}, 'solutionTextSize', 5)
+    numbering_cards = getopt(layout, data, {}, 'numberCards', True)
 
     num_triangle_cards = len(layout['triangleSolutionCards'])
 
@@ -485,6 +486,7 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
                               solcard[(4 - rot) % 3],
                               solcard[(5 - rot) % 3],
                               cardnum(j + 1), trianglepuzorient[j][1]]
+        # Shorthand:
         puzcard = trianglepuzcard[j]
         # What angle does the card number go in the solution?
         # angle of puzzle card + (orientation of sol card - orientation of
@@ -498,13 +500,15 @@ def make_triangles(data, layout, pairs, edges, dsubs, dsubsmd):
             (make_entry(solcard[0], solution_size, 'tikz', solution=True)[0],
              make_entry(solcard[1], solution_size, 'tikz', solution=True)[0],
              make_entry(solcard[2], solution_size, 'tikz', solution=True)[0],
-             '%s %s' % (sizes[max(solution_size-3, 0)], solcard[3]),
+             ('%s %s' % (sizes[max(solution_size-3, 0)], solcard[3]))
+             if numbering_cards else '',
              solcard[4]))
         dsubs['tripuzcard' + str(j + 1)] = (('{%s}' * 5) %
             (make_entry(puzcard[0], puzzle_size, 'tikz')[0],
              make_entry(puzcard[1], puzzle_size, 'tikz')[0],
              make_entry(puzcard[2], puzzle_size, 'tikz')[0],
-             '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[3]),
+             ('%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[3]))
+             if numbering_cards else '',
              puzcard[4]))
 
     # For the Markdown version, we only need to record the puzzle cards at
@@ -543,6 +547,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
 
     puzzle_size = getopt(layout, data, {}, 'puzzleTextSize', 5)
     solution_size = getopt(layout, data, {}, 'solutionTextSize', 5)
+    numbering_cards = getopt(layout, data, {}, 'numberCards', True)
 
     num_triangle_cards = len(layout['triangleSolutionCards'])
     num_square_cards = len(layout['squareSolutionCards'])
@@ -590,6 +595,7 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
                             solcard[(7 - rot) % 4],
                             cardnum(j + num_triangle_cards + 1),
                             squarepuzorient[j][1]]
+        # Shorthand:
         puzcard = squarepuzcard[j]
         # What angle does the card number go in the solution?
         # angle of puzzle card + (orientation of sol card - orientation of
@@ -605,14 +611,16 @@ def make_squares(data, layout, pairs, edges, dsubs, dsubsmd):
              make_entry(solcard[1], solution_size, 'tikz', solution=True)[0],
              make_entry(solcard[2], solution_size, 'tikz', solution=True)[0],
              make_entry(solcard[3], solution_size, 'tikz', solution=True)[0],
-             '%s %s' % (sizes[max(solution_size-3, 0)], solcard[4]),
+             ('%s %s' % (sizes[max(solution_size-3, 0)], solcard[4]))
+             if numbering_cards else '',
              solcard[5]))
         dsubs['sqpuzcard' + str(j + 1)] = (('{%s}' * 6) %
             (make_entry(puzcard[0], puzzle_size, 'tikz')[0],
              make_entry(puzcard[1], puzzle_size, 'tikz')[0],
              make_entry(puzcard[2], puzzle_size, 'tikz')[0],
              make_entry(puzcard[3], puzzle_size, 'tikz')[0],
-             '%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[4]),
+             ('%s %s' % (sizes[max(puzzle_size-3, 0)], puzcard[4]))
+             if numbering_cards else '',
              puzcard[5]))
 
     # For the Markdown version, we only need to record the puzzle cards at

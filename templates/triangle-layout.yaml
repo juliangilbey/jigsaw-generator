@@ -27,6 +27,9 @@ shuffleEdges: false
 puzzleTextSize: 5
 # Default text size on solution pieces
 solutionTextSize: 3
+# Do we number the pieces?
+numberCards: true
+
 triangleSolutionCards:
   - [Q1, E12, E1]
   - [A14, Q15, E2]

@@ -89,7 +89,12 @@
     (b) -- node[\styleb] {\contentb}
     (c) -- node[\stylec] {\contentc}
     cycle;
-  \node[circle,draw,thin,inner sep=1pt,rotate=#7] at ($ #1 $) {#6};
+  % If card number is empty, don't draw circle around number
+  \def\templabel{#6}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt,rotate=#7] at ($ #1 $) {#6};
+  \fi
 }
 
 \newcommand{\uptriangle}[6]{%
@@ -122,7 +127,12 @@
     (c) -- node[\stylec] {\contentc}
     (d) -- node[\styled] {\contentd}
     cycle;
-  \node[circle,draw,thin,inner sep=1pt,rotate=#8] at ($ #1 $) {#7};
+  % If card number is empty, don't draw circle around number
+  \def\templabel{#7}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt,rotate=#8] at ($ #1 $) {#7};
+  \fi
 }
 
 \newcommand{\upsquare}[7]{%
