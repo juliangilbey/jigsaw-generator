@@ -24,9 +24,9 @@ flip: true
 # Do we shuffle the order of the edges from the order given?
 shuffleEdges: false
 # Default text size on puzzle pieces
-puzzleTextSize: 5
+puzzleTextSize: 7
 # Default text size on solution pieces
-solutionTextSize: 5
+solutionTextSize: 7
 # Do we number the pieces?
 numberCards: true
 
