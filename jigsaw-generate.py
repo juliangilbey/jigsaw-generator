@@ -246,7 +246,9 @@ def make_entry(entry, defaultsize, style,
                                else entry['puzzletext'])
 
         # if there is a solutiontext in the entry, this means that we
-        # regard 'hidden' as true, unless it is explicitly set to false
+        # regard 'hidden' as true, unless it is explicitly set to
+        # false; doing this saves us from having to rewrite the logic
+        # of the next paragraph twice.
         if 'solutiontext' in entry:
             if 'hidden' not in entry:
                 entry['hidden'] = True
