@@ -9,7 +9,7 @@ columns: 2
 # producing the problem?
 shufflePairs: true
 # Do we randomly flip (swap) individual questions and answers (the
-# contents of the pairs) on the jigsaw?
+# contents of the pairs) on the puzzle?
 flip: false
 # Do we have "start" and "finish" cards (loop: false) or do the cards
 # go in a complete loop (loop: true)?
