@@ -1704,8 +1704,8 @@ def generate_cardsort(data, options, layout):
         outsolmd.close()
 
 
-# This allows this script to be invoked directly and also (hopefully
-# at some later stage) for the functions to be called via a GUI
+# This allows this script to be invoked directly and also perhaps for
+# the functions to be called via a GUI
 if __name__ == '__main__':
     main()
 
