@@ -1,8 +1,9 @@
-jigsaw-generator (0.1-2~1.gbpea502f) UNRELEASED; urgency=low
+jigsaw-generator (0.1-2~2.gbp75a46b) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @ea502f2ee59b58eb9d9e7f2512c22cf61a58ee02 **
+  ** SNAPSHOT build @75a46b9727a298442fcb2afe7e2b053a0644552c **
 
- -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:53:09 +0100
+
+ -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 18:59:38 +0100
 
 jigsaw-generator (0.1-1) UNRELEASED; urgency=low
 
