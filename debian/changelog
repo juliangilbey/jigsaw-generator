@@ -1,9 +1,11 @@
-jigsaw-generator (0.1.1-2~1.gbp7b2a16) UNRELEASED; urgency=low
+jigsaw-generator (0.1.1-2~3.gbp09be08) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @7b2a16f4cdc07c8cd671bfb9f4a90bd471e1b992 **
+  ** SNAPSHOT build @09be0852140a51af9f26c4290ce1c30eff260f2c **
 
   * Update from upstream
   * UNRELEASED
+  * Snapshot release
+  * Add autoreconf to build system
 
  -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 19:10:24 +0100
 
