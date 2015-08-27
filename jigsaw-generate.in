@@ -4,7 +4,7 @@
 pkgdatadir = '@pkgdatadir@'
 
 import sys
-sys.path[1:1] = pkgdatadir
+sys.path[1:1] = [pkgdatadir]
 
 import jigsaw.generate as generate
 generate.main(pkgdatadir)
