@@ -1,0 +1,2 @@
+# ignore changes on configure
+extend-diff-ignore = "(^|/)configure$"
