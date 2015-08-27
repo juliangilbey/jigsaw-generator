@@ -1,13 +1,14 @@
 # Use a handwritten Makefile rather than an automake mess for such
 # a simple package.  But stick to familiar 
-prefix = /usr/local
-datarootdir = ${prefix}/share
-datadir = ${datarootdir}
-pkgdatadir = ${datadir}/jigsaw-generator
-docdir = ${datarootdir}/doc/jigsaw-generator
-mandir = ${datarootdir}/man
-exec_prefix = ${prefix}
-bindir = ${exec_prefix}/bin
+PACKAGE_TARNAME = jigsaw-generator
+prefix = @prefix@
+datarootdir = @datarootdir@
+datadir = @datadir@
+pkgdatadir = @datadir@/${PACKAGE_TARNAME}
+docdir = @docdir@
+mandir = @mandir@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
 MKDIR_P = @MKDIR_P@
 
 build:
