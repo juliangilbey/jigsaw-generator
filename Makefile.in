@@ -1,0 +1,29 @@
+# Use a handwritten Makefile rather than an automake mess for such
+# a simple package.  But stick to familiar 
+prefix = /usr/local
+datarootdir = ${prefix}/share
+datadir = ${datarootdir}
+pkgdatadir = ${datadir}/jigsaw
+docdir = ${datarootdir}/doc/jigsaw
+exec_prefix = ${prefix}
+bindir = ${exec_prefix}/bin
+MKDIR_P = @MKDIR_P@
+
+build:
+	sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|' jigsaw-generate.in > jigsaw-generate
+	chmod a+x jigsaw-generate
+
+install:
+	$(MKDIR_P) ${DESTDIR}${bindir}
+	cp jigsaw-generate ${DESTDIR}${bindir}
+	chmod 755 ${DESTDIR}${bindir}/jigsaw-generate
+	$(MKDIR_P) ${DESTDIR}${pkgdatadir}
+	cp -a jigsaw templates ${DESTDIR}${pkgdatadir}
+	$(MKDIR_P) ${DESTDIR}${docdir}
+	cp README.md COPYING ChangeLog AUTHORS ${DESTDIR}${docdir}
+	cp -a examples ${DESTDIR}${docdir}
+
+uninstall:
+	rm -rf ${DESTDIR}${pkgdatadir}
+	rm -rf ${DESTDIR}${docdir}
+	rm -f ${DESTDIR}${bindir}/jigsaw-generate

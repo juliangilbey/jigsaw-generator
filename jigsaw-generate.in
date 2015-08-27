@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 import sys
-sys.path[1:1] = '@@DATADIR@@/jigsaw'
+sys.path[1:1] = '@pkgdatadir@'
 
-import generate
+import jigsaw.generate as generate
 generate.main()

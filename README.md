@@ -1,4 +1,4 @@
-### Jigsaw software for CMEP
+### Jigsaw software for the Cambridge Mathematics Education Project
 
 This software is designed to create Tarsia Formulator type
 mathematical jigsaws using LaTeX.  The puzzle data is stored in a YAML
