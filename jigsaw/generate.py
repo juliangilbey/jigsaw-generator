@@ -965,26 +965,36 @@ def make_domino_cards(data, layout, options,
 
 rerun_regex = re.compile(b'rerun ', re.I)
 
-def runlatex(file, options):
-    """Run (lua)latex on file"""
+def runlatex(fn, options):
+    """Run LaTeX or a variant on fn"""
 
     # We may use the options at a later point to specify the LaTeX
     # engine to use, so including it now to reduce amount of code to
     # modify later.
+    error = False
     for count in range(4):
         try:
-            output = subprocess.check_output(['lualatex',
-                                              '--interaction=nonstopmode',
-                                              file])
+            output = subprocess.check_output([options['latex'],
+                                              '--interaction=batchmode',
+                                              fn])
         except subprocess.CalledProcessError as cpe:
-            print('Warning: lualatex %s failed, return value %s' %
-                  (file, cpe.returncode), file=sys.stderr)
-            print('See the lualatex log file for more details.',
+            print('Warning: %s %s failed, return value %s' %
+                  (options['latex'], fn, cpe.returncode), file=sys.stderr)
+            print('See the %s log file for more details.' % options['latex'],
                   file=sys.stderr)
+            error = True
             break
 
         if not rerun_regex.search(output):
             break
+
+    if not error and not options['noclean']:
+        basename = os.path.splitext(fn)[0]
+        for junk in ['aux', 'log', 'tex', 'ind', 'idx', 'out']:
+            try:
+                os.remove(basename + '.' + junk)
+            except:
+                pass
 
 
 #####################################################################
@@ -1003,6 +1013,11 @@ def main(pkgdatadir=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
+    parser.add_argument('-n', '--noclean',
+                        help='do not remove LaTeX auxiliary files',
+                        action='store_true')
+    parser.add_argument('--latex', default='lualatex',
+                        help='the LaTeX variant to run')
     args = parser.parse_args()
 
     if args.puzfile[-5:] == '.yaml':
@@ -1011,8 +1026,11 @@ def main(pkgdatadir=None):
         puzfile = args.puzfile + '.yaml'
     puzbase = puzfile[:-5]
 
-    # We may well have more options in the future
-    options = { 'puzbase': puzbase }
+    # We bundle the command-line args into an options dict
+    options = { 'puzbase': puzbase,
+                'noclean': args.noclean,
+                'latex': args.latex
+    }
 
     try:
         infile = open(puzfile)
@@ -1039,8 +1057,8 @@ def main(pkgdatadir=None):
     # templates by providing their own ones, hence site_data_dir is the
     # appropriate site choice.
     if not pkgdatadir:
-        pkgdatadir = appdirs.site_data_dir('jigsaw')
-    userdatadir = appdirs.user_config_dir('jigsaw')
+        pkgdatadir = appdirs.site_data_dir('jigsaw-generator')
+    userdatadir = appdirs.user_config_dir('jigsaw-generator')
     options['templatedirs'] = ['.', userdatadir,
                                os.path.join(pkgdatadir, 'templates')]
     generate(data, options)
@@ -1063,7 +1081,8 @@ def generate(data, options):
     if 'type' in data:
         puztype = data['type']
         try:
-            layoutf = opentemplate(puztype + '-layout.yaml')
+            layoutf = opentemplate(options['templatedirs'],
+                                   puztype + '-layout.yaml')
         except:
             sys.exit('Unrecognised jigsaw type %s' % data['type'])
     else:
