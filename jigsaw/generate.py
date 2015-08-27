@@ -15,6 +15,7 @@ import os.path
 import re
 import argparse
 import subprocess
+from . import appdirs
 
 import yaml
 from yaml import load, dump
@@ -27,10 +28,6 @@ except ImportError:
 
 # Utility functions and global definitions.  These might get moved out
 # to separate modules for clarity at some point in the near future.
-
-# Template directory
-# This may change once we figure out how to do so ;-)
-templatedir = '/usr/share/jigsaw'
 
 # LaTeX font sizes
 sizes = [r'\tiny',
@@ -74,36 +71,26 @@ def dosub(text, subs):
                   file=sys.stderr)
     return re.sub(r'<:\s*(\S*?)\s*:>', subtext, text)
 
-def opentemplate(name):
+def opentemplate(templatedirs, name):
     """Searches for and then opens a template file.
 
-    Search first in the current directory, then look in the templates
-    directory.  This is currently OS-dependent; this will need making
-    OS-independent in the near future.
+    Search in the directories given in the first argument, which must
+    be an iterable.  Typically, this will be the current directory, then
+    the user config directory, then the package data directory.
     """
     
-    ### ***FIXME*** this is OS-specific and relies on filesystem
-    ### layout; perhaps change to wheel system and use its
-    ### facilities for file finding; see
-    ### http://pythonwheels.com/ as a starting point
-    try:
-        f = open(name)
-    except:
+    for templatedir in templatedirs:
         try:
-            f = open('templates/' + name)
-        except:
             f = open(os.path.join(templatedir, name))
+            break
+        except:
+            f = None
+            continue
 
-        ### ***FIXME*** Once I know how to write new exceptions, use
-        ### that here so that I can throw a catchable exception should
-        ### I wish to.  For the time being, each calling function will
-        ### have to catch the exception individually to produce a
-        ### sensible error message
-
-        # except:
-        #    sys.exit('Template file %s could not be found or opened' %
-        #             name)
-    return f
+    if f:
+        return f
+    else:
+        sys.exit('Could not find template file %s, giving up.' % name)
 
 def check_special(c):
     """Check whether a card or domino is special
@@ -1002,7 +989,7 @@ def runlatex(file, options):
 
 #####################################################################
 
-def main():
+def main(pkgdatadir=None):
     """Process the command line and generate the appropriate output files.
 
     Command line:
@@ -1012,7 +999,7 @@ def main():
     We will generate both LaTeX output files and (eventually) a
     markdown file which can be included where needed.
     """
-
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
@@ -1041,6 +1028,21 @@ def main():
                      'Error position: line %s, column %s' %
                      (mark.line+1, mark.column+1))
 
+    # Determine where the templates files live
+    # We use user_config_dir as I think this is configuration data,
+    # not general package data.  See the end of the page
+    # https://wiki.debian.org/XDGBaseDirectorySpecification which indicates
+    # that data should not be managed via VCS, whereas config should be;
+    # this alone qualifies templates to be considered config.
+    # However, the package templates are not configurations which should
+    # be modified by the user; they go with the package.  Users can modify
+    # templates by providing their own ones, hence site_data_dir is the
+    # appropriate site choice.
+    if not pkgdatadir:
+        pkgdatadir = appdirs.site_data_dir('jigsaw')
+    userdatadir = appdirs.user_config_dir('jigsaw')
+    options['templatedirs'] = ['.', userdatadir,
+                               os.path.join(pkgdatadir, 'templates')]
     generate(data, options)
 
 
@@ -1098,15 +1100,16 @@ def generate_jigsaw(data, options, layout):
     # to produce.
 
     puzbase = options['puzbase']
+    templatedirs = options['templatedirs']
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
     if bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
-            bodypuz = opentemplate(bodypuzfile).read()
+            bodypuz = opentemplate(templatedirs, bodypuzfile).read()
             outpuzfile = puzbase + '-puzzle.tex'
             outpuz = open(outpuzfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuz)
             puzzletex = True
         else:
@@ -1120,10 +1123,10 @@ def generate_jigsaw(data, options, layout):
     if bodysolfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
         if headerfile:
-            bodysol = opentemplate(bodysolfile).read()
+            bodysol = opentemplate(templatedirs, bodysolfile).read()
             outsolfile = puzbase + '-solution.tex'
             outsol = open(outsolfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsol)
             solutiontex = True
         else:
@@ -1138,10 +1141,10 @@ def generate_jigsaw(data, options, layout):
     if bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
-            bodytable = opentemplate(bodytablefile).read()
+            bodytable = opentemplate(templatedirs, bodytablefile).read()
             outtablefile = puzbase + '-table.tex'
             outtable = open(outtablefile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outtable)
             tabletex = True
         else:
@@ -1155,10 +1158,10 @@ def generate_jigsaw(data, options, layout):
     if bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
-            bodypuzmd = opentemplate(bodypuzmdfile).read()
+            bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
             outpuzmdfile = puzbase + '-puzzle.md'
             outpuzmd = open(outpuzmdfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuzmd)
             puzzlemd = True
         else:
@@ -1173,10 +1176,10 @@ def generate_jigsaw(data, options, layout):
     if bodysolmdfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
         if headerfile:
-            bodysolmd = opentemplate(bodysolmdfile).read()
+            bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
             outsolmdfile = puzbase + '-solution.md'
             outsolmd = open(outsolmdfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsolmd)
             solutionmd = True
         else:
@@ -1337,6 +1340,8 @@ def generate_cardsort(data, options, layout):
     # to produce.
 
     puzbase = options['puzbase']
+    templatedirs = options['templatedirs']
+
     category = layout['category']
     if category == 'cardsort':
         dosoln = getopt(layout, data, {}, 'produceSolution', True)
@@ -1347,10 +1352,10 @@ def generate_cardsort(data, options, layout):
     if bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
-            bodypuz = opentemplate(bodypuzfile).read()
+            bodypuz = opentemplate(templatedirs, bodypuzfile).read()
             outpuzfile = puzbase + '-puzzle.tex'
             outpuz = open(outpuzfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuz)
             puzzletex = True
         else:
@@ -1365,10 +1370,10 @@ def generate_cardsort(data, options, layout):
         if bodysolfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
             if headerfile:
-                bodysol = opentemplate(bodysolfile).read()
+                bodysol = opentemplate(templatedirs, bodysolfile).read()
                 outsolfile = puzbase + '-solution.tex'
                 outsol = open(outsolfile, 'w')
-                header = opentemplate(headerfile).read()
+                header = opentemplate(templatedirs, headerfile).read()
                 print(header, file=outsol)
                 solutiontex = True
             else:
@@ -1385,10 +1390,10 @@ def generate_cardsort(data, options, layout):
     if bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
-            bodytable = opentemplate(bodytablefile).read()
+            bodytable = opentemplate(templatedirs, bodytablefile).read()
             outtablefile = puzbase + '-table.tex'
             outtable = open(outtablefile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outtable)
             tabletex = True
         else:
@@ -1402,10 +1407,10 @@ def generate_cardsort(data, options, layout):
     if bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
-            bodypuzmd = opentemplate(bodypuzmdfile).read()
+            bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
             outpuzmdfile = puzbase + '-puzzle.md'
             outpuzmd = open(outpuzmdfile, 'w')
-            header = opentemplate(headerfile).read()
+            header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuzmd)
             puzzlemd = True
         else:
@@ -1421,10 +1426,10 @@ def generate_cardsort(data, options, layout):
         if bodysolmdfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
             if headerfile:
-                bodysolmd = opentemplate(bodysolmdfile).read()
+                bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
                 outsolmdfile = puzbase + '-solution.md'
                 outsolmd = open(outsolmdfile, 'w')
-                header = opentemplate(headerfile).read()
+                header = opentemplate(templatedirs, headerfile).read()
                 print(header, file=outsolmd)
                 solutionmd = True
             else:
@@ -1704,8 +1709,7 @@ def generate_cardsort(data, options, layout):
         outsolmd.close()
 
 
-# This allows this script to be invoked directly and also perhaps for
+# This allows this script to be invoked directly and also perhap for
 # the functions to be called via a GUI
 if __name__ == '__main__':
     main()
-

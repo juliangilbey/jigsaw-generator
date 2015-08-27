@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 
+# This will be needed to find the template files
+pkgdatadir = '@pkgdatadir@'
+
 import sys
-sys.path[1:1] = '@pkgdatadir@'
+sys.path[1:1] = pkgdatadir
 
 import jigsaw.generate as generate
-generate.main()
+generate.main(pkgdatadir)
