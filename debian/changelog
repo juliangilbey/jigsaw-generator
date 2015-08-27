@@ -1,6 +1,6 @@
-jigsaw-generator (0.1.3~1.gbpda3eb3) UNRELEASED; urgency=low
+jigsaw-generator (0.1.3-1~1.gbpb05e3d) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @da3eb3b20924405a1f8f67ffa258a55886906324 **
+  ** SNAPSHOT build @b05e3d4e47d4c4c460997a207c66a404bed58835 **
 
   * Update from upstream
   * UNRELEASED
@@ -11,8 +11,9 @@ jigsaw-generator (0.1.3~1.gbpda3eb3) UNRELEASED; urgency=low
   * Fix changelog version number
   * Add correct dependencies and remove unnecessary docs
   * Update changelog for 0.1.2-1~2.gbp839d0f release
+  * Update changelog for 0.1.3~1.gbpda3eb3 release
 
- -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 20:29:31 +0100
+ -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 20:30:26 +0100
 
 jigsaw-generator (0.1-1) UNRELEASED; urgency=low
 
