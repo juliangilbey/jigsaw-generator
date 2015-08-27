@@ -1017,7 +1017,7 @@ def main(pkgdatadir=None):
                         help='do not remove LaTeX auxiliary files',
                         action='store_true')
     parser.add_argument('--latex', default='lualatex',
-                        help='the LaTeX variant to run')
+                        help='the LaTeX variant to run (default: %(default)s)')
     args = parser.parse_args()
 
     if args.puzfile[-5:] == '.yaml':
