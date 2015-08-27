@@ -1,5 +1,5 @@
 Source: jigsaw-generator
-Section: unknown
+Section: education
 Priority: optional
 Maintainer: Julian Gilbey <jdg@debian.org>
 Build-Depends: debhelper (>= 9), dh-python
