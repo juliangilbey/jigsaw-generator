@@ -3,8 +3,8 @@
 prefix = /usr/local
 datarootdir = ${prefix}/share
 datadir = ${datarootdir}
-pkgdatadir = ${datadir}/jigsaw
-docdir = ${datarootdir}/doc/jigsaw
+pkgdatadir = ${datadir}/jigsaw-generator
+docdir = ${datarootdir}/doc/jigsaw-generator
 mandir = ${datarootdir}/man
 exec_prefix = ${prefix}
 bindir = ${exec_prefix}/bin
@@ -29,12 +29,12 @@ install:
 	chmod -R a+rX ${DESTDIR}${docdir}
 
 	$(MKDIR_P) ${DESTDIR}${mandir}/man1
-	cp jigsaw-generator.1 ${DESTDIR}${mandir}/man1
-	chmod 644 ${DESTDIR}${mandir}/man1/jigsaw-generator.1
+	cp jigsaw-generate.1 ${DESTDIR}${mandir}/man1
+	chmod 644 ${DESTDIR}${mandir}/man1/jigsaw-generate.1
 
 uninstall:
 	rm -rf ${DESTDIR}${pkgdatadir}
 	rm -rf ${DESTDIR}${docdir}
 	rm -f ${DESTDIR}${bindir}/jigsaw-generate
-	rm -f ${DESTDIR}${mandir}/man1/jigsaw-generator.1
+	rm -f ${DESTDIR}${mandir}/man1/jigsaw-generate.1
 
