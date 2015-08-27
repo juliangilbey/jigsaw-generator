@@ -1,5 +1,11 @@
+jigsaw-generator (0.1-2~1.gbpea502f) UNRELEASED; urgency=low
+
+  ** SNAPSHOT build @ea502f2ee59b58eb9d9e7f2512c22cf61a58ee02 **
+
+ -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:53:09 +0100
+
 jigsaw-generator (0.1-1) UNRELEASED; urgency=low
 
   * Initial release (Closes: #1000000)
 
- -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:21:40 +0100
+ -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:49:23 +0100
