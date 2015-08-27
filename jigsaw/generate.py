@@ -1063,7 +1063,8 @@ def generate(data, options):
     if 'type' in data:
         puztype = data['type']
         try:
-            layoutf = opentemplate(puztype + '-layout.yaml')
+            layoutf = opentemplate(options['templatedirs'],
+                                   puztype + '-layout.yaml')
         except:
             sys.exit('Unrecognised jigsaw type %s' % data['type'])
     else:
