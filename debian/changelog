@@ -1,5 +1,5 @@
-jigsaw-generator (0.1-1) unstable; urgency=low
+jigsaw-generator (0.1-1) UNRELEASED; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release (Closes: #1000000)
 
- -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 17:00:58 +0100
+ -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:21:40 +0100
