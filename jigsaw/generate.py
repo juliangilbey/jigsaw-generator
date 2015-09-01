@@ -15,6 +15,8 @@ import os.path
 import re
 import argparse
 import subprocess
+import configparser
+from collections import OrderedDict
 from . import appdirs
 
 import yaml
@@ -1009,15 +1011,89 @@ def main(pkgdatadir=None):
     We will generate both LaTeX output files and (eventually) a
     markdown file which can be included where needed.
     """
-    
+
+    # Begin by reading the user config file.  If it does not exist,
+    # then create it.
+    defaults = OrderedDict([
+        ('makepdf', 'yes'),
+        ('makemd', 'yes'),
+        ('latex', 'pdflatex'),
+        ('clean', 'yes'),
+        ('texfilter', ''),
+        ('mdfilter', '')
+    ])
+
+    userdatadir = appdirs.user_config_dir('jigsaw-generator')
+    if os.access(os.path.join(userdatadir, 'config.ini'), os.R_OK):
+        config = configparser.ConfigParser()
+        config.read(os.path.join(userdatadir, 'config.ini'))
+        if 'jigsaw-generate' not in config:
+            print('Warning: no "jigsaw-generate" section in config.ini\n'
+                  'Your configuration file will be ignored.',
+                  file=sys.stderr)
+            config['jigsaw-generate'] = defaults
+        else:
+            for c in defaults:
+                if c not in config['jigsaw-generate']:
+                    config['jigsaw-generate'][c] = defaults[c]
+    else:
+        # Write a default configuration file
+        config = configparser.ConfigParser()
+        config['jigsaw-generate'] = defaults
+        os.makedirs(userdatadir, exist_ok=True)
+        with open(os.path.join(userdatadir, 'config.ini'), 'w') as configfile:
+            config.write(configfile)
+
+    ### Parse the command line
     parser = argparse.ArgumentParser()
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
-    parser.add_argument('-n', '--noclean',
-                        help='do not remove LaTeX auxiliary files',
+    groupc = parser.add_mutually_exclusive_group()
+    doclean = config['jigsaw-generate'].getboolean('clean')
+    groupc.add_argument('--noclean', '--no-clean',
+                        help=('do not clean LaTeX auxiliary files%s' %
+                              (' (default)' if not doclean else '')),
                         action='store_true')
-    parser.add_argument('--latex', default='lualatex',
-                        help='the LaTeX variant to run (default: %(default)s)')
+    groupc.add_argument('--clean',
+                        help=('clean LaTeX auxiliary files%s' %
+                              (' (default)' if doclean else '')),
+                        action='store_true')
+    parser.add_argument('--latex',
+                        help=('the LaTeX variant to run (default %s)' %
+                              config['jigsaw-generate']['latex']))
+
+    groupp = parser.add_mutually_exclusive_group()
+    dopdf = config['jigsaw-generate'].getboolean('makepdf')
+    groupp.add_argument('--makepdf',
+                        help=('make PDF output via LaTeX%s' %
+                              (' (default)' if dopdf else '')),
+                        action='store_true')
+    groupp.add_argument('--nomakepdf', '--no-makepdf',
+                        help=('do not make PDF output%s' %
+                              (' (default)' if not dopdf else '')),
+                        action='store_true')
+
+    groupm = parser.add_mutually_exclusive_group()
+    domd = config['jigsaw-generate'].getboolean('makemd')
+    groupm.add_argument('--makemd',
+                        help=('make Markdown output%s' %
+                              (' (default)' if domd else '')),
+                        action='store_true')
+    groupm.add_argument('--nomakemd', '--no-makemd',
+                        help=('do not Markdown output%s' %
+                              (' (default)' if not domd else '')),
+                        action='store_true')
+
+    conftexfilter = config['jigsaw-generate']['texfilter']
+    parser.add_argument('--texfilter',
+                        help=('filter to run on LaTeX file%s' %
+                              (' (default %s)' % conftexfilter if conftexfilter
+                               else '')))
+    confmdfilter = config['jigsaw-generate']['mdfilter']
+    parser.add_argument('--mdfilter',
+                        help=('filter to run on Markdown file%s' %
+                              (' (default %s)' % confmdfilter if confmdfilter
+                               else '')))
     args = parser.parse_args()
 
     if args.puzfile[-5:] == '.yaml':
@@ -1027,11 +1103,44 @@ def main(pkgdatadir=None):
     puzbase = puzfile[:-5]
 
     # We bundle the command-line args into an options dict
-    options = { 'puzbase': puzbase,
-                'noclean': args.noclean,
-                'latex': args.latex
-    }
+    options = { 'puzbase': puzbase }
+    if args.makepdf:
+        options['makepdf'] = True
+    elif args.nomakepdf:
+        options['makepdf'] = False
+    else:
+        options['makepdf'] = dopdf
+        
+    if args.makemd:
+        options['makemd'] = True
+    elif args.nomakemd:
+        options['makemd'] = False
+    else:
+        options['makemd'] = domd
 
+    if args.latex:
+        options['latex'] = args.latex
+    else:
+        options['makemd'] = config['jigsaw-generate']['latex']
+
+    if args.clean:
+        options['clean'] = True
+    elif args.noclean:
+        options['clean'] = False
+    else:
+        options['clean'] = doclean
+
+    if args.texfilter != None:
+        options['texfilter'] = args.texfilter
+    else:
+        options['texfilter'] = config['jigsaw-generate']['texfilter']
+
+    if args.mdfilter != None:
+        options['mdfilter'] = args.mdfilter
+    else:
+        options['mdfilter'] = config['jigsaw-generate']['mdfilter']
+
+    ### Read the puzzle file
     try:
         infile = open(puzfile)
     except:
@@ -1059,7 +1168,8 @@ def main(pkgdatadir=None):
     if not pkgdatadir:
         pkgdatadir = appdirs.site_data_dir('jigsaw-generator')
     userdatadir = appdirs.user_config_dir('jigsaw-generator')
-    options['templatedirs'] = ['.', userdatadir,
+    options['templatedirs'] = ['.',
+                               os.path.join(userdatadir, 'templates'),
                                os.path.join(pkgdatadir, 'templates')]
     generate(data, options)
 
