@@ -970,10 +970,32 @@ rerun_regex = re.compile(b'rerun ', re.I)
 def runlatex(fn, options):
     """Run LaTeX or a variant on fn"""
 
-    # We may use the options at a later point to specify the LaTeX
-    # engine to use, so including it now to reduce amount of code to
-    # modify later.
+    texfilter = options['texfilter']
+    filterprog = None
     error = False
+
+    if texfilter:
+        for fdir in options['filterdirs']:
+            if os.access(os.path.join(fdir, texfilter), os.X_OK):
+                filterprog = os.path.join(fdir, texfilter)
+                break
+        if not filterprog:
+            print('Warning: Requested LaTeX filter %s not found, skipping' %
+                  texfilter, file=sys.stderr)
+        else:
+            os.replace(fn, fn + '.filter')
+            try:
+                output = subprocess.check_output(filterprog, fn + '.filter')
+                with open(fn, 'w') as filtered:
+                    print(output, file=filtered)
+            except subprocess.CalledProcessError as cpe:
+                print('Warning: LaTeX filter failed, return value %s' %
+                      cpe.returncode, file=sys.stderr)
+                print('Continuing with LaTeX run on unfiltered file',
+                      file=sys.stderr)
+                os.replace(fn + '.filter', fn)
+                error = True
+                
     for count in range(4):
         try:
             output = subprocess.check_output([options['latex'],
@@ -990,14 +1012,47 @@ def runlatex(fn, options):
         if not rerun_regex.search(output):
             break
 
-    if not error and not options['noclean']:
+    if not error and options['clean']:
         basename = os.path.splitext(fn)[0]
-        for junk in ['aux', 'log', 'tex', 'ind', 'idx', 'out']:
+        for junk in ['aux', 'log', 'tex', 'ind', 'idx', 'out', 'tex.filter']:
             try:
                 os.remove(basename + '.' + junk)
             except:
                 pass
 
+def filtermd(fn, options):
+    """Filter Markdown output if required"""
+
+    mdfilter = options['mdfilter']
+    filterprog = None
+    error = False
+
+    if mdfilter:
+        for fdir in options['filterdirs']:
+            if os.access(os.path.join(fdir, mdfilter), os.X_OK):
+                filterprog = os.path.join(fdir, mdfilter)
+                break
+        if not filterprog:
+            print('Warning: Requested Markdown filter %s not found, skipping' %
+                  mdfilter, file=sys.stderr)
+        else:
+            os.replace(fn, fn + '.filter')
+            try:
+                output = subprocess.check_output(filterprog, fn + '.filter')
+                with open(fn, 'w') as filtered:
+                    print(output, file=filtered)
+            except subprocess.CalledProcessError as cpe:
+                print('Warning: Markdown filter failed, return value %s' %
+                      cpe.returncode, file=sys.stderr)
+                os.replace(fn + '.filter', fn)
+                error = True
+                
+        if not error and options['clean']:
+            basename = os.path.splitext(fn)[0]
+            try:
+                os.remove(basename + '.filtered')
+            except:
+                pass
 
 #####################################################################
 
@@ -1051,11 +1106,11 @@ def main(pkgdatadir=None):
     groupc = parser.add_mutually_exclusive_group()
     doclean = config['jigsaw-generate'].getboolean('clean')
     groupc.add_argument('--noclean', '--no-clean',
-                        help=('do not clean LaTeX auxiliary files%s' %
+                        help=('do not clean auxiliary files%s' %
                               (' (default)' if not doclean else '')),
                         action='store_true')
     groupc.add_argument('--clean',
-                        help=('clean LaTeX auxiliary files%s' %
+                        help=('clean auxiliary files%s' %
                               (' (default)' if doclean else '')),
                         action='store_true')
     parser.add_argument('--latex',
@@ -1171,6 +1226,9 @@ def main(pkgdatadir=None):
     options['templatedirs'] = ['.',
                                os.path.join(userdatadir, 'templates'),
                                os.path.join(pkgdatadir, 'templates')]
+    options['filterdirs'] = ['.',
+                             os.path.join(userdatadir, 'filters'),
+                             os.path.join(pkgdatadir, 'filters')]
     generate(data, options)
 
 
@@ -1225,14 +1283,13 @@ def generate_jigsaw(data, options, layout):
     """Generate output from data for jigsaw-type puzzles."""
 
     # ***FIXME*** The output filenames should be specifiable on the
-    # command line.  Also, there should be options for which outputs
-    # to produce.
+    # command line.
 
     puzbase = options['puzbase']
     templatedirs = options['templatedirs']
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    if bodypuzfile:
+    if options['makepdf'] and bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
@@ -1247,9 +1304,9 @@ def generate_jigsaw(data, options, layout):
             puzzletex = False
     else:
         puzzletex = False
-
+        
     bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
-    if bodysolfile:
+    if options['makepdf'] and bodysolfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
         if headerfile:
             bodysol = opentemplate(templatedirs, bodysolfile).read()
@@ -1267,7 +1324,7 @@ def generate_jigsaw(data, options, layout):
         solutiontex = False
 
     bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
-    if bodytablefile:
+    if options['makepdf'] and bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
@@ -1284,7 +1341,7 @@ def generate_jigsaw(data, options, layout):
         tabletex = False
 
     bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
-    if bodypuzmdfile:
+    if options['makemd'] and bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
@@ -1302,7 +1359,7 @@ def generate_jigsaw(data, options, layout):
         puzzlemd = False
 
     bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
-    if bodysolmdfile:
+    if options['makemd'] and bodysolmdfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
         if headerfile:
             bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
@@ -1455,11 +1512,13 @@ def generate_jigsaw(data, options, layout):
         ptextmd = dosub(bodypuzmd, dsubsmd)
         print(ptextmd, file=outpuzmd)
         outpuzmd.close()
+        filtermd(outpuzmdfile, options)
 
     if solutionmd:
         stextmd = dosub(bodysolmd, dsubsmd)
         print(stextmd, file=outsolmd)
         outsolmd.close()
+        filtermd(outsolmdfile, options)
 
 def generate_cardsort(data, options, layout):
     """Generate cards for a cardsort or domino activity"""
@@ -1478,7 +1537,7 @@ def generate_cardsort(data, options, layout):
         dosoln = True
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    if bodypuzfile:
+    if options['makepdf'] and bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
@@ -1496,7 +1555,7 @@ def generate_cardsort(data, options, layout):
 
     if dosoln:
         bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
-        if bodysolfile:
+        if options['makepdf'] and bodysolfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
             if headerfile:
                 bodysol = opentemplate(templatedirs, bodysolfile).read()
@@ -1516,7 +1575,7 @@ def generate_cardsort(data, options, layout):
         solutiontex = False
 
     bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
-    if bodytablefile:
+    if options['makepdf'] and bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
@@ -1533,7 +1592,7 @@ def generate_cardsort(data, options, layout):
         tabletex = False
 
     bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
-    if bodypuzmdfile:
+    if options['makemd'] and bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
@@ -1552,7 +1611,7 @@ def generate_cardsort(data, options, layout):
 
     if dosoln:
         bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
-        if bodysolmdfile:
+        if options['makemd'] and bodysolmdfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
             if headerfile:
                 bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
@@ -1832,10 +1891,12 @@ def generate_cardsort(data, options, layout):
     if puzzlemd:
         print(dsubsmd['puzbody'], file=outpuzmd)
         outpuzmd.close()
+        filtermd(outpuzmdfile, options)
 
     if solutionmd:
         print(dsubsmd['solbody'], file=outsolmd)
         outsolmd.close()
+        filtermd(outsolmdfile, options)
 
 
 # This allows this script to be invoked directly and also perhap for
