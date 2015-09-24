@@ -967,10 +967,10 @@ def make_domino_cards(data, layout, options,
 
 rerun_regex = re.compile(b'rerun ', re.I)
 
-def runlatex(fn, options):
+def runlatex(fn, layout, data, options):
     """Run LaTeX or a variant on fn"""
 
-    texfilter = options['texfilter']
+    texfilter = getopt(layout, data, options, 'texfilter')
     filterprog = None
     error = False
 
@@ -985,7 +985,8 @@ def runlatex(fn, options):
         else:
             os.replace(fn, fn + '.filter')
             try:
-                output = subprocess.check_output(filterprog, fn + '.filter')
+                output = subprocess.check_output(filterprog,
+                                                 stdin=open(fn + '.filter'))
                 with open(fn, 'w') as filtered:
                     print(output, file=filtered)
             except subprocess.CalledProcessError as cpe:
@@ -1020,10 +1021,10 @@ def runlatex(fn, options):
             except:
                 pass
 
-def filtermd(fn, options):
+def filtermd(fn, layout, data, options):
     """Filter Markdown output if required"""
 
-    mdfilter = options['mdfilter']
+    mdfilter = getopt(layout, data, options, 'mdfilter')
     filterprog = None
     error = False
 
@@ -1038,19 +1039,18 @@ def filtermd(fn, options):
         else:
             os.replace(fn, fn + '.filter')
             try:
-                output = subprocess.check_output(filterprog, fn + '.filter')
+                output = subprocess.check_output(filterprog,
+                                                 stdin=open(fn + '.filter'))
                 with open(fn, 'w') as filtered:
                     print(output, file=filtered)
             except subprocess.CalledProcessError as cpe:
                 print('Warning: Markdown filter failed, return value %s' %
                       cpe.returncode, file=sys.stderr)
-                os.replace(fn + '.filter', fn)
                 error = True
                 
         if not error and options['clean']:
-            basename = os.path.splitext(fn)[0]
             try:
-                os.remove(basename + '.filtered')
+                os.remove(fn + '.filter')
             except:
                 pass
 
@@ -1187,12 +1187,12 @@ def main(pkgdatadir=None):
 
     if args.texfilter != None:
         options['texfilter'] = args.texfilter
-    else:
+    elif config['jigsaw-generate']['texfilter']:
         options['texfilter'] = config['jigsaw-generate']['texfilter']
 
     if args.mdfilter != None:
         options['mdfilter'] = args.mdfilter
-    else:
+    elif config['jigsaw-generate']['mdfilter']:
         options['mdfilter'] = config['jigsaw-generate']['mdfilter']
 
     ### Read the puzzle file
@@ -1494,31 +1494,31 @@ def generate_jigsaw(data, options, layout):
         btext = dosub(bodytable, dsubs)
         print(btext, file=outtable)
         outtable.close()
-        runlatex(outtablefile, options)
+        runlatex(outtablefile, layout, data, options)
 
     if puzzletex:
         ptext = dosub(bodypuz, dsubs)
         print(ptext, file=outpuz)
         outpuz.close()
-        runlatex(outpuzfile, options)
+        runlatex(outpuzfile, layout, data, options)
 
     if solutiontex:
         stext = dosub(bodysol, dsubs)
         print(stext, file=outsol)
         outsol.close()
-        runlatex(outsolfile, options)
+        runlatex(outsolfile, layout, data, options)
 
     if puzzlemd:
         ptextmd = dosub(bodypuzmd, dsubsmd)
         print(ptextmd, file=outpuzmd)
         outpuzmd.close()
-        filtermd(outpuzmdfile, options)
+        filtermd(outpuzmdfile, layout, data, options)
 
     if solutionmd:
         stextmd = dosub(bodysolmd, dsubsmd)
         print(stextmd, file=outsolmd)
         outsolmd.close()
-        filtermd(outsolmdfile, options)
+        filtermd(outsolmdfile, layout, data, options)
 
 def generate_cardsort(data, options, layout):
     """Generate cards for a cardsort or domino activity"""
@@ -1876,27 +1876,27 @@ def generate_cardsort(data, options, layout):
         btext = dosub(bodytable, dsubs)
         print(btext, file=outtable)
         outtable.close()
-        runlatex(outtablefile, options)
+        runlatex(outtablefile, layout, data, options)
 
     if puzzletex:
         print(dsubs['puzbody'], file=outpuz)
         outpuz.close()
-        runlatex(outpuzfile, options)
+        runlatex(outpuzfile, layout, data, options)
 
     if solutiontex:
         print(dsubs['solbody'], file=outsol)
         outsol.close()
-        runlatex(outsolfile, options)
+        runlatex(outsolfile, layout, data, options)
 
     if puzzlemd:
         print(dsubsmd['puzbody'], file=outpuzmd)
         outpuzmd.close()
-        filtermd(outpuzmdfile, options)
+        filtermd(outpuzmdfile, layout, data, options)
 
     if solutionmd:
         print(dsubsmd['solbody'], file=outsolmd)
         outsolmd.close()
-        filtermd(outsolmdfile, options)
+        filtermd(outsolmdfile, layout, data, options)
 
 
 # This allows this script to be invoked directly and also perhap for
