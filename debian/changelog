@@ -1,6 +1,6 @@
-jigsaw-generator (0.1.4-1~1.gbpd3b391) UNRELEASED; urgency=low
+jigsaw-generator (0.1.4-1~2.gbpef4525) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @d3b3915357b4177b91372b8bb44ab371983fcb08 **
+  ** SNAPSHOT build @ef45254d0569a1b8c15505a01ce0655ffa678a29 **
 
   * Update from upstream
   * UNRELEASED
@@ -13,6 +13,8 @@ jigsaw-generator (0.1.4-1~1.gbpd3b391) UNRELEASED; urgency=low
   * Update changelog for 0.1.2-1~2.gbp839d0f release
   * Update changelog for 0.1.3~1.gbpda3eb3 release
   * Update changelog for 0.1.3-1~1.gbpb05e3d release
+  * Update changelog for 0.1.4-1~1.gbpd3b391 release
+  * Add copyright info on goose.png
 
  -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 22:08:01 +0100
 
