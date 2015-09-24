@@ -1187,12 +1187,12 @@ def main(pkgdatadir=None):
 
     if args.texfilter != None:
         options['texfilter'] = args.texfilter
-    else if config['jigsaw-generate']['texfilter']:
+    elif config['jigsaw-generate']['texfilter']:
         options['texfilter'] = config['jigsaw-generate']['texfilter']
 
     if args.mdfilter != None:
         options['mdfilter'] = args.mdfilter
-    else if config['jigsaw-generate']['mdfilter']:
+    elif config['jigsaw-generate']['mdfilter']:
         options['mdfilter'] = config['jigsaw-generate']['mdfilter']
 
     ### Read the puzzle file
