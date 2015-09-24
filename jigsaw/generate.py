@@ -1176,7 +1176,7 @@ def main(pkgdatadir=None):
     if args.latex:
         options['latex'] = args.latex
     else:
-        options['makemd'] = config['jigsaw-generate']['latex']
+        options['latex'] = config['jigsaw-generate']['latex']
 
     if args.clean:
         options['clean'] = True
