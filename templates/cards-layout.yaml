@@ -5,7 +5,7 @@ typename: unsorted cards
 
 puzzleHeaderTeX: template-cardsort-header.tex
 puzzleTemplateTeX: template-cardsort-puzzle.tex
-tableHeaderTeX: template-cardsort-header.tex
+tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
