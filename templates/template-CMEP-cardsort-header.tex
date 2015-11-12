@@ -7,7 +7,7 @@
   rmargin=1.7cm,
   tmargin=4cm,
   bmargin=2cm,
-  footskip=0pt,
+  footskip=8pt,
   headheight=2cm}
 
 \usepackage{fancyhdr}
@@ -72,10 +72,11 @@
 
 \setmonofont[Scale=MatchLowercase]{Monaco}
 
-\newfontfamily\ChalkFont[Path=.,Scale=MatchLowercase]{Delius-Regular.ttf}
+\newfontfamily\ChalkFont[Path=./,Scale=MatchLowercase]{Delius-Regular.ttf}
 \usepackage{fontawesome}
 
 %%% MATHEMATICS
+\usepackage{mathtools}
 \usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 \setmathfont[Scale=MatchLowercase]{XITS Math}
 
