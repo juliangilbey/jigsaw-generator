@@ -26,6 +26,9 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
+debug_getopt = 1
+debug = 0
+
 #####################################################################
 
 # Utility functions and global definitions.  These might get moved out
@@ -52,15 +55,40 @@ def getopt(layout, data, options, opt, default=None):
     """Determine the value of opt from various possible sources
 
     Check the command-line options first for this option, then the
-    data, then finally the layout; return the first value found, or
-    default if the option is not found anywhere.
+    data, then the layout, then the config file; return the first
+    value found, or default if the option is not found anywhere.
+
     """
-    if opt in options:
-        return options[opt]
+    if options and opt in options['options']:
+        if debug & debug_getopt:
+            print('option %s set to "%s" by options' %
+                  (opt, options['options'][opt]), file=sys.stderr)
+        return options['options'][opt]
     if opt in data:
+        if debug & debug_getopt:
+            print('option %s set to "%s" by data' % (opt, data[opt]),
+                  file=sys.stderr)
         return data[opt]
     if opt in layout:
+        if debug & debug_getopt:
+            print('option %s set to "%s" by layout' % (opt, layout[opt]),
+                  file=sys.stderr)
         return layout[opt]
+    if options and opt in options['config']:
+        if debug & debug_getopt:
+            print('option %s set to "%s" by config' %
+                  (opt, options['config'][opt]), file=sys.stderr)
+        if opt in ('clean', 'makepdf', 'makemd'):
+            return options['config'].getboolean(opt)
+        else:
+            return options['config'][opt]
+    if debug & debug_getopt:
+        if default is None:
+            print('option %s set to None by default' % opt,
+                  file=sys.stderr)
+        else:
+            print('option %s set to "%s" by default' % (opt, default),
+                  file=sys.stderr)
     return default
 
 def dosub(text, subs):
@@ -971,6 +999,7 @@ def runlatex(fn, layout, data, options):
     """Run LaTeX or a variant on fn"""
 
     texfilter = getopt(layout, data, options, 'texfilter')
+    latexprog = getopt(layout, data, options, 'latex')
     filterprog = None
     error = False
 
@@ -999,13 +1028,12 @@ def runlatex(fn, layout, data, options):
                 
     for count in range(4):
         try:
-            output = subprocess.check_output([options['latex'],
-                                              '--interaction=batchmode',
-                                              fn])
+            output = subprocess.check_output([latexprog,
+                                              '--interaction=batchmode', fn])
         except subprocess.CalledProcessError as cpe:
             print('Warning: %s %s failed, return value %s' %
-                  (options['latex'], fn, cpe.returncode), file=sys.stderr)
-            print('See the %s log file for more details.' % options['latex'],
+                  (latexprog, fn, cpe.returncode), file=sys.stderr)
+            print('See the %s log file for more details.' % latexprog,
                   file=sys.stderr)
             error = True
             break
@@ -1013,7 +1041,8 @@ def runlatex(fn, layout, data, options):
         if not rerun_regex.search(output):
             break
 
-    if not error and options['clean']:
+    doclean = getopt(layout, data, options, 'clean')
+    if not error and doclean:
         basename = os.path.splitext(fn)[0]
         for junk in ['aux', 'log', 'tex', 'ind', 'idx', 'out', 'tex.filter']:
             try:
@@ -1048,7 +1077,8 @@ def filtermd(fn, layout, data, options):
                       cpe.returncode, file=sys.stderr)
                 error = True
                 
-        if not error and options['clean']:
+        doclean = getopt(layout, data, options, 'clean')
+        if not error and doclean:
             try:
                 os.remove(fn + '.filter')
             except:
@@ -1086,11 +1116,9 @@ def main(pkgdatadir=None):
             print('Warning: no "jigsaw-generate" section in config.ini\n'
                   'Your configuration file will be ignored.',
                   file=sys.stderr)
-            config['jigsaw-generate'] = defaults
+            configs = dict()
         else:
-            for c in defaults:
-                if c not in config['jigsaw-generate']:
-                    config['jigsaw-generate'][c] = defaults[c]
+            configs = config['jigsaw-generate']
     else:
         # Write a default configuration file
         config = configparser.ConfigParser()
@@ -1098,13 +1126,17 @@ def main(pkgdatadir=None):
         os.makedirs(userdatadir, exist_ok=True)
         with open(os.path.join(userdatadir, 'config.ini'), 'w') as configfile:
             config.write(configfile)
+        configs = config['jigsaw-generate']
 
     ### Parse the command line
     parser = argparse.ArgumentParser()
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
     groupc = parser.add_mutually_exclusive_group()
-    doclean = config['jigsaw-generate'].getboolean('clean')
+    if 'clean' in configs:
+        doclean = configs.getboolean('clean')
+    else:
+        doclean = True
     groupc.add_argument('--noclean', '--no-clean',
                         help=('do not clean auxiliary files%s' %
                               (' (default)' if not doclean else '')),
@@ -1115,10 +1147,14 @@ def main(pkgdatadir=None):
                         action='store_true')
     parser.add_argument('--latex',
                         help=('the LaTeX variant to run (default %s)' %
-                              config['jigsaw-generate']['latex']))
+                              configs['latex'] if 'latex' in configs
+                              else 'pdflatex'))
 
     groupp = parser.add_mutually_exclusive_group()
-    dopdf = config['jigsaw-generate'].getboolean('makepdf')
+    if 'makepdf' in configs:
+        dopdf = configs.getboolean('makepdf')
+    else:
+        dopdf = True
     groupp.add_argument('--makepdf',
                         help=('make PDF output via LaTeX%s' %
                               (' (default)' if dopdf else '')),
@@ -1129,7 +1165,10 @@ def main(pkgdatadir=None):
                         action='store_true')
 
     groupm = parser.add_mutually_exclusive_group()
-    domd = config['jigsaw-generate'].getboolean('makemd')
+    if 'makemd' in configs:
+        domd = configs.getboolean('makemd')
+    else:
+        domd = True
     groupm.add_argument('--makemd',
                         help=('make Markdown output%s' %
                               (' (default)' if domd else '')),
@@ -1139,12 +1178,18 @@ def main(pkgdatadir=None):
                               (' (default)' if not domd else '')),
                         action='store_true')
 
-    conftexfilter = config['jigsaw-generate']['texfilter']
+    if 'texfilter' in configs:
+        conftexfilter = configs['texfilter']
+    else:
+        conftexfilter = None
     parser.add_argument('--texfilter',
                         help=('filter to run on LaTeX file%s' %
                               (' (default %s)' % conftexfilter if conftexfilter
                                else '')))
-    confmdfilter = config['jigsaw-generate']['mdfilter']
+    if 'mdfilter' in configs:
+        confmdfilter = configs['mdfilter']
+    else:
+        confmdfilter = None
     parser.add_argument('--mdfilter',
                         help=('filter to run on Markdown file%s' %
                               (' (default %s)' % confmdfilter if confmdfilter
@@ -1158,42 +1203,30 @@ def main(pkgdatadir=None):
     puzbase = puzfile[:-5]
 
     # We bundle the command-line args into an options dict
-    options = { 'puzbase': puzbase }
+    options = dict()
     if args.makepdf:
         options['makepdf'] = True
     elif args.nomakepdf:
         options['makepdf'] = False
-    else:
-        options['makepdf'] = dopdf
         
     if args.makemd:
         options['makemd'] = True
     elif args.nomakemd:
         options['makemd'] = False
-    else:
-        options['makemd'] = domd
 
     if args.latex:
         options['latex'] = args.latex
-    else:
-        options['latex'] = config['jigsaw-generate']['latex']
 
     if args.clean:
         options['clean'] = True
     elif args.noclean:
         options['clean'] = False
-    else:
-        options['clean'] = doclean
 
     if args.texfilter != None:
         options['texfilter'] = args.texfilter
-    elif config['jigsaw-generate']['texfilter']:
-        options['texfilter'] = config['jigsaw-generate']['texfilter']
 
     if args.mdfilter != None:
         options['mdfilter'] = args.mdfilter
-    elif config['jigsaw-generate']['mdfilter']:
-        options['mdfilter'] = config['jigsaw-generate']['mdfilter']
 
     ### Read the puzzle file
     try:
@@ -1223,13 +1256,15 @@ def main(pkgdatadir=None):
     if not pkgdatadir:
         pkgdatadir = appdirs.site_data_dir('jigsaw-generator')
     userdatadir = appdirs.user_config_dir('jigsaw-generator')
-    options['templatedirs'] = ['.',
-                               os.path.join(userdatadir, 'templates'),
-                               os.path.join(pkgdatadir, 'templates')]
-    options['filterdirs'] = ['.',
-                             os.path.join(userdatadir, 'filters'),
-                             os.path.join(pkgdatadir, 'filters')]
-    generate(data, options)
+    templatedirs = ['.',
+                    os.path.join(userdatadir, 'templates'),
+                    os.path.join(pkgdatadir, 'templates')]
+    filterdirs = ['.',
+                  os.path.join(userdatadir, 'filters'),
+                  os.path.join(pkgdatadir, 'filters')]
+    generate(data, {'puzbase': puzbase, 'templatedirs': templatedirs,
+                    'filterdirs': filterdirs,
+                    'options': options, 'config': configs})
 
 
 def generate(data, options):
@@ -1289,7 +1324,9 @@ def generate_jigsaw(data, options, layout):
     templatedirs = options['templatedirs']
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    if options['makepdf'] and bodypuzfile:
+    makepdf = getopt(layout, data, options, 'makepdf')
+    makemd = getopt(layout, data, options, 'makemd')
+    if makepdf and bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
@@ -1306,7 +1343,7 @@ def generate_jigsaw(data, options, layout):
         puzzletex = False
         
     bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
-    if options['makepdf'] and bodysolfile:
+    if makepdf and bodysolfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
         if headerfile:
             bodysol = opentemplate(templatedirs, bodysolfile).read()
@@ -1324,7 +1361,7 @@ def generate_jigsaw(data, options, layout):
         solutiontex = False
 
     bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
-    if options['makepdf'] and bodytablefile:
+    if makepdf and bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
@@ -1341,7 +1378,7 @@ def generate_jigsaw(data, options, layout):
         tabletex = False
 
     bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
-    if options['makemd'] and bodypuzmdfile:
+    if makemd and bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
@@ -1359,7 +1396,7 @@ def generate_jigsaw(data, options, layout):
         puzzlemd = False
 
     bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
-    if options['makemd'] and bodysolmdfile:
+    if makemd and bodysolmdfile:
         headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
         if headerfile:
             bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
@@ -1537,7 +1574,9 @@ def generate_cardsort(data, options, layout):
         dosoln = True
 
     bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    if options['makepdf'] and bodypuzfile:
+    makepdf = getopt(layout, data, options, 'makepdf')
+    makemd = getopt(layout, data, options, 'makemd')
+    if makepdf and bodypuzfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
@@ -1555,7 +1594,7 @@ def generate_cardsort(data, options, layout):
 
     if dosoln:
         bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
-        if options['makepdf'] and bodysolfile:
+        if makepdf and bodysolfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
             if headerfile:
                 bodysol = opentemplate(templatedirs, bodysolfile).read()
@@ -1575,7 +1614,7 @@ def generate_cardsort(data, options, layout):
         solutiontex = False
 
     bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
-    if options['makepdf'] and bodytablefile:
+    if makepdf and bodytablefile:
         headerfile = getopt(layout, data, options, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
@@ -1592,7 +1631,7 @@ def generate_cardsort(data, options, layout):
         tabletex = False
 
     bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
-    if options['makemd'] and bodypuzmdfile:
+    if makemd and bodypuzmdfile:
         headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
@@ -1611,7 +1650,7 @@ def generate_cardsort(data, options, layout):
 
     if dosoln:
         bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
-        if options['makemd'] and bodysolmdfile:
+        if makemd and bodysolmdfile:
             headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
             if headerfile:
                 bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
