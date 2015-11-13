@@ -236,7 +236,7 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
 
 % This is identical to \card, except that it's intended for double-sided
 % cards, so it doesn't draw a border.
-\newcommand{\card}[5]{%
+\newcommand{\borderlesscard}[5]{%
   \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
   \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
   \coordinate (botl) at (topl |- botr);

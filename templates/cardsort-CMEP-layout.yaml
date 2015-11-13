@@ -10,9 +10,9 @@ solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
-puzzleTemplateMarkdown: template-cardsort-puzzle.md
+puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP.md
 solutionHeaderMarkdown: template-header.md
-solutionTemplateMarkdown: template-cardsort-solution.md
+solutionTemplateMarkdown: template-cardsort-solution-CMEP.md
 latex: lualatex
 
 # We accept an arbitrary number of cards
