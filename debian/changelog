@@ -1,6 +1,6 @@
-jigsaw-generator (0.1.5-1~4.gbp50a685) UNRELEASED; urgency=low
+jigsaw-generator (0.1.5-1~5.gbp76da58) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @50a685c8672d470ad95e1370298fca2814da0d4f **
+  ** SNAPSHOT build @76da584e7712fc5baf62c5393b2f78347c8e85bb **
 
   * Update from upstream
   * UNRELEASED
@@ -16,6 +16,7 @@ jigsaw-generator (0.1.5-1~4.gbp50a685) UNRELEASED; urgency=low
   * Update changelog for 0.1.4-1~1.gbpd3b391 release
   * Add copyright info on goose.png
   * Update upstream
+  * Update changelog to match upstream
 
  -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 22:08:01 +0100
 
