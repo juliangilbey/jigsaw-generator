@@ -9,6 +9,7 @@ tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
+latex: lualatex
 
 # We accept an arbitrary number of cards
 cards: 0
