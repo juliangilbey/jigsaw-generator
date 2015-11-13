@@ -7,7 +7,7 @@
   rmargin=1.7cm,
   tmargin=4cm,
   bmargin=2cm,
-  footskip=0pt,
+  footskip=24pt,
   headheight=2cm}
 
 \usepackage{fancyhdr}
@@ -34,32 +34,15 @@
 %% Define styles used in the headers
 \definecolor{headertextcol}{HTML}{000000}
 \newcommand*{\headerlogofont}{\small\color{headertextcol}}
-\newcommand*{\headertitlefont}{\small\color{headertextcol}\bfseries}
 \newcommand*{\footerfont}{\scriptsize}
-\newcommand*{\stationbuttonfont}{\color{white}\bfseries}
-\newcommand*{\pvidbuttonfont}{\color{black}\itshape}
-\newcommand*{\headspace}{\hspace{1ex}}
-\newcommand*{\logoheight}{\headheight-2pt}
-\newcommand*{\bbox}[2][white]{\colorbox{#1}{$\displaystyle #2$}}
-
-%% Define the headers
-% Clear all headers
-\fancyhead{}
-
-% On all pages, the left of the header contains the logo vertically centred
-\fancyhead[L]{%
-  $\vcenter{\hbox{\includegraphics[height=\logoheight]{cmep-logo3}}}$
-  \headerlogofont Cambridge Mathematics
-}
-
-% Page-specific layouts define the centre and right headers
+\newcommand*{\logoheight}{10pt}
 
 %% Define the footers
-% Clear all footers
-\fancyfoot{}
-% Page-specific layouts should define the left footer, containing last upated from the meta.
-% Since many sheets are single page, it might not make senst to put the page number
-% and also, our footers are quite long and often run into the centre
+\fancyfoot[L]{%
+  $\vcenter{\hbox{\includegraphics[height=\logoheight]{cmep-logo3}}}$
+  \footerfont Cambridge Mathematics Education Project
+}
+
 \fancyfoot[R]{%
   \footerfont\copyright{} University of Cambridge unless indicated otherwise. All rights reserved.%
 }
@@ -72,10 +55,11 @@
 
 \setmonofont[Scale=MatchLowercase]{Monaco}
 
-\newfontfamily\ChalkFont[Path=.,Scale=MatchLowercase]{Delius-Regular.ttf}
+\newfontfamily\ChalkFont[Path=./,Scale=MatchLowercase]{Delius-Regular.ttf}
 \usepackage{fontawesome}
 
 %%% MATHEMATICS
+\usepackage{mathtools}
 \usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 \setmathfont[Scale=MatchLowercase]{XITS Math}
 
@@ -232,6 +216,34 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \makestyles\style\content{#4}
 
   \draw (topl) rectangle (botr);
+  \node[text width=\cardtxtwd,align=flush center,\style] at
+     ($ (topl)!0.5!(botr) $) {\content\par};
+  \def\templabel{#3}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt]
+      at ($ (topl) + (\offset,-\offset) $) {#3};
+  \fi
+
+  \def\templabel{#5}
+  \ifx\templabel\empty
+  \else \node at ($ (botl)!0.5!(botr) + (0,\offset) $) {\templabel};
+  \fi
+  \ifx\cardtitle\empty
+  \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
+}
+
+% This is identical to \card, except that it's intended for double-sided
+% cards, so it doesn't draw a border.
+\newcommand{\card}[5]{%
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
+  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (botl) at (topl |- botr);
+  \coordinate (topr) at (topl -| botr);
+
+  \makestyles\style\content{#4}
+
   \node[text width=\cardtxtwd,align=flush center,\style] at
      ($ (topl)!0.5!(botr) $) {\content\par};
   \def\templabel{#3}

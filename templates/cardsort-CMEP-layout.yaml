@@ -1,14 +1,19 @@
 # Template file for generic card sort activity
 category: cardsort
-type: cards
-typename: unsorted cards
+type: cardsort-CMEP
+typename: card sort
 
-puzzleHeaderTeX: template-cardsort-header.tex
+puzzleHeaderTeX: template-cardsort-header-CMEP.tex
 puzzleTemplateTeX: template-cardsort-puzzle.tex
+solutionHeaderTeX: template-cardsort-header.tex
+solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-cardsort-solution.md
+latex: lualatex
 
 # We accept an arbitrary number of cards
 cards: 0
@@ -21,10 +26,10 @@ columns: 2
 # producing the problem?  Say "true" for a proof sorting activity.
 # It probably does not make sense to say "false" here but still to
 # produce a solution.
-shuffleCards: false
+shuffleCards: true
 # Does this puzzle require production of a solution?  If so, the cards
 # must be given in the correct order initially.
-produceSolution: false
+produceSolution: true
 # Do we number the cards?
 numberCards: true
 # Default text size on cards

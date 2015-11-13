@@ -1,14 +1,15 @@
 # Template file for generic card sort activity
 category: cardsort
-type: cards
+type: cards-CMEP
 typename: unsorted cards
 
-puzzleHeaderTeX: template-cardsort-header.tex
+puzzleHeaderTeX: template-cardsort-header-CMEP.tex
 puzzleTemplateTeX: template-cardsort-puzzle.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
+latex: lualatex
 
 # We accept an arbitrary number of cards
 cards: 0

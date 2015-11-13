@@ -4,3 +4,6 @@
 puzzle*.tex
 puzzle*.md
 auto
+Makefile
+config.status
+jigsaw-generate
