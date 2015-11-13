@@ -99,6 +99,34 @@
   \fi
 }
 
+% This is identical to \card, except that it's intended for double-sided
+% cards, so it doesn't draw a border.
+\newcommand{\borderlesscard}[5]{%
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
+  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (botl) at (topl |- botr);
+  \coordinate (topr) at (topl -| botr);
+
+  \makestyles\style\content{#4}
+
+  \node[text width=\cardtxtwd,align=flush center,\style] at
+     ($ (topl)!0.5!(botr) $) {\content\par};
+  \def\templabel{#3}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt]
+      at ($ (topl) + (\offset,-\offset) $) {#3};
+  \fi
+
+  \def\templabel{#5}
+  \ifx\templabel\empty
+  \else \node at ($ (botl)!0.5!(botr) + (0,\offset) $) {\templabel};
+  \fi
+  \ifx\cardtitle\empty
+  \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
+}
+
 % Domino number #3 appears on row #1 column #2 with left content #4,
 % right content #5
 % If card number is empty, don't draw circle around number

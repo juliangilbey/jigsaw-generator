@@ -1,0 +1,36 @@
+% \input template-cardsort-header
+% \testingtrue
+%%% BEGIN DOCUMENT
+
+\chead{\begin{minipage}{\textwidth}
+  \centering \textbf{<: title :>}\\[\smallskipamount]
+  \small(Page \thepage\ of \pageref{LastPage})\\[\smallskipamount]
+  \ <: puzzlenote :>\ \end{minipage}}
+
+\setlength\cardwd{\textwidth - 6pt}
+\setlength\cardwd{\cardwd / <: columns :>}
+\setlength\cardht{\textheight - 6pt}
+\setlength\cardht{\cardht / <: rows :>}
+\setlength\cardtxtwd{4\cardwd/5} % text = 80% of card width
+
+\tikzset{every picture/.style={line width=3pt}}
+
+\def\cardtitle{<: cardtitle :>}
+
+\begin{document}
+
+%%% BEGIN PAGE
+  \begin{tikzpicture}
+%%% BEGIN ITEM
+\card{<: rownum :>}{<: colnum :>}{<: cardnum :>}{<: text :>}{<: label :>}
+%%% END PAGE
+  \end{tikzpicture}
+  \newpage
+%%% END DOCUMENT
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
