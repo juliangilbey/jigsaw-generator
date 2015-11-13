@@ -27,8 +27,12 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-debug_getopt = 1
-debug = 0
+debug_pdb = 1
+debug_getopt = 2
+debug = debug_pdb
+
+if debug & debug_pdb:
+    import pdb
 
 #####################################################################
 
@@ -851,9 +855,9 @@ def make_domino_cards(data, layout, options,
     dsubs['columns'] = columns
     dsubsmd['columns'] = columns
 
-    loop = getopt(layout, data, options, 'loop', True)
-    start = getopt(layout, data, options, 'start', 'Start')
-    finish = getopt(layout, data, options, 'finish', 'Finish')
+    loop = getopt(layout, data, {}, 'loop', True)
+    start = getopt(layout, data, {}, 'start', 'Start')
+    finish = getopt(layout, data, {}, 'finish', 'Finish')
 
     # We temporarily append a terminal pair if we're not looping
     if not loop:
@@ -1000,7 +1004,7 @@ def runlatex(fn, layout, data, options):
     """Run LaTeX or a variant on fn"""
 
     texfilter = getopt(layout, data, options, 'texfilter')
-    latexprog = getopt(layout, data, options, 'latex')
+    latexprog = getopt(layout, data, options, 'latex', 'pdflatex')
     filterprog = None
     error = False
 
@@ -1042,7 +1046,7 @@ def runlatex(fn, layout, data, options):
         if not rerun_regex.search(output):
             break
 
-    doclean = getopt(layout, data, options, 'clean')
+    doclean = getopt(layout, data, options, 'clean', True)
     if not error and doclean:
         basename = os.path.splitext(fn)[0]
         for junk in ['aux', 'log', 'tex', 'ind', 'idx', 'out', 'tex.filter']:
@@ -1078,7 +1082,7 @@ def filtermd(fn, layout, data, options):
                       cpe.returncode, file=sys.stderr)
                 error = True
                 
-        doclean = getopt(layout, data, options, 'clean')
+        doclean = getopt(layout, data, options, 'clean', True)
         if not error and doclean:
             try:
                 os.remove(fn + '.filter')
@@ -1132,6 +1136,10 @@ def main(pkgdatadir=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
+    
+    parser.add_argument('-o', '--output',
+                        help='basename of output files')
+    
     groupc = parser.add_mutually_exclusive_group()
     if 'clean' in configs:
         doclean = configs.getboolean('clean')
@@ -1204,6 +1212,10 @@ def main(pkgdatadir=None):
 
     # We bundle the command-line args into an options dict
     options = dict()
+
+    if args.output:
+        options['output'] = args.output
+
     if args.makepdf:
         options['makepdf'] = True
     elif args.nomakepdf:
@@ -1314,11 +1326,11 @@ def generate_jigsaw(data, options, layout):
     puzbase = options['puzbase']
     templatedirs = options['templatedirs']
 
-    bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    makepdf = getopt(layout, data, options, 'makepdf')
-    makemd = getopt(layout, data, options, 'makemd')
+    bodypuzfile = getopt(layout, data, {}, 'puzzleTemplateTeX')
+    makepdf = getopt(layout, data, options, 'makepdf', True)
+    makemd = getopt(layout, data, options, 'makemd', True)
     if makepdf and bodypuzfile:
-        headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
+        headerfile = getopt(layout, data, {}, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
             outpuzfile = puzbase + '-puzzle.tex'
@@ -1333,9 +1345,9 @@ def generate_jigsaw(data, options, layout):
     else:
         puzzletex = False
         
-    bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
+    bodysolfile = getopt(layout, data, {}, 'solutionTemplateTeX')
     if makepdf and bodysolfile:
-        headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
+        headerfile = getopt(layout, data, {}, 'solutionHeaderTeX')
         if headerfile:
             bodysol = opentemplate(templatedirs, bodysolfile).read()
             outsolfile = puzbase + '-solution.tex'
@@ -1351,9 +1363,9 @@ def generate_jigsaw(data, options, layout):
     else:
         solutiontex = False
 
-    bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
+    bodytablefile = getopt(layout, data, {}, 'tableTemplateTeX')
     if makepdf and bodytablefile:
-        headerfile = getopt(layout, data, options, 'tableHeaderTeX')
+        headerfile = getopt(layout, data, {}, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
             outtablefile = puzbase + '-table.tex'
@@ -1368,9 +1380,9 @@ def generate_jigsaw(data, options, layout):
     else:
         tabletex = False
 
-    bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
+    bodypuzmdfile = getopt(layout, data, {}, 'puzzleTemplateMarkdown')
     if makemd and bodypuzmdfile:
-        headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
+        headerfile = getopt(layout, data, {}, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
             outpuzmdfile = puzbase + '-puzzle.md'
@@ -1386,9 +1398,9 @@ def generate_jigsaw(data, options, layout):
     else:
         puzzlemd = False
 
-    bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
+    bodysolmdfile = getopt(layout, data, {}, 'solutionTemplateMarkdown')
     if makemd and bodysolmdfile:
-        headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
+        headerfile = getopt(layout, data, {}, 'solutionHeaderMarkdown')
         if headerfile:
             bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
             outsolmdfile = puzbase + '-solution.md'
@@ -1469,14 +1481,14 @@ def generate_jigsaw(data, options, layout):
                  layout['typename'])
     cards = []  # so later call to make_table doesn't break
 
-    if getopt(layout, data, options, 'shufflePairs'):
+    if getopt(layout, data, {}, 'shufflePairs'):
         random.shuffle(pairs)
-    if getopt(layout, data, options, 'shuffleEdges'):
+    if getopt(layout, data, {}, 'shuffleEdges'):
         random.shuffle(edges)
 
     # We preserve the original pairs data for the table; we only flip
     # the questions and answers (if requested) for the puzzle cards
-    if getopt(layout, data, options, 'flip'):
+    if getopt(layout, data, {}, 'flip'):
         flippedpairs = []
         for p in pairs:
             if random.choice([True, False]):
@@ -1501,11 +1513,11 @@ def generate_jigsaw(data, options, layout):
         make_squares(data, layout, flippedpairs, edges, dsubs, dsubsmd)
 
     if exists_hidden:
-        hiddennote = getopt(layout, data, options, 'hiddennote',
+        hiddennote = getopt(layout, data, {}, 'hiddennote',
           'Entries that are hidden in the puzzle are highlighted in yellow.')
-        hiddennotemd = getopt(layout, data, options, 'hiddennotemd',
+        hiddennotemd = getopt(layout, data, {}, 'hiddennotemd',
           'Entries that are hidden in the puzzle are indicated with (*).')
-        hiddennotetable = getopt(layout, data, options, 'hiddennotetable',
+        hiddennotetable = getopt(layout, data, {}, 'hiddennotetable',
                                  hiddennotemd)
         dsubs['hiddennotesolution'] = hiddennote
         dsubs['hiddennotetable'] = hiddennotetable
@@ -1515,8 +1527,8 @@ def generate_jigsaw(data, options, layout):
         dsubs['hiddennotetable'] = ''
         dsubsmd['hiddennotemd'] = ''
 
-    dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
-    dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
+    dsubs['puzzlenote'] = getopt(layout, data, {}, 'note', '')
+    dsubsmd['puzzlenote'] = getopt(layout, data, {}, 'note', '')
 
     if tabletex:
         btext = dosub(bodytable, dsubs)
@@ -1551,12 +1563,12 @@ def generate_jigsaw(data, options, layout):
 def generate_cardsort(data, options, layout):
     """Generate cards for a cardsort or domino activity"""
 
-    # ***FIXME*** The output filenames should be specifiable on the
-    # command line.  Also, there should be options for which outputs
-    # to produce.
-
     puzbase = options['puzbase']
     templatedirs = options['templatedirs']
+    try:
+        outbase = options['options']['output']
+    except KeyError:
+        outbase = puzbase
 
     category = layout['category']
     if category == 'cardsort':
@@ -1564,14 +1576,15 @@ def generate_cardsort(data, options, layout):
     else:
         dosoln = True
 
-    bodypuzfile = getopt(layout, data, options, 'puzzleTemplateTeX')
-    makepdf = getopt(layout, data, options, 'makepdf')
-    makemd = getopt(layout, data, options, 'makemd')
+    bodypuzfile = getopt(layout, data, {}, 'puzzleTemplateTeX')
+    makepdf = getopt(layout, data, options, 'makepdf', True)
+    makemd = getopt(layout, data, options, 'makemd', True)
+
     if makepdf and bodypuzfile:
-        headerfile = getopt(layout, data, options, 'puzzleHeaderTeX')
+        headerfile = getopt(layout, data, {}, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
-            outpuzfile = puzbase + '-puzzle.tex'
+            outpuzfile = outbase + '-puzzle.tex'
             outpuz = open(outpuzfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuz)
@@ -1584,12 +1597,12 @@ def generate_cardsort(data, options, layout):
         puzzletex = False
 
     if dosoln:
-        bodysolfile = getopt(layout, data, options, 'solutionTemplateTeX')
+        bodysolfile = getopt(layout, data, {}, 'solutionTemplateTeX')
         if makepdf and bodysolfile:
-            headerfile = getopt(layout, data, options, 'solutionHeaderTeX')
+            headerfile = getopt(layout, data, {}, 'solutionHeaderTeX')
             if headerfile:
                 bodysol = opentemplate(templatedirs, bodysolfile).read()
-                outsolfile = puzbase + '-solution.tex'
+                outsolfile = outbase + '-solution.tex'
                 outsol = open(outsolfile, 'w')
                 header = opentemplate(templatedirs, headerfile).read()
                 print(header, file=outsol)
@@ -1604,12 +1617,12 @@ def generate_cardsort(data, options, layout):
     else:
         solutiontex = False
 
-    bodytablefile = getopt(layout, data, options, 'tableTemplateTeX')
+    bodytablefile = getopt(layout, data, {}, 'tableTemplateTeX')
     if makepdf and bodytablefile:
-        headerfile = getopt(layout, data, options, 'tableHeaderTeX')
+        headerfile = getopt(layout, data, {}, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
-            outtablefile = puzbase + '-table.tex'
+            outtablefile = outbase + '-table.tex'
             outtable = open(outtablefile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outtable)
@@ -1621,12 +1634,12 @@ def generate_cardsort(data, options, layout):
     else:
         tabletex = False
 
-    bodypuzmdfile = getopt(layout, data, options, 'puzzleTemplateMarkdown')
+    bodypuzmdfile = getopt(layout, data, {}, 'puzzleTemplateMarkdown')
     if makemd and bodypuzmdfile:
-        headerfile = getopt(layout, data, options, 'puzzleHeaderMarkdown')
+        headerfile = getopt(layout, data, {}, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
-            outpuzmdfile = puzbase + '-puzzle.md'
+            outpuzmdfile = outbase + '-puzzle.md'
             outpuzmd = open(outpuzmdfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuzmd)
@@ -1640,12 +1653,12 @@ def generate_cardsort(data, options, layout):
         puzzlemd = False
 
     if dosoln:
-        bodysolmdfile = getopt(layout, data, options, 'solutionTemplateMarkdown')
+        bodysolmdfile = getopt(layout, data, {}, 'solutionTemplateMarkdown')
         if makemd and bodysolmdfile:
-            headerfile = getopt(layout, data, options, 'solutionHeaderMarkdown')
+            headerfile = getopt(layout, data, {}, 'solutionHeaderMarkdown')
             if headerfile:
                 bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
-                outsolmdfile = puzbase + '-solution.md'
+                outsolmdfile = outbase + '-solution.md'
                 outsolmd = open(outsolmdfile, 'w')
                 header = opentemplate(templatedirs, headerfile).read()
                 print(header, file=outsolmd)
@@ -1853,11 +1866,11 @@ def generate_cardsort(data, options, layout):
     # for the solution and table.  Shuffling pairs is fine, though, as
     # their original order is immaterial if shufflePairs is requested.
 
-    if getopt(layout, data, options, 'shufflePairs'):
+    if getopt(layout, data, {}, 'shufflePairs'):
         random.shuffle(pairs)
     # We preserve the original pairs data for the table; we only flip
     # the questions and answers (if requested) for the puzzle cards
-    if getopt(layout, data, options, 'flip'):
+    if getopt(layout, data, {}, 'flip'):
         flippedpairs = []
         for p in pairs:
             if random.choice([True, False]):
@@ -1893,8 +1906,8 @@ def generate_cardsort(data, options, layout):
         dsubs['hiddennotetable'] = ''
         dsubsmd['hiddennotemd'] = ''
 
-    dsubs['puzzlenote'] = getopt(layout, data, options, 'note', '')
-    dsubsmd['puzzlenote'] = getopt(layout, data, options, 'note', '')
+    dsubs['puzzlenote'] = getopt(layout, data, {}, 'note', '')
+    dsubsmd['puzzlenote'] = getopt(layout, data, {}, 'note', '')
 
     dsubs['puzbody'] = dosub(dsubs['puzbody'], dsubs)
     dsubsmd['puzbody'] = dosub(dsubsmd['puzbody'], dsubsmd)
