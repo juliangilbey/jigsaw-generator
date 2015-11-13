@@ -29,7 +29,7 @@ except ImportError:
 
 debug_pdb = 1
 debug_getopt = 2
-debug = debug_pdb
+debug = 0
 
 if debug & debug_pdb:
     import pdb
@@ -1034,7 +1034,7 @@ def runlatex(fn, layout, data, options):
     for count in range(4):
         try:
             output = subprocess.check_output([latexprog,
-                                              '--interaction=batchmode', fn])
+                                              '--interaction=nonstopmode', fn])
         except subprocess.CalledProcessError as cpe:
             print('Warning: %s %s failed, return value %s' %
                   (latexprog, fn, cpe.returncode), file=sys.stderr)
