@@ -12,6 +12,7 @@ import random
 import sys
 import os
 import os.path
+import shutil
 import re
 import argparse
 import subprocess
@@ -1097,18 +1098,19 @@ def main(pkgdatadir=None):
     markdown file which can be included where needed.
     """
 
-    # Begin by reading the user config file.  If it does not exist,
-    # then create it.
-    defaults = OrderedDict([
-        ('makepdf', 'yes'),
-        ('makemd', 'yes'),
-        ('latex', 'pdflatex'),
-        ('clean', 'yes'),
-        ('texfilter', ''),
-        ('mdfilter', '')
-    ])
-
+    if not pkgdatadir:
+        pkgdatadir = appdirs.site_data_dir('jigsaw-generator')
     userdatadir = appdirs.user_config_dir('jigsaw-generator')
+    templatedirs = ['.',
+                    os.path.join(userdatadir, 'templates'),
+                    os.path.join(pkgdatadir, 'templates')]
+    filterdirs = ['.',
+                  os.path.join(userdatadir, 'filters'),
+                  os.path.join(pkgdatadir, 'filters')]
+
+    # Begin by reading the user config file.  If it does not exist,
+    # then copy the default one to the user's config directory.
+
     if os.access(os.path.join(userdatadir, 'config.ini'), os.R_OK):
         config = configparser.ConfigParser()
         config.read(os.path.join(userdatadir, 'config.ini'))
@@ -1120,13 +1122,11 @@ def main(pkgdatadir=None):
         else:
             configs = config['jigsaw-generate']
     else:
-        # Write a default configuration file
-        config = configparser.ConfigParser()
-        config['jigsaw-generate'] = defaults
+        # Copy the default configuration file
         os.makedirs(userdatadir, exist_ok=True)
-        with open(os.path.join(userdatadir, 'config.ini'), 'w') as configfile:
-            config.write(configfile)
-        configs = config['jigsaw-generate']
+        shutil.copy(os.path.join(pkgdatadir, 'templates', 'default_config.ini'),
+                    os.path.join(userdatadir, 'config.ini'))
+        configs = dict()
 
     ### Parse the command line
     parser = argparse.ArgumentParser()
@@ -1253,15 +1253,6 @@ def main(pkgdatadir=None):
     # be modified by the user; they go with the package.  Users can modify
     # templates by providing their own ones, hence site_data_dir is the
     # appropriate site choice.
-    if not pkgdatadir:
-        pkgdatadir = appdirs.site_data_dir('jigsaw-generator')
-    userdatadir = appdirs.user_config_dir('jigsaw-generator')
-    templatedirs = ['.',
-                    os.path.join(userdatadir, 'templates'),
-                    os.path.join(pkgdatadir, 'templates')]
-    filterdirs = ['.',
-                  os.path.join(userdatadir, 'filters'),
-                  os.path.join(pkgdatadir, 'filters')]
     generate(data, {'puzbase': puzbase, 'templatedirs': templatedirs,
                     'filterdirs': filterdirs,
                     'options': options, 'config': configs})
