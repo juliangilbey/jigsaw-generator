@@ -1,3 +1,8 @@
+2015-11-13  Julian Gilbey  <jdg@debian.org>
+
+        * Lots of improvements to template handling, configuration file
+        handling and so on.  See the git log for the full details.
+
 2015-08-26  Julian Gilbey  <jdg@debian.org>
 
         * First version of jigsaw software
