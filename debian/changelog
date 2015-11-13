@@ -1,6 +1,6 @@
-jigsaw-generator (0.1.6-1~5.gbp76da58) UNRELEASED; urgency=low
+jigsaw-generator (0.1.7-1~6.gbpc41bab) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @76da584e7712fc5baf62c5393b2f78347c8e85bb **
+  ** SNAPSHOT build @c41babc0ee38fddb23fc2a514111aabdfc7984c1 **
 
   * Update from upstream
   * UNRELEASED
@@ -17,6 +17,8 @@ jigsaw-generator (0.1.6-1~5.gbp76da58) UNRELEASED; urgency=low
   * Add copyright info on goose.png
   * Update upstream
   * Update changelog to match upstream
+  * Update to upstream
+  * update debian/changelog
 
  -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 22:08:01 +0100
 
