@@ -998,7 +998,7 @@ def make_domino_cards(data, layout, options,
         pairs.pop()
 
 
-rerun_regex = re.compile(b'rerun ', re.I)
+rerun_regex = re.compile(r'rerun ', re.I)
 
 def runlatex(fn, layout, data, options):
     """Run LaTeX or a variant on fn"""
@@ -1020,7 +1020,8 @@ def runlatex(fn, layout, data, options):
             os.replace(fn, fn + '.filter')
             try:
                 output = subprocess.check_output(filterprog,
-                                                 stdin=open(fn + '.filter'))
+                                                 stdin=open(fn + '.filter'),
+                                                 universal_newlines=True)
                 with open(fn, 'w') as filtered:
                     print(output, file=filtered)
             except subprocess.CalledProcessError as cpe:
@@ -1034,7 +1035,8 @@ def runlatex(fn, layout, data, options):
     for count in range(4):
         try:
             output = subprocess.check_output([latexprog,
-                                              '--interaction=nonstopmode', fn])
+                                              '--interaction=nonstopmode', fn],
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as cpe:
             print('Warning: %s %s failed, return value %s' %
                   (latexprog, fn, cpe.returncode), file=sys.stderr)
@@ -1074,7 +1076,8 @@ def filtermd(fn, layout, data, options):
             os.replace(fn, fn + '.filter')
             try:
                 output = subprocess.check_output(filterprog,
-                                                 stdin=open(fn + '.filter'))
+                                                 stdin=open(fn + '.filter'),
+                                                 universal_newlines=True)
                 with open(fn, 'w') as filtered:
                     print(output, file=filtered)
             except subprocess.CalledProcessError as cpe:
