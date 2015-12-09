@@ -1,10 +1,10 @@
 # Template file for generic card sort activity
 category: cardsort
-type: cardsort-CMEP
+type: cardsort-spaced-CMEP
 typename: card sort
 
 puzzleHeaderTeX: template-cardsort-header-CMEP.tex
-puzzleTemplateTeX: template-cardsort-puzzle.tex
+puzzleTemplateTeX: template-cardsort-spaced-puzzle.tex
 solutionHeaderTeX: template-cardsort-header.tex
 solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex

@@ -1,21 +1,18 @@
 # Template file for generic card sort activity
 category: cardsort
-type: cardsort-CMEP
-typename: card sort
+type: cardsort-spaced
+typename: card sort spaced
 
-puzzleHeaderTeX: template-cardsort-header-CMEP.tex
-puzzleTemplateTeX: template-cardsort-puzzle.tex
+puzzleHeaderTeX: template-cardsort-header.tex
+puzzleTemplateTeX: template-cardsort-spaced-puzzle.tex
 solutionHeaderTeX: template-cardsort-header.tex
 solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
-puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP.md
+puzzleTemplateMarkdown: template-cardsort-puzzle.md
 solutionHeaderMarkdown: template-header.md
-solutionTemplateMarkdown: template-cardsort-solution-CMEP.md
-latex: lualatex
-texfilter: cmep-texfilter
-mdfilter: cmep-mdfilter
+solutionTemplateMarkdown: template-cardsort-solution.md
 
 # We accept an arbitrary number of cards
 cards: 0
