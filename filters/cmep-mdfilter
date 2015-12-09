@@ -1,0 +1,23 @@
+#! /usr/bin/env python3
+
+"""
+Filter program for handling CMEP Markdown jigsaw files
+
+Usage: This program takes a Markdown file on stdin and outputs a
+filtered version on stdout
+
+Actions: ![]() images are replaced by the CMEP element
+<cm-image url="..." alt-text="" caption="..." />
+"""
+
+import fileinput
+import re
+
+img_re = re.compile(r'!\[([^\]]*)\]\(([^\)]*)\)')
+
+for line in fileinput.input():
+    line = img_re.sub(r'<cm-image url="\2" alt-text="" caption="\1" />', line)
+    print(line, end='')
+
+    
+            

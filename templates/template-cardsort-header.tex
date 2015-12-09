@@ -35,7 +35,7 @@
 
 \usepackage[export]{adjustbox}
 
-\newcommand{\image}[1]{\includegraphics[max height=0.8\cardht, max width=0.8\cardwd]{#1}}
+\newcommand{\image}[1]{\includegraphics[max height=0.7\cardht, max width=0.7\cardwd]{#1}}
 % There might be a nicer way to do the following, but I haven't yet
 % found it.
 \newcommand{\imagecap}[2]{%
@@ -61,6 +61,12 @@
   \def#2{#4}
 }
 
+% How much space should there be around the cards?
+% The gap between cards is twice this amount
+% This is zero by default, but can be modified by
+% users of this header.
+\newdimen\cardseph \setlength\cardseph{0pt}
+\newdimen\cardsepv \setlength\cardsepv{0pt}
 \newdimen\cardwd
 \newdimen\cardht
 \newdimen\cardtxtwd
@@ -73,8 +79,8 @@
 % If card number is empty, don't draw circle around number
 % Top left is (0,0) in our drawing
 \newcommand{\card}[5]{%
-  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
-  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd+\cardseph, \cardht-#1*\cardht-\cardsepv) $);
+  \coordinate (botr) at ($ (#2*\cardwd-\cardseph, -#1*\cardht+\cardsepv) $);
   \coordinate (botl) at (topl |- botr);
   \coordinate (topr) at (topl -| botr);
 
@@ -102,8 +108,8 @@
 % This is identical to \card, except that it's intended for double-sided
 % cards, so it doesn't draw a border.
 \newcommand{\borderlesscard}[5]{%
-  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
-  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd+\cardseph, \cardht-#1*\cardht-\cardsepv) $);
+  \coordinate (botr) at ($ (#2*\cardwd-\cardseph, -#1*\cardht+\cardsepv) $);
   \coordinate (botl) at (topl |- botr);
   \coordinate (topr) at (topl -| botr);
 
