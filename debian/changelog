@@ -1,6 +1,6 @@
-jigsaw-generator (0.1.7-1~6.gbpc41bab) UNRELEASED; urgency=low
+jigsaw-generator (0.1.8-1~7.gbp508906) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @c41babc0ee38fddb23fc2a514111aabdfc7984c1 **
+  ** SNAPSHOT build @5089060748c4daa781833dee937e017ff2f81953 **
 
   * Update from upstream
   * UNRELEASED
@@ -19,6 +19,7 @@ jigsaw-generator (0.1.7-1~6.gbpc41bab) UNRELEASED; urgency=low
   * Update changelog to match upstream
   * Update to upstream
   * update debian/changelog
+  * Update changelog
 
  -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 22:08:01 +0100
 
