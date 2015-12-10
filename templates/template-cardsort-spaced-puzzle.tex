@@ -7,13 +7,22 @@
   \small(Page \thepage\ of \pageref{LastPage})\\[\smallskipamount]
   \ <: puzzlenote :>\ \end{minipage}}
 
-\setlength\cardwd{\textwidth - 6pt}
+% The card separation is given; we need to halve it to find
+% the amount of offset of the border on each side.
+% The 1.5pt (which is half of 3pt) is to take account of the
+% thickness of the card border.
+\ifthenelse{\lengthtest{<: cardseph :> > 0pt}}
+ {\setlength\cardseph{<: cardseph :> / 2 + 1.5pt}}
+ {\setlength\cardseph{0pt}}
+\ifthenelse{\lengthtest{<: cardsepv :> > 0pt}}
+ {\setlength\cardsepv{<: cardsepv :> / 2 + 1.5pt}}
+ {\setlength\cardsepv{0pt}}
+
+\setlength\cardwd{\textwidth - 6pt + 2\cardseph}
 \setlength\cardwd{\cardwd / <: columns :>}
-\setlength\cardht{\textheight - 6pt}
+\setlength\cardht{\textheight - 6pt + 2\cardsepv}
 \setlength\cardht{\cardht / <: rows :>}
 \setlength\cardtxtwd{4\cardwd/5} % text = 80% of card width
-\setlength\cardseph{6pt}
-\setlength\cardsepv{6pt}
 
 \tikzset{every picture/.style={line width=3pt}}
 

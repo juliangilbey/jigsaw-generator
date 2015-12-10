@@ -705,10 +705,20 @@ def make_cardsort_cards(data, layout, options,
 
     rows = getopt(layout, data, {}, 'rows')
     columns = getopt(layout, data, {}, 'columns')
+    cardsep = getopt(layout, data, {}, 'cardsep', '12pt')
+    cardseph = getopt(layout, data, {}, 'cardsepHorizontal')
+    cardsepv = getopt(layout, data, {}, 'cardsepVertical')
+    if cardseph is None:
+        cardseph = cardsep
+    if cardsepv is None:
+        cardsepv = cardsep
+
     dsubs['rows'] = rows
     dsubsmd['rows'] = rows
     dsubs['columns'] = columns
     dsubsmd['columns'] = columns
+    dsubs['cardseph'] = cardseph
+    dsubs['cardsepv'] = cardsepv
 
     # We do a presift of the cards to identify the real cards as
     # opposed to the special cards.  It would be more efficient to
