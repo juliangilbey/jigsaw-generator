@@ -274,8 +274,8 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
 % If card number is empty, don't draw circle around number
 % Top left is (0,0) in our drawing
 \newcommand{\domino}[5]{%
-  \coordinate (topl) at ($ (#2*\cardwd-\cardwd, \cardht-#1*\cardht) $);
-  \coordinate (botr) at ($ (#2*\cardwd, -#1*\cardht) $);
+  \coordinate (topl) at ($ (#2*\cardwd-\cardwd+\cardseph, \cardht-#1*\cardht-\cardsepv) $);
+  \coordinate (botr) at ($ (#2*\cardwd-\cardseph, -#1*\cardht+\cardsepv) $);
   \coordinate (botl) at (topl |- botr);
   \coordinate (topr) at (topl -| botr);
   \coordinate (topm) at ($ (topl)!0.5!(topr) $);
