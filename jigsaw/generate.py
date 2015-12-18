@@ -1,11 +1,12 @@
 #! /usr/bin/env python3
 
 """
-jigsaw-generate.py
-Copyright (C) 2014 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>, <jdg@debian.org>
+jigsaw-generate
+Copyright (C) 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
+  <jdg@debian.org>
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
-under certain conditions; see the LICENSE file for details.
+under certain conditions; see the COPYING file for details.
 """
 
 import random
@@ -1104,7 +1105,7 @@ def filtermd(fn, layout, data, options):
 
 #####################################################################
 
-def main(pkgdatadir=None):
+def main(pkgdatadir=None, pkgversion=0.0):
     """Process the command line and generate the appropriate output files.
 
     Command line:
@@ -1146,7 +1147,20 @@ def main(pkgdatadir=None):
         configs = dict()
 
     ### Parse the command line
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    versioninfo = '''
+This is jigsaw-generate, version %s.
+Copyright (C) 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
+  <jdg@debian.org>
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see the COPYING file for details.''' % pkgversion
+
+    parser.add_argument('-v', '--version', action='version',
+                        version=versioninfo)
+
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
     

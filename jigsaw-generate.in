@@ -2,9 +2,10 @@
 
 # This will be needed to find the template files
 pkgdatadir = '@pkgdatadir@'
+pkgversion = '@PACKAGE_VERSION@'
 
 import sys
 sys.path[1:1] = [pkgdatadir]
 
 import jigsaw.generate as generate
-generate.main(pkgdatadir)
+generate.main(pkgdatadir, pkgversion)

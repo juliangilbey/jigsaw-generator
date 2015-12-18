@@ -1,10 +1,11 @@
 # Use a handwritten Makefile rather than an automake mess for such
 # a simple package.  But stick to familiar 
-PACKAGE_TARNAME = jigsaw-generator
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
 prefix = @prefix@
 datarootdir = @datarootdir@
 datadir = @datadir@
-pkgdatadir = @datadir@/${PACKAGE_TARNAME}
+pkgdatadir = @datadir@/${PACKAGE_NAME}
 docdir = @docdir@
 mandir = @mandir@
 exec_prefix = @exec_prefix@
@@ -12,7 +13,7 @@ bindir = @bindir@
 MKDIR_P = @MKDIR_P@
 
 build:
-	sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|' jigsaw-generate.in > jigsaw-generate
+	sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|; s|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|;' jigsaw-generate.in > jigsaw-generate
 	chmod a+x jigsaw-generate
 
 install:
