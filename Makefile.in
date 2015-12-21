@@ -1,5 +1,6 @@
 # Use a handwritten Makefile rather than an automake mess for such
-# a simple package.  But stick to familiar 
+# a simple package.  But stick to familiar autoconf variable names.
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 prefix = @prefix@
@@ -22,12 +23,12 @@ install:
 	chmod 755 ${DESTDIR}${bindir}/jigsaw-generate
 
 	$(MKDIR_P) ${DESTDIR}${pkgdatadir}
-	cp -a jigsaw filters templates ${DESTDIR}${pkgdatadir}
+	cp -R jigsaw filters templates ${DESTDIR}${pkgdatadir}
 	chmod -R a+rX ${DESTDIR}${pkgdatadir}
 
 	$(MKDIR_P) ${DESTDIR}${docdir}
 	cp README.md COPYING ChangeLog AUTHORS ${DESTDIR}${docdir}
-	cp -a examples ${DESTDIR}${docdir}
+	cp -R examples ${DESTDIR}${docdir}
 	chmod -R a+rX ${DESTDIR}${docdir}
 
 	$(MKDIR_P) ${DESTDIR}${mandir}/man1
