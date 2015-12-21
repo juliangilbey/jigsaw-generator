@@ -5,10 +5,14 @@ typename: unsorted cards
 
 puzzleHeaderTeX: template-cardsort-header.tex
 puzzleTemplateTeX: template-cardsort-puzzle.tex
+solutionHeaderTeX: template-cardsort-header.tex
+solutionTemplateTeX: template-cardsort-solution.tex
 tableHeaderTeX: template-header.tex
 tableTemplateTeX: template-cardsort-table.tex
 puzzleHeaderMarkdown: template-header.md
 puzzleTemplateMarkdown: template-cardsort-puzzle.md
+solutionHeaderMarkdown: template-header.md
+solutionTemplateMarkdown: template-cardsort-solution.md
 
 # We accept an arbitrary number of cards
 cards: 0
