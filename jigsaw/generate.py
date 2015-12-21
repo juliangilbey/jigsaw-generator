@@ -1241,6 +1241,9 @@ under certain conditions; see the COPYING file for details.''' % pkgversion
     options = dict()
 
     if args.output:
+        if os.path.dirname(args.output) not in ['', '.']:
+            sys.exit('Cannot currently handle --output not in current '
+                     'directory;\nplease change directory first')
         options['output'] = args.output
 
     if args.makepdf:
@@ -1347,11 +1350,12 @@ def generate(data, options):
 def generate_jigsaw(data, options, layout):
     """Generate output from data for jigsaw-type puzzles."""
 
-    # ***FIXME*** The output filenames should be specifiable on the
-    # command line.
-
     puzbase = options['puzbase']
     templatedirs = options['templatedirs']
+    try:
+        outbase = options['options']['output']
+    except KeyError:
+        outbase = os.path.basename(puzbase)
 
     bodypuzfile = getopt(layout, data, {}, 'puzzleTemplateTeX')
     makepdf = getopt(layout, data, options, 'makepdf', True)
@@ -1360,7 +1364,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
-            outpuzfile = puzbase + '-puzzle.tex'
+            outpuzfile = outbase + '-puzzle.tex'
             outpuz = open(outpuzfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuz)
@@ -1377,7 +1381,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'solutionHeaderTeX')
         if headerfile:
             bodysol = opentemplate(templatedirs, bodysolfile).read()
-            outsolfile = puzbase + '-solution.tex'
+            outsolfile = outbase + '-solution.tex'
             outsol = open(outsolfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsol)
@@ -1395,7 +1399,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
-            outtablefile = puzbase + '-table.tex'
+            outtablefile = outbase + '-table.tex'
             outtable = open(outtablefile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outtable)
@@ -1412,7 +1416,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
-            outpuzmdfile = puzbase + '-puzzle.md'
+            outpuzmdfile = outbase + '-puzzle.md'
             outpuzmd = open(outpuzmdfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuzmd)
@@ -1430,7 +1434,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'solutionHeaderMarkdown')
         if headerfile:
             bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
-            outsolmdfile = puzbase + '-solution.md'
+            outsolmdfile = outbase + '-solution.md'
             outsolmd = open(outsolmdfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsolmd)
@@ -1595,7 +1599,7 @@ def generate_cardsort(data, options, layout):
     try:
         outbase = options['options']['output']
     except KeyError:
-        outbase = puzbase
+        outbase = os.path.basename(puzbase)
 
     category = layout['category']
     if category == 'cardsort':
