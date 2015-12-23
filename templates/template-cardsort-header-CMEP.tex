@@ -220,11 +220,6 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \coordinate (botl) at (topl |- botr);
   \coordinate (topr) at (topl -| botr);
 
-  \makestyles\style\content{#4}
-
-  \draw (topl) rectangle (botr);
-  \node[text width=\cardtxtwd,align=flush center,\style] at
-     ($ (topl)!0.5!(botr) $) {\content\par};
   \def\templabel{#3}
   \ifx\templabel\empty
   \else
@@ -239,6 +234,26 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \ifx\cardtitle\empty
   \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
   \fi
+
+  \ifx\cardtitle\empty
+    \ifx\templabel\empty
+      \coordinate (cent) at ($ (topl)!0.5!(botr) $);
+    \else
+      \coordinate (cent) at ($ (topl)!0.5!(botr) + (0,0.5*\offset)$);
+    \fi
+  \else
+    \ifx\templabel\empty
+      \coordinate (cent) at ($ (topl)!0.5!(botr) + (0,-0.5*\offset)$);
+    \else
+      \coordinate (cent) at ($ (topl)!0.5!(botr) $);
+    \fi
+  \fi
+
+  \makestyles\style\content{#4}
+
+  \draw (topl) rectangle (botr);
+  \node[text width=\cardtxtwd,align=flush center,\style] at (cent)
+     {\content\par};
 }
 
 % This is identical to \card, except that it's intended for double-sided
@@ -249,10 +264,6 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \coordinate (botl) at (topl |- botr);
   \coordinate (topr) at (topl -| botr);
 
-  \makestyles\style\content{#4}
-
-  \node[text width=\cardtxtwd,align=flush center,\style] at
-     ($ (topl)!0.5!(botr) $) {\content\par};
   \def\templabel{#3}
   \ifx\templabel\empty
   \else
@@ -267,6 +278,25 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \ifx\cardtitle\empty
   \else \node at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
   \fi
+
+  \ifx\cardtitle\empty
+    \ifx\templabel\empty
+      \coordinate (cent) at ($ (topl)!0.5!(botr) $);
+    \else
+      \coordinate (cent) at ($ (topl)!0.5!(botr) + (0,0.5*\offset)$);
+    \fi
+  \else
+    \ifx\templabel\empty
+      \coordinate (cent) at ($ (topl)!0.5!(botr) + (0,-0.5*\offset)$);
+    \else
+      \coordinate (cent) at ($ (topl)!0.5!(botr) $);
+    \fi
+  \fi
+
+  \makestyles\style\content{#4}
+
+  \node[text width=\cardtxtwd,align=flush center,\style] at (cent)
+     {\content\par};
 }
 
 % Domino number #3 appears on row #1 column #2 with left content #4,
@@ -281,16 +311,13 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \coordinate (topm) at ($ (topl)!0.5!(topr) $);
   \coordinate (botm) at ($ (botl)!0.5!(botr) $);
 
-  \makestyles\stylea\contenta{#4}
-  \makestyles\styleb\contentb{#5}
-
   \draw (topl) rectangle (botr);
   \draw [divider] (topm) -- (botm);
 
-  \node[text width=\cardtxtwd,align=flush center,\stylea] at
-     ($ (topl)!0.5!(botm) $) {\contenta\par};
-  \node[text width=\cardtxtwd,align=flush center,\styleb] at
-     ($ (topm)!0.5!(botr) $) {\contentb\par};
+  \ifx\cardtitle\empty
+  \else
+    \node[fill=white] at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+  \fi
   \def\templabel{#3}
   \ifx\templabel\empty
   \else
@@ -299,9 +326,20 @@ tikzsetting={draw=chalkborder,dashed,line width=3pt,dash pattern = on 3pt off 3p
   \fi
 
   \ifx\cardtitle\empty
+    \coordinate (centl) at ($ (topl)!0.5!(botm) $);
+    \coordinate (centr) at ($ (topm)!0.5!(botr) $);
   \else
-    \node[fill=white] at ($ (topl)!0.5!(topr) + (0,-\offset) $) {\cardtitle};
+    \coordinate (centl) at ($ (topl)!0.5!(botm) + (0,-0.5*\offset)$);
+    \coordinate (centr) at ($ (topm)!0.5!(botr) + (0,-0.5*\offset)$);
   \fi
+
+  \makestyles\stylel\contentl{#4}
+  \makestyles\styler\contentr{#5}
+
+  \node[text width=\cardtxtwd,align=flush center,\stylel] at (centl)
+     {\contentl\par};
+  \node[text width=\cardtxtwd,align=flush center,\styler] at (centr)
+     {\contentr\par};
 }
 
 \setlength{\parindent}{0pt}
