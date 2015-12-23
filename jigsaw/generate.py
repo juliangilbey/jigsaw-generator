@@ -157,8 +157,9 @@ def check_special(c):
         if 'newpage' in c:
             special = True
             if c['newpage'] != True:
-                print('Invalid value for newpage, only newpage: True '
-                      'permitted\nCard/Domino value: %s' % c['newpage'],
+                print('Invalid value for newpage, only newpage: true '
+                      'permitted\nCard/Domino value: %s\nTreating as'
+                      'newpage: true anyway' % c['newpage'],
                       file=sys.stderr)
                 c['newpage'] = True
         if 'newlabel' in c:
@@ -738,7 +739,8 @@ def make_cardsort_cards(data, layout, options,
 
     num_cards = len(realcards)
     cardorder = list(range(num_cards))
-    if getopt(layout, data, {}, 'shuffleCards', False):
+    shufflecards = getopt(layout, data, {}, 'shuffleCards', False)
+    if shufflecards:
         random.shuffle(cardorder)
     invcardorder = {j: i for (i, j) in enumerate(cardorder)}
 
@@ -761,7 +763,7 @@ def make_cardsort_cards(data, layout, options,
             if 'newpage' in c:
                 # this would presumably only occur for non-shuffled cards;
                 # it would make no sense otherwise
-                if layout['shuffleCards']:
+                if shufflecards:
                     print('newpage makes no sense for shuffled cards!'
                           ' Ignoring', file=sys.stderr)
                 else:
