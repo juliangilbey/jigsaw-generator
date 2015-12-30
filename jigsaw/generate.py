@@ -1931,9 +1931,15 @@ def generate_cardsort(data, options, layout):
                           puztemplatemd, soltemplatemd, dsubs, dsubsmd)
 
     if exists_hidden:
-        dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'
-        dsubs['hiddennotetable'] = 'Entries that are hidden in the puzzle are indicated with (*).'
-        dsubsmd['hiddennotemd'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+        hiddennote = getopt(layout, data, {}, 'hiddennote',
+          'Entries that are hidden in the puzzle are highlighted in yellow.')
+        hiddennotemd = getopt(layout, data, {}, 'hiddennotemd',
+          'Entries that are hidden in the puzzle are indicated with (*).')
+        hiddennotetable = getopt(layout, data, {}, 'hiddennotetable',
+                                 hiddennotemd)
+        dsubs['hiddennotesolution'] = hiddennote
+        dsubs['hiddennotetable'] = hiddennotetable
+        dsubsmd['hiddennotemd'] = hiddennotemd
     else:
         dsubs['hiddennotesolution'] = ''
         dsubs['hiddennotetable'] = ''
