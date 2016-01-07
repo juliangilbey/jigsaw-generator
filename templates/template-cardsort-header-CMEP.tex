@@ -59,6 +59,14 @@
 \newfontfamily\ChalkFont[Path=./,Scale=MatchLowercase]{Delius-Regular.ttf}
 \usepackage{fontawesome}
 
+% The baseline spacing is quite small for larger fonts
+\makeatletter
+\renewcommand\large{\@setfontsize\large\@xivpt{20}}
+\renewcommand\Large{\@setfontsize\Large\@xviipt{24.5}}
+\renewcommand\LARGE{\@setfontsize\LARGE\@xxpt{28}}
+\renewcommand\huge{\@setfontsize\huge\@xxvpt{34}}
+\makeatother
+
 %%% MATHEMATICS
 \usepackage{mathtools}
 \usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}

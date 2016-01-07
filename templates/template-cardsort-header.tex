@@ -29,6 +29,14 @@
 \usepackage{lastpage}
 \usepackage{ifthen}
 
+% The baseline spacing is quite small for larger fonts
+\makeatletter
+\renewcommand\large{\@setfontsize\large\@xivpt{20}}
+\renewcommand\Large{\@setfontsize\Large\@xviipt{24.5}}
+\renewcommand\LARGE{\@setfontsize\LARGE\@xxpt{28}}
+\renewcommand\huge{\@setfontsize\huge\@xxvpt{34}}
+\makeatother
+
 \newsavebox\templateimagebox
 \newdimen\templateimagewd
 \newif\iftesting  % say \testingtrue to have \card use simple
