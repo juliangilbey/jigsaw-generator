@@ -775,15 +775,19 @@ def make_cardsort_cards(data, layout, options,
         col = pagecards % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col }
         solsubs = { 'rownum': row, 'colnum': col }
+        puzsubsmd = dict(puzsubs)
+        solsubsmd = dict(solsubs)
         if numbering_cards:
             puzsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)], i + 1)
             solsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)],
                                             invcardorder[i] + 1)
+            puzsubsmd['cardnum'] = str(i + 1)
+            solsubsmd['cardnum'] = str(invcardorder[i] + 1)
         else:
             puzsubs['cardnum'] = ''
             solsubs['cardnum'] = ''
-        puzsubsmd = dict(puzsubs)
-        solsubsmd = dict(solsubs)
+            puzsubsmd['cardnum'] = ''
+            solsubsmd['cardnum'] = ''
 
         if pagecards == 0:
             if i > 0:
