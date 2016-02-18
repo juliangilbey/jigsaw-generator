@@ -41,3 +41,10 @@ uninstall:
 	rm -f ${DESTDIR}${bindir}/jigsaw-generate
 	rm -f ${DESTDIR}${mandir}/man1/jigsaw-generate.1
 
+clean:
+	rm -f jigsaw-generate
+
+distclean: clean
+	rm -f Makefile config.log config.status
+
+.PHONY: build install uninstall clean distclean
