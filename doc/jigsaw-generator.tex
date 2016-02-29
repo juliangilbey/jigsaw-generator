@@ -156,7 +156,7 @@ edges:
   - '$108$'
 \end{verbatim}
 
-The resulting puzzle looks like this:
+The solution to the resulting puzzle looks like this:
 
 \begin{center}
   \tikzset{above/.default=2pt}
@@ -342,7 +342,7 @@ common options are given first in each of the following three lists.
   text to write on the start of the chain.  The default is |'Start'|.
 \item |finish:| (dominoes only) If we do not have a loop, then the
   text to write on the end of the chain.  The default is |'Finish'|.
-\item \textbf{WILL WANT SOMETHING HERE ABOUT \% DIVIDER ON DOMINOES}
+% \item \textbf{WILL WANT SOMETHING HERE ABOUT \% DIVIDER ON DOMINOES}
 \end{itemize}
 
 \subsubsection*{Options applicable to jigsaws only}
@@ -362,6 +362,42 @@ The content of the cards is given in a final one or two \YAML\
 key--value pairs, depending on the type of material being produced.
 The keys are |cards| (for card sorts), |pairs| (for dominoes and
 jigsaws) and |edges| (for jigsaws).
+
+Each of these takes as a value a \YAML\ sequence of card content.  For
+|cards| and |edges|, each of these is a single entry, while for
+|pairs|, each one is a sequence of two entries, as in the example
+above.  The number of cards, edges or pairs depends upon the type of
+puzzle being produced.
+
+Each entry can have exactly one of the following types of content:
+
+\begin{itemize}
+\item A string.  This will be the content of the relevant card, edge
+  or half of a pair.  This will be inserted verbatim into the Markdown
+  and \LaTeX\ output files, so should be written in \LaTeX.  (Images
+  are handled specially; see below.)
+\item A \YAML\ mapping.  This uses the following keys:
+  \begin{itemize}
+  \item |text:| This contains the text to be used as content for this
+    entry (card, edge or half of a pair).
+  \item |size:| This will be added to the |defaultsize|, so a size of
+    |1| will produce larger text in the \PDF\, while a size of |-1|
+    will produce smaller text.
+  \item |hidden:| If this is set to |true|, the entry will not be
+    shown on the puzzle, only on the solution.
+  \item |label:| This overrides the current label.
+  \item |puzzletext:|, |puzzlesize:| These override the |text| and
+    |size| settings for the puzzle.  Specifying |puzzletext| overrides
+    any |hidden| setting.
+  \item |solutiontext:|, |solutionsize:| These override the |text| and
+    |size| settings for the solution.  If |solutiontext| is specified,
+    then |hidden| is assumed to be |true|.
+  \end{itemize}
+  Either |text| or both |puzzletext| and |solutiontext| must be
+  present.
+\end{itemize}
+
+
 
 \section{Old stuff dumped here still to tidy}
 
