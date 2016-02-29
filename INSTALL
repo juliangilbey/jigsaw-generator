@@ -6,6 +6,12 @@ sudo make install
 
 More configuration options can be found by running ./configure --help
 
+You will need to install Python 3.x and a TeX distribution.  You will
+also need the PyYAML module.  The latter can be achieved with the
+command
+
+  sudo -H pip3 install PyYAML
+
 To uninstall, run
 
 sudo make uninstall
