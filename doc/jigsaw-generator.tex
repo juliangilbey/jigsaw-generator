@@ -134,6 +134,7 @@ specified.  These input files are written in \YAML.
 For example, here is a data file for creating a small hexagonal puzzle:
 
 \begin{verbatim}
+format: 1
 type: smallhexagon
 title: An example puzzle
 note: 'You will have to work out the missing number shown as `?'''
@@ -237,6 +238,11 @@ common options are given first in each of the following three lists.
 \subsubsection*{Options applicable to all puzzle types}
 
 \begin{itemize}
+\item |format:| The version of the file format.  It is currently
+  ignored, but the format version of the current software is 1.
+  Future changes to the software will use the format version where
+  relevant to produce backward-compatible behaviour for older format
+  files.
 \item |type:| (required) The type of jigsaw being created.  The
   current recognised standard types are those listed above, namely
   |smallhexagon|, and so on.
@@ -399,105 +405,50 @@ Each entry can have exactly one of the following types of content:
 
 
 
-\section{Old stuff dumped here still to tidy}
+\section{Puzzle templates}
+\label{sec:templates}
 
 The puzzle templates are \LaTeX\ files with templating marks.  For the
-templates I have created, I have used \PGF/\TikZ\ for the graphics and
-to place the text items.  My initial templates were written when I was
-using version 2.10 of \PGF/\TikZ, as distributed with \TeX~Live 2013.
-However, it turned out that I ran into a bug related to the placement
-of text along cyclic paths, which has been fixed in version 3.0.0
-(distributed in \TeX~Live 2014).  It is therefore necessary to have an
-up-to-date \TeX~Live distribution (or at least an up-to-date \PGF) for
-these templates to work correctly.  Alternative templates can be
+supplied templates, \PGF/\TikZ\ has been used for the graphics and to
+place the text items.  Version 3.0.0 or higher of \PGF/\TikZ\ is
+required for the current templates.  Alternative templates can be
 written if this is desired.  For example, someone might prefer to use
 Asymptote or another graphical package, or they may wish to modify the
 existing templates in various ways.
 
-There is also a template description file (again written in \YAML) for
-each puzzle type: this specifies various parameters required to create
-the puzzle.
+There is also a template description file (written in \YAML) for each
+puzzle type: this specifies various parameters required to create the
+puzzle.
 
-Both of these template types (the puzzle templates and the description
-files) are described in detail in the software documentation.
+\textbf{TODO: Write a description of the template and template
+  description files}
 
-I wrote the program itself in Python.  This was for a few reasons.
-Firstly, it is a well-known, popular language, so if other people wish
-to become involved in developing this software, it will be relatively
-easy for them to do so.  Secondly, the Python interpreter is easy to
-install on the major platforms people will be using.  Furthermore,
-since the software is written in pure Python, it does not require
-compilation, making things a little simpler to install.  Finally, it
-provided me with an opportunity to learn more about this language: as
-I have learnt more about Python, I have improved my code and made it
-more idiomatic.  The code is currently written in Python~3.x; if I
-have time and people express an interest, I will endeavour to make it
-compatible with Python~2.7.
+In the meantime, please look at the template and template description
+files in the distributed package to see how they are written, and
+modify them appropriately if you wish to create your own.  You can
+also email me if you have questions.
 
-To create the jigsaws, the jigsaw generator program is run over the
-data file.  It reads this file along with the relevant template
-description file and puzzle template files.  It then fills in the
-puzzle templates with the puzzle data to create \LaTeX\ files (and
-Markdown files too, if requested).  The \LaTeX\ files are then
-processed with pdf\LaTeX\ (or some other \LaTeX\ variant) to create
-\PDF s for printing.
+These files can be specified in the puzzle files as described above
+(with the template description file specified by the |type| option,
+and the templates defined within the template description file or
+overridden by the corresponding options in the puzzle file). 
 
-\subsection{An example data file}
+\section{Filters}
+\label{sec:filters}
 
-Figure~\ref{fig:smallhex-example} shows the \YAML\ puzzle file which
-was used to create the example shown in
-figure~\ref{fig:jigsaw-complete} above (with some small
-modifications).
+There may be occasions on which you need to systematically modify the
+\LaTeX\ file prior to running \LaTeX, or to modify the Markdown output
+in some way.  Filters offer this facility.  They are programs (scripts
+or other executables) which read in the \LaTeX\ or Markdown on
+standard input and write the filtered version to standard output.  For
+example, you might have reason to change the standard Markdown or
+\LaTeX\ syntax for images to meet some local need.
 
-The file begins with some metadata:
-\begin{itemize}
-\item the type of the puzzle: in this case, it is a `smallhexagon'
-  puzzle, which consists of six triangles;
-\item the title of the puzzle, which is optional, and
-\item an optional note, which is printed above the puzzle.
-\end{itemize}
+Filters can been specified either on the command line or within the
+puzzle files or within the template description files.
 
-The existing jigsaw types at the time of writing are \texttt{hexagon},
-\texttt{smallhexagon}, \texttt{triangle} and \texttt{parquet}; there are a few more in the
-pipeline, too.  It is also possible to write one's own jigsaw types,
-as long as they consist of equilateral triangles and squares.  (To
-write templates using different shapes would require extensions to the
-software itself; I may do this in the future.)  In addition, there are
-three more types, \texttt{cards}, \texttt{cardsort} and \texttt{dominoes}, which are described
-briefly later.
 
-The next section of the file specifies the data.  There are two parts
-here: the pairs data, which lists question and answer pairs, and the
-edges data, which specifies the text to appear on the edges in an
-anticlockwise direction.  Each pair is a sequence of two items, the
-question and the answer, whereas each edge consists of just a single
-item.
-
-Each item is usually just a single string.  However, there is a
-possibility of `hiding' text in the puzzle.  This means either leaving
-a blank where the text should appear or writing something else in its
-place.  The fourth question--answer pair in the above example
-illustrates this.  This pair is written using \YAML\ `block style' for
-clarity, that is, the question and answer are written on separate
-equally-indented lines.  The question is just a plain string
-(|'$(3^2)^2$'|), whereas the answer is a mapping with two
-entries: the \texttt{puzzletext} appears in the puzzle, while the
-\texttt{solutiontext} appears in the solution.  This feature could be
-used as in the example shown, or it could be used to introduce
-deliberate mistakes in the puzzle, increasing the level of difficulty
-for the students.  There is also an alternative notation available to
-simply hide the text in the puzzle, which is described in the
-documentation.
-
-If a puzzle does include such hidden text, then the solution
-highlights these occurrences; in the default templates, these are
-shown with a yellow background.
-
-It is also possible to include images in the items or to change the
-text size of individual items or all items.  The details are described
-in the documentation.
-
-\subsubsection{Some notes on \texorpdfstring{\YAML}{YAML} syntax}
+\section{Some notes on \texorpdfstring{\YAML}{YAML} syntax}
 
 For a full, precise description of \YAML\ syntax, see the \YAML\
 Specification~\cite{YAML}.  What follows is a very brief summary of
@@ -538,72 +489,6 @@ entries (type, title, pairs, and so on) can appear in any order.
 However, for the benefit of the human reader, it is wise to maintain a
 meaningful order to these entries.
 
-\subsection{Card sorts and dominoes}
-
-As mentioned above, this software also offers some other types of
-activities: card sorts and dominoes.
-
-A domino puzzle is just a collection of question--answer pairs
-which are laid out on a series of dominoes.  Each domino consists of
-an answer and a new question.  The dominoes can then be laid out to
-create a complete chain (beginning with `Start' and ending with
-`Finish') or loop (if `Start' and `Finish' are not present), with each
-question matching its corresponding answer.  The data file used to
-create this is very similar to the example shown above, only the type is
-now \texttt{dominoes}.  Within the data file, it is also possible to specify
-various options such as how many dominoes should appear on a page and
-whether the cards should form a loop or chain; these are described in
-more detail in the documentation.
-
-A card sort is simply a collection of cards which are to be sorted in
-some way.  For the \texttt{cardsort} type, the aim is to sort the cards into
-the correct order, and so the cards are shuffled for the puzzle and a
-solution is also produced by default.  For the \texttt{cards} type, on the
-other hand, there is no canonical order (for example: ``Arrange these
-cards into order of importance to you'' in a politics
-lesson), and so no solution is produced, nor are the cards shuffled by
-default.  Again, the data file is very similar in structure, and
-details can be found in the documentation.
-
-Both cards and dominoes offer the possibility of having some form of
-title on the cards, and cards have a further option of having labels
-on individual cards.  (This was introduced into the software when we
-wanted to create an activity which had different categories of cards;
-the categories were then written on the cards.)  Additional options
-are discussed in the documentation.
-
-\subsection{Markdown output}
-
-As explained in section~\ref{sec:desire-tex}, our requirements include
-the need to output a Markdown version of cards data for inclusion into
-our build system; from there, it is translated into \HTML.  Our
-current system requires each card to be embedded in an \HTML\
-|<div>| element.  The cards are then displayed in an appropriate
-way using some simple \CSS.  Since |pandoc| passes any \HTML\
-|<div>| elements in a Markdown file to the \HTML\ output
-unchanged, we simply need a Markdown file with the |<div>|
-elements already present for our card sorts.  I have therefore created
-a Markdown template file which places the card content within these
-elements.
-
-For other needs, it is perfectly straightforward to create alternative
-Markdown templates, which could then be converted into the required
-\HTML.  For example, with the appropriate JavaScript and supporting
-\CSS, it would be entirely feasible to create an interactive version
-of the card sort or jigsaw from the same data file.  While we have not
-yet done this, it would be a very interesting next step.
-
-\section{Installing the package}
-
-The software can be downloaded from GitHub; the repository is
-\url{https://github.com/juliangilbey/jigsaw-generator}.  At the time
-of writing, the simplest way to obtain it is to use git to clone the
-repository.
-
-The software has been tested on \GNU/Linux and \MacOSX\ operating
-systems.
-
-\smallskip
 \section*{Acknowledgements}
 
 I thank those who offered very useful ideas and feedback at the \TUG\

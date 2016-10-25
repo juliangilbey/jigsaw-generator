@@ -2,7 +2,7 @@
 
 """
 jigsaw-generate
-Copyright (C) 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
+Copyright (C) 2014-2016 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
   <jdg@debian.org>
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
