@@ -23,7 +23,8 @@ install:
 	chmod 755 ${DESTDIR}${bindir}/jigsaw-generate
 
 	$(MKDIR_P) ${DESTDIR}${pkgdatadir}
-	cp -R jigsaw filters templates ${DESTDIR}${pkgdatadir}
+	cp -R jigsaw templates ${DESTDIR}${pkgdatadir}
+	if [ -d filters ]; then cp -R filters ${DESTDIR}${pkgdatadir}; fi
 	chmod -R a+rX ${DESTDIR}${pkgdatadir}
 
 	$(MKDIR_P) ${DESTDIR}${docdir}
