@@ -1,4 +1,5 @@
 # A trial jigsaw puzzle
+format: 1
 type: parquet
 contributor: Julian
 title: A trial parquet puzzle

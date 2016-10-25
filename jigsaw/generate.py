@@ -1,11 +1,12 @@
 #! /usr/bin/env python3
 
 """
-jigsaw-generate.py
-Copyright (C) 2014 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>, <jdg@debian.org>
+jigsaw-generate
+Copyright (C) 2014-2016 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
+  <jdg@debian.org>
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
-under certain conditions; see the LICENSE file for details.
+under certain conditions; see the COPYING file for details.
 """
 
 import random
@@ -156,8 +157,9 @@ def check_special(c):
         if 'newpage' in c:
             special = True
             if c['newpage'] != True:
-                print('Invalid value for newpage, only newpage: True '
-                      'permitted\nCard/Domino value: %s' % c['newpage'],
+                print('Invalid value for newpage, only newpage: true '
+                      'permitted\nCard/Domino value: %s\nTreating as'
+                      'newpage: true anyway' % c['newpage'],
                       file=sys.stderr)
                 c['newpage'] = True
         if 'newlabel' in c:
@@ -705,10 +707,20 @@ def make_cardsort_cards(data, layout, options,
 
     rows = getopt(layout, data, {}, 'rows')
     columns = getopt(layout, data, {}, 'columns')
+    cardsep = getopt(layout, data, {}, 'cardsep', '12pt')
+    cardseph = getopt(layout, data, {}, 'cardsepHorizontal')
+    cardsepv = getopt(layout, data, {}, 'cardsepVertical')
+    if cardseph is None:
+        cardseph = cardsep
+    if cardsepv is None:
+        cardsepv = cardsep
+
     dsubs['rows'] = rows
     dsubsmd['rows'] = rows
     dsubs['columns'] = columns
     dsubsmd['columns'] = columns
+    dsubs['cardseph'] = cardseph
+    dsubs['cardsepv'] = cardsepv
 
     # We do a presift of the cards to identify the real cards as
     # opposed to the special cards.  It would be more efficient to
@@ -727,7 +739,8 @@ def make_cardsort_cards(data, layout, options,
 
     num_cards = len(realcards)
     cardorder = list(range(num_cards))
-    if getopt(layout, data, {}, 'shuffleCards', False):
+    shufflecards = getopt(layout, data, {}, 'shuffleCards', False)
+    if shufflecards:
         random.shuffle(cardorder)
     invcardorder = {j: i for (i, j) in enumerate(cardorder)}
 
@@ -750,7 +763,7 @@ def make_cardsort_cards(data, layout, options,
             if 'newpage' in c:
                 # this would presumably only occur for non-shuffled cards;
                 # it would make no sense otherwise
-                if layout['shuffleCards']:
+                if shufflecards:
                     print('newpage makes no sense for shuffled cards!'
                           ' Ignoring', file=sys.stderr)
                 else:
@@ -762,15 +775,19 @@ def make_cardsort_cards(data, layout, options,
         col = pagecards % columns + 1
         puzsubs = { 'rownum': row, 'colnum': col }
         solsubs = { 'rownum': row, 'colnum': col }
+        puzsubsmd = dict(puzsubs)
+        solsubsmd = dict(solsubs)
         if numbering_cards:
             puzsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)], i + 1)
             solsubs['cardnum'] = '%s %s' % (sizes[max(size-3, 0)],
                                             invcardorder[i] + 1)
+            puzsubsmd['cardnum'] = str(i + 1)
+            solsubsmd['cardnum'] = str(invcardorder[i] + 1)
         else:
             puzsubs['cardnum'] = ''
             solsubs['cardnum'] = ''
-        puzsubsmd = dict(puzsubs)
-        solsubsmd = dict(solsubs)
+            puzsubsmd['cardnum'] = ''
+            solsubsmd['cardnum'] = ''
 
         if pagecards == 0:
             if i > 0:
@@ -1094,7 +1111,7 @@ def filtermd(fn, layout, data, options):
 
 #####################################################################
 
-def main(pkgdatadir=None):
+def main(pkgdatadir=None, pkgversion=0.0):
     """Process the command line and generate the appropriate output files.
 
     Command line:
@@ -1136,7 +1153,20 @@ def main(pkgdatadir=None):
         configs = dict()
 
     ### Parse the command line
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    versioninfo = '''
+This is jigsaw-generate, version %s.
+Copyright (C) 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
+  <jdg@debian.org>
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see the COPYING file for details.''' % pkgversion
+
+    parser.add_argument('-v', '--version', action='version',
+                        version=versioninfo)
+
     parser.add_argument('puzfile', metavar='puzzlefile[.yaml]',
                         help='yaml file containing puzzle data')
     
@@ -1217,6 +1247,9 @@ def main(pkgdatadir=None):
     options = dict()
 
     if args.output:
+        if os.path.dirname(args.output) not in ['', '.']:
+            sys.exit('Cannot currently handle --output not in current '
+                     'directory;\nplease change directory first')
         options['output'] = args.output
 
     if args.makepdf:
@@ -1323,11 +1356,12 @@ def generate(data, options):
 def generate_jigsaw(data, options, layout):
     """Generate output from data for jigsaw-type puzzles."""
 
-    # ***FIXME*** The output filenames should be specifiable on the
-    # command line.
-
     puzbase = options['puzbase']
     templatedirs = options['templatedirs']
+    try:
+        outbase = options['options']['output']
+    except KeyError:
+        outbase = os.path.basename(puzbase)
 
     bodypuzfile = getopt(layout, data, {}, 'puzzleTemplateTeX')
     makepdf = getopt(layout, data, options, 'makepdf', True)
@@ -1336,7 +1370,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'puzzleHeaderTeX')
         if headerfile:
             bodypuz = opentemplate(templatedirs, bodypuzfile).read()
-            outpuzfile = puzbase + '-puzzle.tex'
+            outpuzfile = outbase + '-puzzle.tex'
             outpuz = open(outpuzfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuz)
@@ -1353,7 +1387,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'solutionHeaderTeX')
         if headerfile:
             bodysol = opentemplate(templatedirs, bodysolfile).read()
-            outsolfile = puzbase + '-solution.tex'
+            outsolfile = outbase + '-solution.tex'
             outsol = open(outsolfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsol)
@@ -1371,7 +1405,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'tableHeaderTeX')
         if headerfile:
             bodytable = opentemplate(templatedirs, bodytablefile).read()
-            outtablefile = puzbase + '-table.tex'
+            outtablefile = outbase + '-table.tex'
             outtable = open(outtablefile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outtable)
@@ -1388,7 +1422,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'puzzleHeaderMarkdown')
         if headerfile:
             bodypuzmd = opentemplate(templatedirs, bodypuzmdfile).read()
-            outpuzmdfile = puzbase + '-puzzle.md'
+            outpuzmdfile = outbase + '-puzzle.md'
             outpuzmd = open(outpuzmdfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outpuzmd)
@@ -1406,7 +1440,7 @@ def generate_jigsaw(data, options, layout):
         headerfile = getopt(layout, data, {}, 'solutionHeaderMarkdown')
         if headerfile:
             bodysolmd = opentemplate(templatedirs, bodysolmdfile).read()
-            outsolmdfile = puzbase + '-solution.md'
+            outsolmdfile = outbase + '-solution.md'
             outsolmd = open(outsolmdfile, 'w')
             header = opentemplate(templatedirs, headerfile).read()
             print(header, file=outsolmd)
@@ -1571,7 +1605,7 @@ def generate_cardsort(data, options, layout):
     try:
         outbase = options['options']['output']
     except KeyError:
-        outbase = puzbase
+        outbase = os.path.basename(puzbase)
 
     category = layout['category']
     if category == 'cardsort':
@@ -1901,9 +1935,15 @@ def generate_cardsort(data, options, layout):
                           puztemplatemd, soltemplatemd, dsubs, dsubsmd)
 
     if exists_hidden:
-        dsubs['hiddennotesolution'] = 'Entries that are hidden in the puzzle are highlighted in yellow.'
-        dsubs['hiddennotetable'] = 'Entries that are hidden in the puzzle are indicated with (*).'
-        dsubsmd['hiddennotemd'] = 'Entries that are hidden in the puzzle are indicated with (*).'
+        hiddennote = getopt(layout, data, {}, 'hiddennote',
+          'Entries that are hidden in the puzzle are highlighted in yellow.')
+        hiddennotemd = getopt(layout, data, {}, 'hiddennotemd',
+          'Entries that are hidden in the puzzle are indicated with (*).')
+        hiddennotetable = getopt(layout, data, {}, 'hiddennotetable',
+                                 hiddennotemd)
+        dsubs['hiddennotesolution'] = hiddennote
+        dsubs['hiddennotetable'] = hiddennotetable
+        dsubsmd['hiddennotemd'] = hiddennotemd
     else:
         dsubs['hiddennotesolution'] = ''
         dsubs['hiddennotetable'] = ''

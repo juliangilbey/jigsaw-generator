@@ -1,4 +1,5 @@
 # A hexagonal jigsaw puzzle, from http://www.mrbartonmaths.com/jigsaw.htm
+format: 1
 type: hexagon
 title: Powers and roots
 note: "The `?' means a number for you to fill in"

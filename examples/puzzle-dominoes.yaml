@@ -1,4 +1,5 @@
 # A trial domino activity
+format: 1
 type: dominoes
 title: A trial domino puzzle
 note: This is a silly example of a puzzle

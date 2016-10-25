@@ -1,4 +1,5 @@
 # Template file for large triangle jigsaw
+format: 1
 category: jigsaw
 type: triangle
 typename: triangle

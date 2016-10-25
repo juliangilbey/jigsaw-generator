@@ -1,0 +1,507 @@
+% Documentation for jigsaw-generator
+% Copyright (C) 2015 Julian Gilbey
+% This is free software, and you are welcome to redistribute it
+% under certain conditions; see the COPYING file for details.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{calc}
+\usepackage{tikz}[2013/12/13 v3.0.0]
+\usetikzlibrary{calc}
+\usepackage{amsmath}
+\usepackage{upquote}  % to get straight quote marks for code examples
+
+\def\YAML{{\small YAML}}
+\def\CMEP{{\small CMEP}}
+\def\JSON{{\small JSON}}
+\def\PDF{{\small PDF}}
+\def\HTML{{\small HTML}}
+\def\XML{{\small XML}}
+\def\MathML{Math{\small ML}}
+\def\MacOSX{Mac\,{\small OS\,X}}
+\def\GNU{{\small GNU}}
+\def\WYSIWYG{{\small WYSIWYG}}
+\def\PGF{{\small PGF}}
+\def\TikZ{Ti\emph{k}Z}
+\def\CSS{{\small CSS}}
+\def\CTAN{{\small CTAN}}
+\def\TUG{{\small TUG}}
+
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+
+\def\gobble#1{}
+
+%%%%%%%%%%%%%% The following are macros required for typesetting the
+%%%%%%%%%%%%%% jigsaw example.  They are reduced from the full macros
+%%%%%%%%%%%%%% which come with the jigsaw software.
+\tikzset{regular/.style={sloped, above}}
+
+\newlength\sidelength % side length
+\newlength\trad % triangle circumradius
+\newcommand{\setshapesize}[1]{%
+ \pgfmathsetlength\sidelength{#1*72.27/2.54}
+ \pgfmathsetlength\trad{(#1*72.27/2.54) / sqrt(3)}
+}
+
+\newcommand{\makestyles}[3]{%
+    % split #3 into {style}{text}
+    \makestylesa#1#2#3
+}
+\newcommand{\makestylesa}[4]{%
+  \def#1{#3}
+  \def#2{#4}
+}
+
+\newcommand{\tiltedtriangle}[7]{%
+  \coordinate (a) at ($ #1 +({#2-150}:\trad) $);
+  \coordinate (b) at ($ #1 +({#2-30}:\trad) $);
+  \coordinate (c) at ($ #1 +({#2+90}:\trad) $);
+
+  \makestyles\stylea\contenta{#3}
+  \makestyles\styleb\contentb{#4}
+  \makestyles\stylec\contentc{#5}
+
+  \draw[allow upside down]
+    (a) -- node[\stylea] {\contenta}
+    (b) -- node[\styleb] {\contentb}
+    (c) -- node[\stylec] {\contentc}
+    cycle;
+  % If card number is empty, don't draw circle around number
+  \def\templabel{#6}
+  \ifx\templabel\empty
+  \else
+    \node[circle,draw,thin,inner sep=1pt,rotate=#7] at ($ #1 $) {#6};
+  \fi
+}
+
+\newcommand{\uptriangle}[6]{%
+  \tiltedtriangle{#1}{0}{#2}{#3}{#4}{#5}{#6}
+}
+\newcommand{\downtriangle}[6]{%
+  \tiltedtriangle{#1}{180}{#2}{#3}{#4}{#5}{#6}
+}
+\newcommand{\lefttriangle}[6]{%
+  \tiltedtriangle{#1}{90}{#2}{#3}{#4}{#5}{#6}
+}
+\newcommand{\righttriangle}[6]{%
+  \tiltedtriangle{#1}{270}{#2}{#3}{#4}{#5}{#6}
+}
+
+%%%%%%%%%%%%%% end jigsaw macros
+
+
+\begin{document}
+
+\title{Creating (mathematical) jigsaw puzzles using jigsaw-generator}
+\author{Julian Gilbey}
+\date{December 2015}
+\maketitle
+
+\begin{abstract}
+  \noindent
+  The jigsaw puzzles described here are constructed from shapes such
+  as triangles, squares and so on, with questions and answers written
+  along their edges.  The aim is to match them up correctly.  Related
+  puzzle varieties are card sorts and dominoes.  This package provides
+  a \TeX- and Python-based system designed to author such puzzles.
+  The input is a text-based \YAML\ file; the output can include both
+  printable \PDF s for cutting up and Markdown files for potential
+  conversion to \HTML.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+For a general background to this software and its history, see
+my \TUG boat article~\cite{JGtugboat}.
+
+This documentation describes the usage of the software; some details
+have changed since the \TUG boat article, and so all of the relevant
+material will be repeated here.
+
+\subsection{Usage overview}
+
+The most important files from a user's perspective are the data input
+files.  These specify the type of puzzle (a hexagonal jigsaw or a card
+sort, for example), any options for the jigsaw (such as whether to
+number the cards or not) and the text to appear on the puzzle.
+Sensible defaults are provided for all of the options if they are not
+specified.  These input files are written in \YAML.
+
+For example, here is a data file for creating a small hexagonal puzzle:
+
+\begin{verbatim}
+format: 1
+type: smallhexagon
+title: An example puzzle
+note: 'You will have to work out the missing number shown as `?'''
+
+pairs:
+  - ['$10^6\div10^3$', '$1000$']
+  - ['$10^{23}\div10^{21}$', '$100$']
+  - ['$9^4\times9^5$', '$9^9$']
+  - - '$(3^2)^2$'
+    - puzzletext: '?'
+      solutiontext: '$81$'
+  - ['$6\times6^2$', '$216$']
+  - ['$2^4\div2^6$', '$\dfrac{1}{4}$']
+edges:
+  - '$-1$'
+  - '$10$'
+  - '$13^2\times13$'
+  - '$39$'
+  - '$13^3$'
+  - '$108$'
+\end{verbatim}
+
+The solution to the resulting puzzle looks like this:
+
+\begin{center}
+  \tikzset{above/.default=2pt}
+  
+  \setshapesize{3.7}
+  \begin{tikzpicture}[line width=1.5pt, rounded corners=0.7pt]
+    \righttriangle{(60:\trad)}  {{regular}{\normalsize $1000$}}{{regular}{\normalsize $10^{23}\div10^{21}$}}{{regular}{\normalsize $108$}}{\scriptsize 1}{150} % {A1}{Q2}{E1}{1}{270}
+    \lefttriangle {(0:\trad)}   {{regular}{\normalsize $13^3$}}{{regular}{\normalsize $100$}}{{regular}{\normalsize $9^4\times9^5$}}{\scriptsize 3}{-150} % {E2}{A2}{Q3}{2}{90}
+    \righttriangle{(-60:\trad)} {{regular}{\normalsize $(3^2)^2$}}{{regular}{\normalsize $39$}}{{regular}{\normalsize $9^9$}}{\scriptsize 2}{150} % {Q4}{E3}{A3}{3}{270}
+    \lefttriangle {(-120:\trad)}{{regular}{\normalsize $81$}}{{regular}{\normalsize $6\times6^2$}}{{regular}{\normalsize $13^2\times13$}}{\scriptsize \underline{6}}{-30} % {A4}{Q5}{E4}{4}{90}
+    \righttriangle{(180:\trad)} {{regular}{\normalsize $10$}}{{regular}{\normalsize $216$}}{{regular}{\normalsize $2^4\div2^6$}}{\scriptsize 5}{150} % {E5}{A5}{Q6}{5}{270}
+    \lefttriangle {(120:\trad)} {{regular}{\normalsize $10^6\div10^3$}}{{regular}{\normalsize $-1$}}{{regular}{\normalsize $\frac{1}{4}$}}{\scriptsize 4}{-150} % {Q1}{E6}{A6}{6}{90}
+  \end{tikzpicture}
+\end{center}
+
+If the puzzle is stored in the file |hexpuzzle.yaml|, then the
+command:
+\begin{verbatim}
+jigsaw-generate hexpuzzle
+\end{verbatim}
+will produce several \PDF\ files: |hexpuzzle-puzzle.pdf|
+(containing the puzzle), |hexpuzzle-solution.pdf| (the solution)
+and |hexpuzzle-table.pdf| (with the puzzle content laid out in a
+tabular form), along with Markdown versions |hexpuzzle-puzzle.md|
+and |hexpu|zzle-solution.md+ containing the puzzle and solution
+respectively; these can be used to create \HTML\ versions of the
+puzzle via pandoc or some such system.
+
+In the following sections, the data files are described in detail, and
+then the other supporting files (configuration files, templates and so
+on) and command line options are described.
+
+In many cases, it is adequate to simply copy and edit the example
+input files, which will be found in
+\nolinkurl{/usr/local/share/doc/jigsaw-generator/examples} or
+\nolinkurl{/usr/share/doc/jigsaw-generator/examples}, depending on
+your specific installation of the package.
+
+\section{Data input files}
+
+The data input files consist of layout information (the type of
+puzzle, whether to produce a solution and so forth) and content
+information.  Being a \YAML\ mapping, these can appear in any order in
+the data file; will will describe them in these two separate sections
+for simplicity.
+
+\subsection{Available layouts}
+
+There are four jigsaw puzzle layouts currently available:
+\begin{itemize}
+\item smallhexagon, which consists of 6 triangles as shown above;
+\item hexagon, which consists of 24 triangles;
+\item triangle, which consists of 16 smaller triangles;
+\item parquet, which consists of 4 squares and 8 triangles.
+\end{itemize}
+
+There are also three card sort layouts currently available:
+\begin{itemize}
+\item cards, which consists of an arbitrary number of rectangular
+  cards; no solution is produced, and this is intended for
+  classification activities or suchlike, where there is no ``correct''
+  answer expected; these cards are not shuffled by default;
+\item cardsort, which is like cards, except that there is a correct
+  order, so the cards are shuffled and a solution is produced;
+\item dominoes, which consists of an arbitrary number of domino cards;
+  a solution is produced.
+\end{itemize}
+
+More details are given in the following sections.
+
+\subsection{Layout information}
+
+Each of these options must be followed by a colon and a space,
+followed by the option value, as demonstrated in the example above.
+All of these options are optional unless stated otherwise.  The most
+common options are given first in each of the following three lists.
+
+\subsubsection*{Options applicable to all puzzle types}
+
+\begin{itemize}
+\item |format:| The version of the file format.  It is currently
+  ignored, but the format version of the current software is 1.
+  Future changes to the software will use the format version where
+  relevant to produce backward-compatible behaviour for older format
+  files.
+\item |type:| (required) The type of jigsaw being created.  The
+  current recognised standard types are those listed above, namely
+  |smallhexagon|, and so on.
+\item |title:| The title of the activity, printed at
+  the top of the page.
+\item |note:| A note printed at the top of the page.
+\item |produceSolution:| Whether to produce a solution \PDF\ and
+  Markdown file; the default is |true| except for cards, where
+  the default is |false|.
+\item |numberCards:| Do we number the cards for ease of
+  identification?  (Default: |true|)
+\item |textSize:| How large the text should be on the cards; this
+  is a number from 0 to 9, with 0 being the smallest.  (Default:~5)
+\item |makepdf:| Whether to produce \PDF\ output files.  (Default:
+  |True|)
+\item |makemd:| Whether to produce Markdown output files.  (Default:
+  |True|)
+\item |latex:| Which \LaTeX\ engine to use to produce the \PDF\
+  files.  (Default: |pdflatex|)
+\item |texfilter:| If specified, this is a filter to pass the \LaTeX\
+  files through prior to running \LaTeX.  See the later section on
+  filters (\ref{sec:filters}) for more information on filters.
+\item |mdfilter:| If specified, this is a filter to pass the Markdown
+  files through to produce the final Markdown files.
+\item |clean:| If true, then intermediate files will be deleted.
+  This includes the \LaTeX\ files and related aux files and so on.
+  (Default: |true|)
+\item |puzzleHeaderTeX:| This specifies the header file to use to
+  produce the \LaTeX\ puzzle file.  See the later section on templates
+  (\ref{sec:templates}) for more information on header and template
+  files.
+\item |puzzleTemplateTeX:| This specifies the template file to
+  use to produce the \LaTeX\ puzzle file.
+\item |solutionHeaderTeX:| This specifies the header file to
+  use to produce the \LaTeX\ solution file.
+\item |solutionTemplateTeX:| This specifies the template file to
+  use to produce the \LaTeX\ solution file.
+\item |tableHeaderTeX:| This specifies the header file to
+  use to produce the \LaTeX\ table file.
+\item |tableTemplateTeX:| This specifies the template file to
+  use to produce the \LaTeX\ table file.
+\item |puzzleHeaderMarkdown:| This specifies the header file to
+  use to produce the Markdown puzzle file.
+\item |puzzleTemplateMarkdown:| This specifies the template file to
+  use to produce the Markdown puzzle file.
+\item |solutionHeaderMarkdown:| This specifies the header file to
+  use to produce the Markdown solution file.
+\item |solutionTemplateMarkdown:| This specifies the template file to
+  use to produce the Markdown solution file.
+\item |hiddennote:| If any entries are hidden, the note to include at
+  the top of the \PDF\ solution output file.  (Default:
+  |'|\texttt{Entries that are hidden in the puzzle are highlighted in
+    yellow.}|'|)
+\item |hiddennotemd:| If any entries are hidden, the note to include
+  at the top of the Markdown solution output file.  (Default:
+  |'|\texttt{Entries that are hidden in the puzzle are indicated with
+    (*).}|'|)
+\item |hiddennotetable:| If any entries are hidden, the note to
+  include at the top of the \PDF\ table output file.  (Default:
+  |'|\texttt{Entries that are hidden in the puzzle are indicated with
+    (*).}|'|)
+\end{itemize}
+
+\subsubsection*{Options applicable to card sorts and dominoes only}
+
+\begin{itemize}
+\item |rows:| (required) How many rows of cards to produce per
+  page.
+\item |columns:| (required) How many columns of cards to produce
+  per page.
+\item |shuffleCards:| (card sorts only) Are the cards shuffled?
+  This is by default |true| for cardsort, and |false| for
+  cards.
+\item |shufflePairs:| (dominoes only) Are the order of the pairs
+  shuffled from the order given in the data file?  This is by default
+  |false|.
+\item |flip:| (dominoes only) Are the order of the entries in
+  each pair presented in a random order?  This is by default
+  |false|.
+\item |cardTitle:| The title to write on each card.
+\item |cardTitleSize:| How large the title should be on the
+  cards, a number from 0 to 9 (like the |textSize|).  By default,
+  this is 1~less than the label size (see below).
+\item |label:| The default label to write on each card.  This is
+  like a subtitle, and appears at the bottom of the card.  (This can
+  be useful if the cards are of two or more types, and the type of
+  card is important.)  This is not used for dominoes.
+\item |labelSize:| How large the labels should be on the cards,
+  again a number from 0 to 9; by default, this is 2~less than the text
+  size.  (This can be overridden for individual cards.)  This is not
+  used for dominoes (though setting it will have an impact on the size
+  of the title if |cardTitleSize| is not set).
+\item |cardsep:| How much space to leave between
+  adjacent cards.  By default this is 12pt.  It should be a \TeX\
+  length.
+\item |cardsepHorizontal:| How much space to leave between
+  horizontally adjacent cards.  By default, this is |cardsep|.
+\item |cardsepVertical:| How much space to leave between
+  vertically adjacent cards.  By default, this is |cardsep|.
+\item |loop:| (dominoes only) Do we have a domino loop, with
+  there being no start and end?  The default is |true|.
+\item |start:| (dominoes only) If we do not have a loop, then the
+  text to write on the start of the chain.  The default is |'Start'|.
+\item |finish:| (dominoes only) If we do not have a loop, then the
+  text to write on the end of the chain.  The default is |'Finish'|.
+% \item \textbf{WILL WANT SOMETHING HERE ABOUT \% DIVIDER ON DOMINOES}
+\end{itemize}
+
+\subsubsection*{Options applicable to jigsaws only}
+
+\begin{itemize}
+\item |shufflePairs:| Are the order of the pairs shuffled from
+  the order given in the data file?  This is by default |false|.
+\item |flip:| Are the order of the entries in each pair presented
+  in a random order?  This is by default |true|.
+\item |shuffleEdges:| Are the order of the edges shuffled from
+  the order given in the data file?  This is by default |false|.
+\end{itemize}
+
+\subsection{Card content}
+
+The content of the cards is given in a final one or two \YAML\
+key--value pairs, depending on the type of material being produced.
+The keys are |cards| (for card sorts), |pairs| (for dominoes and
+jigsaws) and |edges| (for jigsaws).
+
+Each of these takes as a value a \YAML\ sequence of card content.  For
+|cards| and |edges|, each of these is a single entry, while for
+|pairs|, each one is a sequence of two entries, as in the example
+above.  The number of cards, edges or pairs depends upon the type of
+puzzle being produced.
+
+Each entry can have exactly one of the following types of content:
+
+\begin{itemize}
+\item A string.  This will be the content of the relevant card, edge
+  or half of a pair.  This will be inserted verbatim into the Markdown
+  and \LaTeX\ output files, so should be written in \LaTeX.  (Images
+  are handled specially; see below.)
+\item A \YAML\ mapping.  This uses the following keys:
+  \begin{itemize}
+  \item |text:| This contains the text to be used as content for this
+    entry (card, edge or half of a pair).
+  \item |size:| This will be added to the |defaultsize|, so a size of
+    |1| will produce larger text in the \PDF\, while a size of |-1|
+    will produce smaller text.
+  \item |hidden:| If this is set to |true|, the entry will not be
+    shown on the puzzle, only on the solution.
+  \item |label:| This overrides the current label.
+  \item |puzzletext:|, |puzzlesize:| These override the |text| and
+    |size| settings for the puzzle.  Specifying |puzzletext| overrides
+    any |hidden| setting.
+  \item |solutiontext:|, |solutionsize:| These override the |text| and
+    |size| settings for the solution.  If |solutiontext| is specified,
+    then |hidden| is assumed to be |true|.
+  \end{itemize}
+  Either |text| or both |puzzletext| and |solutiontext| must be
+  present.
+\end{itemize}
+
+
+
+\section{Puzzle templates}
+\label{sec:templates}
+
+The puzzle templates are \LaTeX\ files with templating marks.  For the
+supplied templates, \PGF/\TikZ\ has been used for the graphics and to
+place the text items.  Version 3.0.0 or higher of \PGF/\TikZ\ is
+required for the current templates.  Alternative templates can be
+written if this is desired.  For example, someone might prefer to use
+Asymptote or another graphical package, or they may wish to modify the
+existing templates in various ways.
+
+There is also a template description file (written in \YAML) for each
+puzzle type: this specifies various parameters required to create the
+puzzle.
+
+\textbf{TODO: Write a description of the template and template
+  description files}
+
+In the meantime, please look at the template and template description
+files in the distributed package to see how they are written, and
+modify them appropriately if you wish to create your own.  You can
+also email me if you have questions.
+
+These files can be specified in the puzzle files as described above
+(with the template description file specified by the |type| option,
+and the templates defined within the template description file or
+overridden by the corresponding options in the puzzle file). 
+
+\section{Filters}
+\label{sec:filters}
+
+There may be occasions on which you need to systematically modify the
+\LaTeX\ file prior to running \LaTeX, or to modify the Markdown output
+in some way.  Filters offer this facility.  They are programs (scripts
+or other executables) which read in the \LaTeX\ or Markdown on
+standard input and write the filtered version to standard output.  For
+example, you might have reason to change the standard Markdown or
+\LaTeX\ syntax for images to meet some local need.
+
+Filters can been specified either on the command line or within the
+puzzle files or within the template description files.
+
+
+\section{Some notes on \texorpdfstring{\YAML}{YAML} syntax}
+
+For a full, precise description of \YAML\ syntax, see the \YAML\
+Specification~\cite{YAML}.  What follows is a very brief summary of
+some of the basic parts of the specification which should be
+sufficient for most people's needs when using this software.
+
+Although \YAML\ allows unquoted strings in general, there are a number
+of restrictions on what is permitted in them.  For this reason, it may
+be simplest to single-quote all value strings.  (\YAML\ also offers
+double-quoted strings, but these interpolate backslash-escapes; this
+is probably undesirable in this context, since many \TeX\ expressions
+include backslashes.)
+
+Within a single-quoted string, a single quote is written as a doubled
+quote mark (|''|), hence the three quote marks in a row at the
+end of the note field in the above example (two to indicate a quote,
+and the third to end the string).
+
+For collections (`sequences' and `mappings' in \YAML's terminology,
+each of which consists of a number of `entries'), \YAML\ allows two
+different notations: either a flow style, which is similar to \JSON\
+notation, or a block style.  With the flow style, the entries of a
+sequence, such as a question--answer pair or the list of edges,
+are enclosed in square brackets and separated by commas; for the block
+style, each entry appears on a new line preceded by a
+vertically-aligned hyphen.
+
+Similarly, for a mapping the entries
+consist of key--value pairs, with the key and value separated by a
+colon.  They can be written either using a flow style as a
+comma-separated list enclosed in braces, or with a block style by
+writing each key--value pair on an identically-indented new line.
+
+Both of the sequence styles appear in the example here, though only
+the block style is used for mappings.  Note also that the top-level
+structure of the file is itself a mapping.  This means that the
+entries (type, title, pairs, and so on) can appear in any order.
+However, for the benefit of the human reader, it is wise to maintain a
+meaningful order to these entries.
+
+\section*{Acknowledgements}
+
+I thank those who offered very useful ideas and feedback at the \TUG\
+conference; these have helped me to solve some of the thorny issues I
+had been facing.
+
+\smallskip
+\bibliographystyle{plain}
+\bibliography{jigsawrefs}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
