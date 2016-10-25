@@ -433,6 +433,11 @@ These files can be specified in the puzzle files as described above
 and the templates defined within the template description file or
 overridden by the corresponding options in the puzzle file). 
 
+These files are looked for in the current directory, in the user config
+directory (typically |~/.config/jigsaw-generator/templates/|) and in the
+package filters directory (typically
+|/usr/share/jigsaw-generator/templates/|.
+
 \section{Filters}
 \label{sec:filters}
 
@@ -447,6 +452,11 @@ example, you might have reason to change the standard Markdown or
 Filters can been specified either on the command line or within the
 puzzle files or within the template description files.
 
+Filters are looked for in the current directory, in the user config
+directory (typically |~/.config/jigsaw-generator/filters/|) and in the
+package filters directory (typically
+|/usr/share/jigsaw-generator/filters/|; this assumes that all supplied
+filters are system-independent scripts).
 
 \section{Some notes on \texorpdfstring{\YAML}{YAML} syntax}
 
