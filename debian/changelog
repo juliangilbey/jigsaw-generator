@@ -1,30 +1,5 @@
-jigsaw-generator (0.1.8-1~7.gbp508906) UNRELEASED; urgency=low
-
-  ** SNAPSHOT build @5089060748c4daa781833dee937e017ff2f81953 **
-
-  * Update from upstream
-  * UNRELEASED
-  * Snapshot release
-  * Add autoreconf to build system
-  * Update changelog for 0.1.1-2~3.gbp09be08 release
-  * Update changelog for 0.1.1-2~4.gbp45c030 release
-  * Fix changelog version number
-  * Add correct dependencies and remove unnecessary docs
-  * Update changelog for 0.1.2-1~2.gbp839d0f release
-  * Update changelog for 0.1.3~1.gbpda3eb3 release
-  * Update changelog for 0.1.3-1~1.gbpb05e3d release
-  * Update changelog for 0.1.4-1~1.gbpd3b391 release
-  * Add copyright info on goose.png
-  * Update upstream
-  * Update changelog to match upstream
-  * Update to upstream
-  * update debian/changelog
-  * Update changelog
-
- -- Julian Gilbey <J.Gilbey@maths.cam.ac.uk>  Thu, 27 Aug 2015 22:08:01 +0100
-
-jigsaw-generator (0.1-1) UNRELEASED; urgency=low
+jigsaw-generator (0.2.1-1) unstable; urgency=low
 
   * Initial release (Closes: #1000000)
 
- -- Julian Gilbey <jdg@debian.org>  Thu, 27 Aug 2015 18:49:23 +0100
+ -- Julian Gilbey <jdg@debian.org>  Tue, 25 Oct 2016 22:08:05 +0100
