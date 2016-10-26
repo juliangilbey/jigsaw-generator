@@ -1,4 +1,5 @@
-# A trial proofsort
+# A proof sorter activity, based on
+# https://undergroundmathematics.org/thinking-about-numbers/square-root-of-2-is-irrational
 format: 1
 type: cardsort
 resource: PI3_RT5_2
@@ -19,12 +20,8 @@ produceSolution: true
 # Default text size on cards
 textSize: 6
 # Card title
-cardTitle: CMEP -- $\sqrt{2}$ is irrational
+cardTitle: $\sqrt{2}$ is irrational
 cardTitleSize: 2
-
-# Use CMEP Markdown output
-puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-1col.md
-solutionTemplateMarkdown: template-cardsort-solution-CMEP-1col.md
 
 cards:
   - Suppose, for a contradiction, that $\sqrt{2}$ is rational.

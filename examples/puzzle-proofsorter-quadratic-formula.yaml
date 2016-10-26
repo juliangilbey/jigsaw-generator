@@ -1,4 +1,5 @@
-# A trial proofsort
+# A proof sorter activity, based on
+# https://undergroundmathematics.org/quadratics/proving-quad-formula
 format: 1
 type: cardsort
 resource: E1_RT5_1
@@ -19,12 +20,8 @@ produceSolution: true
 # Default text size on cards
 textSize: 5
 # Card title
-cardTitle: CMEP - Quadratic formula proof
+cardTitle: Quadratic formula proof
 cardTitleSize: 1
-
-# Use CMEP Markdown output
-puzzleTemplateMarkdown: template-cardsort-puzzle-CMEP-1col.md
-solutionTemplateMarkdown: template-cardsort-solution-CMEP-1col.md
 
 cards:
   - Consider $ax^2 + bx + c = 0$, where $a \neq 0$.

@@ -1,4 +1,5 @@
-# A trial proofsort
+# An example proofsort, based on
+# https://undergroundmathematics.org/quadratics/discriminating
 format: 1
 type: cardsort
 resource: E1_RT7_3
@@ -19,7 +20,7 @@ produceSolution: false
 # Default text size on cards
 textSize: 6
 # Card title
-cardTitle: CMEP - Discriminating
+cardTitle: Discriminating
 
 cards:
   - If $a < 0$, then the equation has no real roots.
