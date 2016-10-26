@@ -1,3 +1,8 @@
+2016-10-26  Julian Gilbey  <jdg@debian.org>
+
+        * The git log has a full changelog.  Prepare for first Debian
+        release version. (0.2.3)
+
 2015-11-13  Julian Gilbey  <jdg@debian.org>
 
         * Lots of improvements to template handling, configuration file

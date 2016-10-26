@@ -16,6 +16,7 @@ MKDIR_P = @MKDIR_P@
 build:
 	sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|; s|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|;' jigsaw-generate.in > jigsaw-generate
 	chmod a+x jigsaw-generate
+	$(MAKE) -C doc build
 
 install:
 	$(MKDIR_P) ${DESTDIR}${bindir}
@@ -30,6 +31,7 @@ install:
 	$(MKDIR_P) ${DESTDIR}${docdir}
 	cp README.md COPYING ChangeLog AUTHORS ${DESTDIR}${docdir}
 	cp -R examples ${DESTDIR}${docdir}
+	cp doc/jigsaw-generator.pdf ${DESTDIR}${docdir}
 	chmod -R a+rX ${DESTDIR}${docdir}
 
 	$(MKDIR_P) ${DESTDIR}${mandir}/man1
@@ -44,8 +46,9 @@ uninstall:
 
 clean:
 	rm -f jigsaw-generate
+	$(MAKE) -C doc clean
 
 distclean: clean
-	rm -f Makefile config.log config.status
+	rm -f Makefile doc/Makefile config.log config.status
 
 .PHONY: build install uninstall clean distclean
