@@ -1,0 +1,10 @@
+Document: jigsaw-generator
+Title: jigsaw-generator manual
+Author: Julian Gilbey
+Abstract: This manual describes what jigsaw-generator is
+ and how it can be used to create mathematical and other educational
+ jigsaw puzzles.
+Section: Education
+
+Format: PDF
+Files: /usr/share/doc/jigsaw-generator/jigsaw-generator.pdf.gz
