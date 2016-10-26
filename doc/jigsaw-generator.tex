@@ -182,9 +182,18 @@ will produce several \PDF\ files: |hexpuzzle-puzzle.pdf|
 (containing the puzzle), |hexpuzzle-solution.pdf| (the solution)
 and |hexpuzzle-table.pdf| (with the puzzle content laid out in a
 tabular form), along with Markdown versions |hexpuzzle-puzzle.md|
-and |hexpu|zzle-solution.md+ containing the puzzle and solution
+and |hexpuzzle-solution.md| containing the puzzle and solution
 respectively; these can be used to create \HTML\ versions of the
 puzzle via pandoc or some such system.
+
+The command-line command |jigsaw-generate| offers a number of command
+line switches; run the command
+\begin{verbatim}
+jigsaw-generate --help
+\end{verbatim}
+to obtain information about this.
+
+\bigskip
 
 In the following sections, the data files are described in detail, and
 then the other supporting files (configuration files, templates and so
@@ -401,6 +410,17 @@ Each entry can have exactly one of the following types of content:
   \end{itemize}
   Either |text| or both |puzzletext| and |solutiontext| must be
   present.
+
+\item Special \YAML\ content.
+  \begin{itemize}
+  \item |newpage: true| This produces a new page in the \PDF\ output
+    file for card sort activities, but has no effect on the table or
+    Markdown outputs.
+  \item |newlabel:| This contains the text to be used as the default
+    label for all following cards.
+  \item |newlabelsize:| This specifies the label size to be used as
+    the default for all following cards.
+  \end{itemize}
 \end{itemize}
 
 
@@ -416,27 +436,26 @@ written if this is desired.  For example, someone might prefer to use
 Asymptote or another graphical package, or they may wish to modify the
 existing templates in various ways.
 
-There is also a template description file (written in \YAML) for each
-puzzle type: this specifies various parameters required to create the
-puzzle.
+There is also a layout file (written in \YAML) for each puzzle type:
+this specifies various parameters required to create the puzzle.
 
-\textbf{TODO: Write a description of the template and template
-  description files}
+\textbf{TODO: Write a description of the template and layout files}
 
-In the meantime, please look at the template and template description
-files in the distributed package to see how they are written, and
-modify them appropriately if you wish to create your own.  You can
-also email me if you have questions.
+In the meantime, please look at the template and layout files in the
+distributed package to see how they are written, and modify them
+appropriately if you wish to create your own.  You can also email me
+if you have questions.
 
 These files can be specified in the puzzle files as described above
 (with the template description file specified by the |type| option,
-and the templates defined within the template description file or
-overridden by the corresponding options in the puzzle file). 
+and the templates defined within the layout file or overridden by the
+corresponding options in the puzzle file).
 
 These files are looked for in the current directory, in the user config
 directory (typically |~/.config/jigsaw-generator/templates/|) and in the
-package filters directory (typically
-|/usr/share/jigsaw-generator/templates/|.
+package templates directory (typically
+|/usr/share/jigsaw-generator/templates/| or
+|/usr/local/share/jigsaw-generator/templates/|).
 
 \section{Filters}
 \label{sec:filters}
@@ -455,8 +474,31 @@ puzzle files or within the template description files.
 Filters are looked for in the current directory, in the user config
 directory (typically |~/.config/jigsaw-generator/filters/|) and in the
 package filters directory (typically
-|/usr/share/jigsaw-generator/filters/|; this assumes that all supplied
-filters are system-independent scripts).
+|/usr/share/jigsaw-generator/filters/| or
+|/usr/local/share/jigsaw-generator/filters/|; this assumes that all
+supplied filters are system-independent scripts).
+
+\section{Configuration files}
+
+The |jigsaw-generate| program reads a configuration file,
+|~/.config/jigsaw-generator/config.ini|, which is in an INI format.
+The default configuration file can be found in
+|/usr/share/jigsaw-generator/templates/default_config.ini| (or
+|/usr/local/share/...|, depending on where is has been installed).
+
+The default file is effectively as follows:
+
+\begin{verbatim}
+[jigsaw-generate]
+makepdf = yes
+makemd = yes
+latex = pdflatex
+clean = yes
+texfilter = 
+mdfilter = 
+\end{verbatim}
+
+and these correspond to the identically-named command-line options.
 
 \section{Some notes on \texorpdfstring{\YAML}{YAML} syntax}
 
@@ -486,11 +528,11 @@ are enclosed in square brackets and separated by commas; for the block
 style, each entry appears on a new line preceded by a
 vertically-aligned hyphen.
 
-Similarly, for a mapping the entries
-consist of key--value pairs, with the key and value separated by a
-colon.  They can be written either using a flow style as a
-comma-separated list enclosed in braces, or with a block style by
-writing each key--value pair on an identically-indented new line.
+Similarly, for a mapping the entries consist of key--value pairs, with
+the key and value separated by a colon.  They can be written either
+using a flow style as a comma-separated list enclosed in braces, or
+with a block style by writing each key--value pair on an
+identically-indented new line.
 
 Both of the sequence styles appear in the example here, though only
 the block style is used for mappings.  Note also that the top-level
