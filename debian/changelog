@@ -1,5 +1,5 @@
-jigsaw-generator (0.2.2-1) unstable; urgency=low
+jigsaw-generator (0.2.3-1) unstable; urgency=low
 
   * Initial release (Closes: #1000000)
 
- -- Julian Gilbey <jdg@debian.org>  Tue, 25 Oct 2016 22:08:05 +0100
+ -- Julian Gilbey <jdg@debian.org>  Wed, 26 Oct 2016 12:00:38 +0100
