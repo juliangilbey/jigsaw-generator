@@ -1,0 +1,12 @@
+build:
+	pdflatex jigsaw-generator
+	bibtex jigsaw-generator
+	pdflatex jigsaw-generator
+	pdflatex jigsaw-generator
+
+clean:
+	rm -f jigsaw-generator.aux jigsaw-generator.bbl jigsaw-generator.blg
+	rm -f jigsaw-generator.log jigsaw-generator.out jigsaw-generator.pdf
+	rm -f jigsaw-generator.toc
+
+.PHONY: build install uninstall clean distclean
