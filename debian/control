@@ -9,7 +9,7 @@ Homepage: https://github.com/juliangilbey/jigsaw-generator.git
 
 Package: jigsaw-generator
 Architecture: all
-Depends: python3, texlive-pictures, ${python3:Depends}, ${misc:Depends}
+Depends: python3, python3-yaml, texlive-pictures, ${python3:Depends}, ${misc:Depends}
 Description: Generate jigsaw and card sort activities for classroom use
  This software is designed to create Tarsia Formulator type
  mathematical jigsaws using LaTeX.  The puzzle data is stored in a YAML
