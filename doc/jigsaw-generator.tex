@@ -452,10 +452,11 @@ and the templates defined within the layout file or overridden by the
 corresponding options in the puzzle file).
 
 These files are looked for in the current directory, in the user config
-directory (typically |~/.config/jigsaw-generator/templates/|) and in the
-package templates directory (typically
-|/usr/share/jigsaw-generator/templates/| or
-|/usr/local/share/jigsaw-generator/templates/|).
+directory (typically
+\nolinkurl{~/.config/jigsaw-generator/templates/})
+and in the package templates directory (typically
+\nolinkurl{/usr/share/jigsaw-generator/templates/} or
+\nolinkurl{/usr/local/share/jigsaw-generator/templates/}).
 
 \section{Filters}
 \label{sec:filters}
@@ -472,19 +473,20 @@ Filters can been specified either on the command line or within the
 puzzle files or within the template description files.
 
 Filters are looked for in the current directory, in the user config
-directory (typically |~/.config/jigsaw-generator/filters/|) and in the
-package filters directory (typically
-|/usr/share/jigsaw-generator/filters/| or
-|/usr/local/share/jigsaw-generator/filters/|; this assumes that all
-supplied filters are system-independent scripts).
+directory (typically \nolinkurl{~/.config/jigsaw-generator/filters/})
+and in the package filters directory (typically
+\nolinkurl{/usr/share/jigsaw-generator/filters/} or
+\nolinkurl{/usr/local/share/jigsaw-generator/filters/}; this assumes
+that all supplied filters are system-independent scripts).
 
 \section{Configuration files}
 
-The |jigsaw-generate| program reads a configuration file,
-|~/.config/jigsaw-generator/config.ini|, which is in an INI format.
-The default configuration file can be found in
-|/usr/share/jigsaw-generator/templates/default_config.ini| (or
-|/usr/local/share/...|, depending on where is has been installed).
+The |jigsaw-generate| program reads a configuration file, found at
+\nolinkurl{~/.config/jigsaw-generator/config.ini}, which is in an
+{\small INI} format.  The default configuration file can be found in
+\nolinkurl{/usr/share/jigsaw-generator/templates/default_config.ini}
+(or \nolinkurl{/usr/local/share/...}, depending on where is has been
+installed).
 
 The default file is effectively as follows:
 
