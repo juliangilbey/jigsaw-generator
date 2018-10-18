@@ -2,7 +2,7 @@ Source: jigsaw-generator
 Section: education
 Priority: optional
 Maintainer: Julian Gilbey <jdg@debian.org>
-Build-Depends: debhelper (>= 11), dh-python, python3, autotools-dev, autoconf, dh-autoreconf, texlive-latex-base, texlive-latex-extra, texlive-pictures
+Build-Depends: debhelper (>= 11), dh-python, python3, texlive-latex-base, texlive-latex-extra, texlive-pictures
 Build-Conflicts: autoconf2.13
 Standards-Version: 4.2.1
 Homepage: https://github.com/juliangilbey/jigsaw-generator.git
