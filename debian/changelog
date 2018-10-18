@@ -1,10 +1,17 @@
+jigsaw-generator (0.2.5-1) unstable; urgency=medium
+
+  * New upstream version
+  * Update Standards-Version, and move to debhelper v11
+
+ -- Julian Gilbey <jdg@debian.org>  Thu, 18 Oct 2018 16:24:00 +0100
+
 jigsaw-generator (0.2.4-1) unstable; urgency=medium
 
   * Update copyright file to include Eddy Petrișor (mentioned in
     appdirs.py, thanks to Thorsten Alteholz for spotting this)
   * Including missing runtime dependency on python3-yaml (Closes: #848216)
 
- -- Julian Gilbey <jdg@debian.org>  Thu, 15 Dec 2016 18:50:48 +0000
+ -- Julian Gilbey <jdg@debian.org>  Thu, 18 Oct 2018 14:35:49 +0100
 
 jigsaw-generator (0.2.3-1) unstable; urgency=low
 
