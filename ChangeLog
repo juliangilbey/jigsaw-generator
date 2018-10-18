@@ -1,3 +1,8 @@
+2018-10-18  Julian Gilbey  <jdg@debian.org>
+
+        * Remove old email address (J.Gilbey@maths.cam.ac.uk will cease
+        working at some point)
+
 2016-12-15  Julian Gilbey  <jdg@debian.org>
 
         * Finish writing (and fixing) documentation. (version 0.2.4)
