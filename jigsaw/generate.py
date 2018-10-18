@@ -2,8 +2,7 @@
 
 """
 jigsaw-generate
-Copyright (C) 2014-2016 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
-  <jdg@debian.org>
+Copyright (C) 2014-2016 Julian Gilbey <jdg@debian.org>
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions; see the COPYING file for details.
@@ -1158,8 +1157,7 @@ def main(pkgdatadir=None, pkgversion=0.0):
 
     versioninfo = '''
 This is jigsaw-generate, version %s.
-Copyright (C) 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>,
-  <jdg@debian.org>
+Copyright (C) 2014-2015 Julian Gilbey <jdg@debian.org>
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions; see the COPYING file for details.''' % pkgversion
