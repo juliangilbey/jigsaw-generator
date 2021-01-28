@@ -3,7 +3,7 @@ Upstream-Name: jigsaw-generator
 Source: https://github.com/juliangilbey/jigsaw-generator.git
 
 Files: *
-Copyright: 2014-2015 Julian Gilbey <J.Gilbey@maths.cam.ac.uk>, <jdg@debian.org>
+Copyright: 2014-2015 Julian Gilbey <jdg@debian.org>
 License: GPL-3+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -53,4 +53,4 @@ License: public-domain
  Created 2011-02-28
  Description
    This image comes from the 4th edition of Meyers
-   Konversationslexikon (1885-90), it is therefore Public Domain. 
+   Konversationslexikon (1885-90), it is therefore Public Domain.
